@@ -11,14 +11,22 @@ const AuthCallback = () => {
       
       if (error) {
         console.error('Auth callback error:', error);
-        navigate('/auth?error=callback_failed');
+        navigate('/login?error=callback_failed');
         return;
       }
 
       if (data.session) {
-        navigate('/dashboard');
+        // Check if user has completed onboarding
+        const user = data.session.user;
+        const onboardingCompleted = user?.user_metadata?.onboarding_completed;
+        
+        if (onboardingCompleted) {
+          navigate('/dashboard');
+        } else {
+          navigate('/onboarding');
+        }
       } else {
-        navigate('/auth');
+        navigate('/login');
       }
     };
 

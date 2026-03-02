@@ -60,7 +60,7 @@ const HeroSection = () => {
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
           <Button variant="hero" size="lg" className="text-base px-8 py-6" asChild>
-            <Link to="/auth?mode=signup">
+            <Link to="/login?mode=signup">
               Start Generating Free
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>

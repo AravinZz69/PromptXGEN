@@ -18,7 +18,21 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!user) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Check if user has completed onboarding
+  const onboardingCompleted = user?.user_metadata?.onboarding_completed;
+  const isOnboardingPage = location.pathname === '/onboarding';
+
+  // Redirect to onboarding if not completed and not already on onboarding page
+  if (!onboardingCompleted && !isOnboardingPage) {
+    return <Navigate to="/onboarding" replace />;
+  }
+
+  // Redirect to dashboard if onboarding is completed and user is on onboarding page
+  if (onboardingCompleted && isOnboardingPage) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;

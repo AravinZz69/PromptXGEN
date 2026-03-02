@@ -18,12 +18,12 @@ const ResetPassword = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // If no user session, redirect to auth
+    // If no user session, redirect to login
     if (!user) {
       // Give time for Supabase to set up the session from the reset link
       const timer = setTimeout(() => {
         if (!user) {
-          navigate('/auth');
+          navigate('/login');
         }
       }, 3000);
       return () => clearTimeout(timer);

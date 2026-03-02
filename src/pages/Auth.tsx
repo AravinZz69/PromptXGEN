@@ -26,7 +26,13 @@ const Auth = () => {
 
   useEffect(() => {
     if (user) {
-      navigate('/dashboard');
+      // Check if user has completed onboarding
+      const onboardingCompleted = user?.user_metadata?.onboarding_completed;
+      if (onboardingCompleted) {
+        navigate('/dashboard');
+      } else {
+        navigate('/onboarding');
+      }
     }
   }, [user, navigate]);
 
@@ -68,7 +74,7 @@ const Auth = () => {
             title: 'Account created!',
             description: 'Welcome to Prompt Genius!',
           });
-          navigate('/dashboard');
+          navigate('/onboarding');
         }
       } else if (mode === 'forgot-password') {
         const { error } = await resetPassword(email);

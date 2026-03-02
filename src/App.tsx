@@ -22,6 +22,7 @@ import Pricing from "./pages/Pricing";
 import GenerativeAI from "./pages/GenerativeAI";
 import Onboarding from "./pages/Onboarding";
 import Login from "./pages/Login";
+import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -107,6 +108,14 @@ function AnimatedRoutes() {
           element={
             <ProtectedRoute>
               <Pricing />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <Analytics />
             </ProtectedRoute>
           }
         />

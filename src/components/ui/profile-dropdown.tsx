@@ -1,0 +1,264 @@
+"use client";
+
+import * as React from "react";
+import { cn } from "@/lib/utils";
+import { Settings, CreditCard, FileText, LogOut, User, Sparkles } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+interface Profile {
+    name: string;
+    email: string;
+    avatar: string;
+    subscription?: string;
+    model?: string;
+}
+
+interface MenuItem {
+    label: string;
+    value?: string;
+    href: string;
+    icon: React.ReactNode;
+    external?: boolean;
+}
+
+const AIIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg
+        height="1em"
+        style={{
+            flex: "none",
+            lineHeight: 1,
+        }}
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+        width="1em"
+        {...props}
+    >
+        <title>{"AI"}</title>
+        <defs>
+            <linearGradient
+                id="ai-icon-gradient"
+                x1="0%"
+                x2="68.73%"
+                y1="100%"
+                y2="30.395%"
+            >
+                <stop offset="0%" stopColor="#8B5CF6" />
+                <stop offset="52.021%" stopColor="#6366F1" />
+                <stop offset="100%" stopColor="#EC4899" />
+            </linearGradient>
+        </defs>
+        <path
+            d="M12 24A14.304 14.304 0 000 12 14.304 14.304 0 0012 0a14.305 14.305 0 0012 12 14.305 14.305 0 00-12 12"
+            fill="url(#ai-icon-gradient)"
+            fillRule="nonzero"
+        />
+    </svg>
+);
+
+interface ProfileDropdownProps extends React.HTMLAttributes<HTMLDivElement> {
+    compact?: boolean;
+}
+
+export function ProfileDropdown({
+    compact = false,
+    className,
+    ...props
+}: ProfileDropdownProps) {
+    const [isOpen, setIsOpen] = React.useState(false);
+    const { user, signOut } = useAuth();
+    const navigate = useNavigate();
+
+    const profileData: Profile = {
+        name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || "User",
+        email: user?.email || "",
+        avatar: user?.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${user?.email}`,
+        subscription: "FREE",
+        model: "GPT-4",
+    };
+
+    const menuItems: MenuItem[] = [
+        {
+            label: "Profile",
+            href: "/dashboard",
+            icon: <User className="w-4 h-4" />,
+        },
+        {
+            label: "Model",
+            value: profileData.model,
+            href: "/dashboard",
+            icon: <AIIcon className="w-4 h-4" />,
+        },
+        {
+            label: "Subscription",
+            value: profileData.subscription,
+            href: "/dashboard",
+            icon: <CreditCard className="w-4 h-4" />,
+        },
+        {
+            label: "Settings",
+            href: "/dashboard",
+            icon: <Settings className="w-4 h-4" />,
+        },
+        {
+            label: "Terms & Policies",
+            href: "/",
+            icon: <FileText className="w-4 h-4" />,
+            external: false,
+        },
+    ];
+
+    const handleSignOut = async () => {
+        await signOut();
+        navigate('/');
+    };
+
+    return (
+        <div className={cn("relative", className)} {...props}>
+            <DropdownMenu onOpenChange={setIsOpen}>
+                <div className="group relative">
+                    <DropdownMenuTrigger asChild>
+                        <button
+                            type="button"
+                            className={cn(
+                                "flex items-center rounded-2xl bg-card border border-border hover:border-border/80 hover:bg-muted/50 hover:shadow-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                                compact ? "gap-2 p-2" : "gap-4 p-3"
+                            )}
+                        >
+                            {!compact && (
+                                <div className="text-left flex-1 hidden sm:block">
+                                    <div className="text-sm font-medium text-foreground tracking-tight leading-tight">
+                                        {profileData.name}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground tracking-tight leading-tight">
+                                        {profileData.email}
+                                    </div>
+                                </div>
+                            )}
+                            <div className="relative">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary via-purple-500 to-pink-500 p-0.5">
+                                    <div className="w-full h-full rounded-full overflow-hidden bg-card">
+                                        <img
+                                            src={profileData.avatar}
+                                            alt={profileData.name}
+                                            className="w-full h-full object-cover rounded-full"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </button>
+                    </DropdownMenuTrigger>
+
+                    {/* Bending line indicator on the right */}
+                    {!compact && (
+                        <div
+                            className={cn(
+                                "absolute -right-3 top-1/2 -translate-y-1/2 transition-all duration-200 hidden sm:block",
+                                isOpen
+                                    ? "opacity-100"
+                                    : "opacity-60 group-hover:opacity-100"
+                            )}
+                        >
+                            <svg
+                                width="12"
+                                height="24"
+                                viewBox="0 0 12 24"
+                                fill="none"
+                                className={cn(
+                                    "transition-all duration-200",
+                                    isOpen
+                                        ? "text-primary scale-110"
+                                        : "text-muted-foreground group-hover:text-foreground"
+                                )}
+                                aria-hidden="true"
+                            >
+                                <path
+                                    d="M2 4C6 8 6 16 2 20"
+                                    stroke="currentColor"
+                                    strokeWidth="1.5"
+                                    strokeLinecap="round"
+                                    fill="none"
+                                />
+                            </svg>
+                        </div>
+                    )}
+
+                    <DropdownMenuContent
+                        align="end"
+                        sideOffset={4}
+                        className="w-64 p-2 bg-card/95 backdrop-blur-sm border border-border rounded-2xl shadow-xl"
+                    >
+                        {/* User info header in dropdown for compact mode */}
+                        {compact && (
+                            <>
+                                <div className="px-3 py-2 mb-2">
+                                    <div className="text-sm font-medium text-foreground">
+                                        {profileData.name}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">
+                                        {profileData.email}
+                                    </div>
+                                </div>
+                                <DropdownMenuSeparator className="bg-border" />
+                            </>
+                        )}
+                        
+                        <div className="space-y-1">
+                            {menuItems.map((item) => (
+                                <DropdownMenuItem key={item.label} asChild>
+                                    <Link
+                                        to={item.href}
+                                        className="flex items-center p-3 hover:bg-muted/80 rounded-xl transition-all duration-200 cursor-pointer group hover:shadow-sm border border-transparent hover:border-border/50"
+                                    >
+                                        <div className="flex items-center gap-2 flex-1">
+                                            {item.icon}
+                                            <span className="text-sm font-medium text-foreground tracking-tight leading-tight whitespace-nowrap group-hover:text-foreground transition-colors">
+                                                {item.label}
+                                            </span>
+                                        </div>
+                                        <div className="flex-shrink-0 ml-auto">
+                                            {item.value && (
+                                                <span
+                                                    className={cn(
+                                                        "text-xs font-medium rounded-md py-1 px-2 tracking-tight",
+                                                        item.label === "Model"
+                                                            ? "text-blue-500 bg-blue-500/10 border border-blue-500/20"
+                                                            : "text-purple-500 bg-purple-500/10 border border-purple-500/20"
+                                                    )}
+                                                >
+                                                    {item.value}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </Link>
+                                </DropdownMenuItem>
+                            ))}
+                        </div>
+
+                        <DropdownMenuSeparator className="my-3 bg-gradient-to-r from-transparent via-border to-transparent" />
+
+                        <DropdownMenuItem asChild>
+                            <button
+                                type="button"
+                                onClick={handleSignOut}
+                                className="w-full flex items-center gap-3 p-3 duration-200 bg-destructive/10 rounded-xl hover:bg-destructive/20 cursor-pointer border border-transparent hover:border-destructive/30 hover:shadow-sm transition-all group"
+                            >
+                                <LogOut className="w-4 h-4 text-destructive group-hover:text-destructive" />
+                                <span className="text-sm font-medium text-destructive group-hover:text-destructive">
+                                    Sign Out
+                                </span>
+                            </button>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </div>
+            </DropdownMenu>
+        </div>
+    );
+}

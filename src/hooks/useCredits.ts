@@ -9,7 +9,6 @@ export interface UserCredits {
   usedCredits: number;
   remainingCredits: number;
   planType: 'free' | 'pro' | 'enterprise';
-  resetDate: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -18,11 +17,8 @@ export interface CreditTransaction {
   id: string;
   userId: string;
   amount: number;
-  type: 'deduct' | 'refund' | 'topup' | 'reset' | 'signup_bonus';
+  type: 'deduction' | 'topup' | 'refund' | 'bonus' | 'reset' | 'admin_grant';
   description: string | null;
-  modelUsed: string | null;
-  promptLength: number;
-  responseLength: number;
   createdAt: string;
 }
 
@@ -63,22 +59,30 @@ export function useCredits(): UseCreditsReturn {
         .eq('user_id', user.id)
         .single();
 
-      // If no record exists, create one
+      // If no record exists, create one with 20 free credits
       if (fetchError && fetchError.code === 'PGRST116') {
         const { data: newData, error: insertError } = await supabase
           .from('user_credits')
           .insert({
             user_id: user.id,
-            total_credits: 100,
+            credits_balance: 20,
+            total_credits: 20,
             used_credits: 0,
             plan_type: 'free',
-            reset_date: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toISOString(),
           })
           .select()
           .single();
 
         if (insertError) throw insertError;
         data = newData;
+
+        // Log the signup bonus
+        await supabase.from('credit_transactions').insert({
+          user_id: user.id,
+          amount: 20,
+          transaction_type: 'bonus',
+          description: 'Welcome bonus - Free signup credits',
+        });
       } else if (fetchError) {
         throw fetchError;
       }
@@ -87,11 +91,10 @@ export function useCredits(): UseCreditsReturn {
         setCredits({
           id: data.id,
           userId: data.user_id,
-          totalCredits: data.total_credits,
-          usedCredits: data.used_credits,
-          remainingCredits: data.remaining_credits,
-          planType: data.plan_type,
-          resetDate: data.reset_date,
+          totalCredits: data.total_credits || 20,
+          usedCredits: data.used_credits || 0,
+          remainingCredits: data.credits_balance ?? (data.total_credits - data.used_credits) ?? 20,
+          planType: data.plan_type || 'free',
           createdAt: data.created_at,
           updatedAt: data.updated_at,
         });
@@ -122,11 +125,8 @@ export function useCredits(): UseCreditsReturn {
           id: t.id,
           userId: t.user_id,
           amount: t.amount,
-          type: t.type,
+          type: t.transaction_type,
           description: t.description,
-          modelUsed: t.model_used,
-          promptLength: t.prompt_length,
-          responseLength: t.response_length,
           createdAt: t.created_at,
         }))
       );

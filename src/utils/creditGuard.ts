@@ -75,18 +75,20 @@ export async function checkCredits(): Promise<CheckCreditsResult> {
     if (error.code === 'PGRST116') {
       return {
         hasCredits: true,
-        remaining: 100,
+        remaining: 20,
         plan: 'free',
-        total: 100,
+        total: 20,
         used: 0,
       };
     }
     throw error;
   }
 
+  const remaining = data.credits_balance ?? (data.total_credits - data.used_credits) ?? 20;
+  
   return {
-    hasCredits: data.remaining_credits > 0 || data.plan_type === 'enterprise',
-    remaining: data.remaining_credits,
+    hasCredits: remaining > 0 || data.plan_type === 'enterprise',
+    remaining: remaining,
     plan: data.plan_type,
     total: data.total_credits,
     used: data.used_credits,
@@ -106,13 +108,14 @@ export async function deductCredits(
     throw new Error('User not authenticated');
   }
 
+  // Calculate the credit cost
+  const cost = calculateCreditCost(model, promptTokens, responseTokens);
+
   // Use RPC function to deduct credits atomically
-  const { data, error } = await supabase.rpc('deduct_user_credits', {
+  const { data, error } = await supabase.rpc('deduct_credits', {
     p_user_id: session.user.id,
-    p_model: model,
-    p_prompt_tokens: promptTokens,
-    p_response_tokens: responseTokens,
-    p_description: description,
+    p_amount: cost,
+    p_description: description || `AI generation using ${model}`,
   });
 
   if (error) {
@@ -120,12 +123,11 @@ export async function deductCredits(
     throw error;
   }
 
-  const result = data?.[0];
-  
   return {
-    success: result?.success ?? false,
-    remaining: result?.remaining ?? 0,
-    cost: result?.cost ?? 0,
+    success: data?.success ?? false,
+    remaining: data?.new_balance ?? 0,
+    cost: data?.deducted ?? cost,
+    error: data?.error,
   };
 }
 

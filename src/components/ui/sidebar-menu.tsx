@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   Crown,
@@ -13,14 +13,18 @@ import {
   Sparkles,
   Wand2,
   Bookmark,
+  Shield,
 } from 'lucide-react';
 import { CreditBadge } from '@/components/credits/CreditBadge';
+import { checkIsAdmin } from '@/lib/adminService';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface NavItem {
   id: string;
   label: string;
   icon: React.ElementType;
   badge?: number;
+  adminOnly?: boolean;
 }
 
 const navItems: NavItem[] = [
@@ -34,6 +38,7 @@ const navItems: NavItem[] = [
   { id: 'study', label: 'Study Mode', icon: BookOpen },
   { id: 'analytics', label: 'Analytics', icon: Clock },
   { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'admin', label: 'Admin Panel', icon: Shield, adminOnly: true },
 ];
 
 interface SidebarProps {
@@ -53,6 +58,21 @@ export default function Sidebar({
 }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [activeItem, setActiveItem] = useState('dashboard');
+  const [isAdmin, setIsAdmin] = useState(false);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    async function checkAdmin() {
+      if (user) {
+        const adminStatus = await checkIsAdmin();
+        setIsAdmin(adminStatus);
+      }
+    }
+    checkAdmin();
+  }, [user]);
+
+  // Filter nav items based on admin status
+  const filteredNavItems = navItems.filter(item => !item.adminOnly || isAdmin);
 
   const handleNavClick = (itemId: string) => {
     setActiveItem(itemId);
@@ -112,7 +132,7 @@ export default function Sidebar({
 
       {/* Navigation Items */}
       <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
-        {navItems.map((item) => {
+        {filteredNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeItem === item.id;
 

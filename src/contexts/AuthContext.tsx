@@ -17,6 +17,54 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Helper function to create user profile data (replaces database trigger)
+async function ensureUserProfile(user: User) {
+  if (!user) return;
+  
+  const fullName = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User';
+  
+  // Create profile if not exists
+  await supabase.from('profiles').upsert({
+    id: user.id,
+    email: user.email,
+    full_name: fullName,
+    avatar_url: user.user_metadata?.avatar_url || null,
+  }, { onConflict: 'id' });
+  
+  // Create user_profile if not exists
+  await supabase.from('user_profiles').upsert({
+    user_id: user.id,
+    email: user.email,
+    full_name: fullName,
+    avatar_url: user.user_metadata?.avatar_url || null,
+    is_active: true,
+  }, { onConflict: 'user_id' });
+  
+  // Create credits if not exists
+  const { data: existingCredits } = await supabase
+    .from('user_credits')
+    .select('id')
+    .eq('user_id', user.id)
+    .single();
+    
+  if (!existingCredits) {
+    await supabase.from('user_credits').insert({
+      user_id: user.id,
+      credits_balance: 100,
+      total_credits: 100,
+      used_credits: 0,
+    });
+    
+    // Record signup bonus
+    await supabase.from('credit_transactions').insert({
+      user_id: user.id,
+      amount: 100,
+      transaction_type: 'bonus',
+      description: 'Welcome bonus - Free signup credits',
+    });
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -27,15 +75,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      if (session?.user) {
+        ensureUserProfile(session.user);
+      }
       setLoading(false);
     });
 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
+      if (session?.user) {
+        await ensureUserProfile(session.user);
+      }
       setLoading(false);
     });
 

@@ -111,6 +111,9 @@ export function MiniNavbar() {
     { label: 'Features', to: '#features' },
     { label: 'Pricing', to: '#pricing' },
     { label: 'Templates', to: '#templates' },
+    { label: 'Blogs', to: '/blogs' },
+    { label: 'About', to: '/about' },
+    { label: 'Contact', to: '/contact' },
   ];
 
   const dashboardNavLinks = [

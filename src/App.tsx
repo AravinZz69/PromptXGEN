@@ -22,6 +22,9 @@ import Settings from "./pages/Settings";
 import Pricing from "./pages/Pricing";
 import GenerativeAI from "./pages/GenerativeAI";
 import Admin from "./pages/Admin";
+import Blogs from "./pages/Blogs";
+import AboutUs from "./pages/AboutUs";
+import ContactUs from "./pages/ContactUs";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -109,6 +112,9 @@ function AnimatedRoutes() {
             </AdminRoute>
           }
         />
+        <Route path="/blogs" element={<Blogs />} />
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/contact" element={<ContactUs />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

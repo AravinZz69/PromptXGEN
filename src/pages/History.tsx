@@ -44,6 +44,11 @@ import {
 } from '@/components/ui/alert-dialog';
 
 const History = () => {
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, []);
+
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   

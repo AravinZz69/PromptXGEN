@@ -58,6 +58,11 @@ const Settings = () => {
   // Temp state for editing
   const [tempProfile, setTempProfile] = useState<UserProfile>(profile);
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, []);
+
   useEffect(() => {
     if (user) {
       const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';

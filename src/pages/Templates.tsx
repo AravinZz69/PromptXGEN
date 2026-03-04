@@ -591,6 +591,11 @@ const Templates = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, []);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [selectedRole, setSelectedRole] = useState<"all" | "teacher" | "student">("all");

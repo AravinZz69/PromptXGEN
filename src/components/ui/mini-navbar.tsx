@@ -71,6 +71,7 @@ export function MiniNavbar() {
   const isDashboardPage = location.pathname.startsWith('/dashboard') || 
                           location.pathname.startsWith('/generate') ||
                           location.pathname.startsWith('/templates') ||
+                          location.pathname.startsWith('/history') ||
                           location.pathname.startsWith('/settings');
 
   const toggleMenu = () => {
@@ -152,12 +153,12 @@ export function MiniNavbar() {
   );
 
   const dashboardButtonElement = (
-    <button 
-      onClick={() => navigate('/dashboard')}
-      className="relative z-10 px-4 py-2 sm:px-3 text-xs sm:text-sm font-semibold text-black bg-gradient-to-br from-primary to-purple-400 rounded-full hover:from-primary/90 hover:to-purple-500 transition-all duration-200 w-full sm:w-auto"
+    <Link 
+      to="/dashboard"
+      className="relative z-10 px-4 py-2 sm:px-3 text-xs sm:text-sm font-semibold text-black bg-gradient-to-br from-primary to-purple-400 rounded-full hover:from-primary/90 hover:to-purple-500 transition-all duration-200 w-full sm:w-auto text-center"
     >
       Dashboard
-    </button>
+    </Link>
   );
 
   // Render right side content based on page type

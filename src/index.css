@@ -106,4 +106,69 @@
     0%, 100% { box-shadow: 0 0 20px -5px hsl(var(--glow) / 0.2); }
     50% { box-shadow: 0 0 40px -5px hsl(var(--glow) / 0.4); }
   }
+
+  /* Chat Streaming Animations */
+  
+  /* Bouncing dots for thinking indicator */
+  @keyframes bounce-dot {
+    0%, 80%, 100% { 
+      transform: translateY(0); 
+      opacity: 0.4; 
+    }
+    40% { 
+      transform: translateY(-8px); 
+      opacity: 1; 
+    }
+  }
+
+  /* Cursor blink for streaming */
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* Shimmer for thinking bar */
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(300%); }
+  }
+
+  /* Message entrance animation */
+  @keyframes message-in {
+    from { 
+      opacity: 0; 
+      transform: translateY(12px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+  }
+
+  /* Stop button pulse animation */
+  @keyframes stop-pulse {
+    0%, 100% { 
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); 
+    }
+    50% { 
+      box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); 
+    }
+  }
+
+  /* Utility classes */
+  .animate-bounce-dot {
+    animation: bounce-dot 1.2s infinite ease-in-out;
+  }
+  .animate-blink {
+    animation: blink 1s ease-in-out infinite;
+  }
+  .animate-shimmer {
+    animation: shimmer 1.5s infinite;
+  }
+  .animate-message-in {
+    animation: message-in 0.3s ease-out forwards;
+  }
+  .animate-stop-pulse {
+    animation: stop-pulse 1.5s ease-in-out infinite;
+  }
 }

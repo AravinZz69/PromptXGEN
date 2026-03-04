@@ -28,6 +28,11 @@ const Dashboard = () => {
   const userInitials = user?.email?.substring(0, 2).toUpperCase() || 'U';
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, []);
+
   // Load bookmark count from localStorage
   useEffect(() => {
     const savedBookmarks = localStorage.getItem('templateBookmarks');

@@ -21,47 +21,54 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 async function ensureUserProfile(user: User) {
   if (!user) return;
   
-  const fullName = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User';
-  
-  // Create profile if not exists
-  await supabase.from('profiles').upsert({
-    id: user.id,
-    email: user.email,
-    full_name: fullName,
-    avatar_url: user.user_metadata?.avatar_url || null,
-  }, { onConflict: 'id' });
-  
-  // Create user_profile if not exists
-  await supabase.from('user_profiles').upsert({
-    user_id: user.id,
-    email: user.email,
-    full_name: fullName,
-    avatar_url: user.user_metadata?.avatar_url || null,
-    is_active: true,
-  }, { onConflict: 'user_id' });
-  
-  // Create credits if not exists
-  const { data: existingCredits } = await supabase
-    .from('user_credits')
-    .select('id')
-    .eq('user_id', user.id)
-    .single();
+  try {
+    const fullName = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User';
     
-  if (!existingCredits) {
-    await supabase.from('user_credits').insert({
-      user_id: user.id,
-      credits_balance: 100,
-      total_credits: 100,
-      used_credits: 0,
-    });
+    // Create profile if not exists - these are fire and forget, don't block login
+    await Promise.allSettled([
+      supabase.from('profiles').upsert({
+        id: user.id,
+        email: user.email,
+        full_name: fullName,
+        avatar_url: user.user_metadata?.avatar_url || null,
+      }, { onConflict: 'id' }),
+      
+      supabase.from('user_profiles').upsert({
+        user_id: user.id,
+        email: user.email,
+        full_name: fullName,
+        avatar_url: user.user_metadata?.avatar_url || null,
+        is_active: true,
+      }, { onConflict: 'user_id' }),
+    ]);
     
-    // Record signup bonus
-    await supabase.from('credit_transactions').insert({
-      user_id: user.id,
-      amount: 100,
-      transaction_type: 'bonus',
-      description: 'Welcome bonus - Free signup credits',
-    });
+    // Create credits if not exists
+    const { data: existingCredits } = await supabase
+      .from('user_credits')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+      
+    if (!existingCredits) {
+      await Promise.allSettled([
+        supabase.from('user_credits').insert({
+          user_id: user.id,
+          credits_balance: 100,
+          total_credits: 100,
+          used_credits: 0,
+        }),
+        
+        supabase.from('credit_transactions').insert({
+          user_id: user.id,
+          amount: 100,
+          transaction_type: 'bonus',
+          description: 'Welcome bonus - Free signup credits',
+        }),
+      ]);
+    }
+  } catch (err) {
+    console.warn('Error in ensureUserProfile:', err);
+    // Don't throw - allow login to continue even if profile setup fails
   }
 }
 
@@ -72,11 +79,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        ensureUserProfile(session.user);
+        try {
+          await ensureUserProfile(session.user);
+        } catch (err) {
+          console.warn('Failed to ensure user profile on init:', err);
+          // Don't block the app if profile creation fails
+        }
       }
       setLoading(false);
     });
@@ -88,7 +100,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        await ensureUserProfile(session.user);
+        try {
+          await ensureUserProfile(session.user);
+        } catch (err) {
+          console.warn('Failed to ensure user profile:', err);
+          // Don't block login if profile creation fails
+        }
       }
       setLoading(false);
     });

@@ -23,9 +23,26 @@ import Pricing from "./pages/Pricing";
 import GenerativeAI from "./pages/GenerativeAI";
 import Admin from "./pages/Admin";
 import Blogs from "./pages/Blogs";
+import BlogPost from "./pages/BlogPost";
 import AboutUs from "./pages/AboutUs";
 import ContactUs from "./pages/ContactUs";
 import NotFound from "./pages/NotFound";
+
+// Admin Portal imports
+import AdminApp from "./admin/AdminApp";
+import AdminProtectedRoute from "./admin/AdminProtectedRoute";
+import AdminLogin from "./admin/pages/AdminLogin";
+import AdminDashboard from "./admin/pages/AdminDashboard";
+import Analytics from "./admin/pages/Analytics";
+import UserManagement from "./admin/pages/UserManagement";
+import PromptManagement from "./admin/pages/PromptManagement";
+import RevenueManagement from "./admin/pages/RevenueManagement";
+import AIModelConfig from "./admin/pages/AIModelConfig";
+import SupportTickets from "./admin/pages/SupportTickets";
+import Notifications from "./admin/pages/Notifications";
+import FeatureFlags from "./admin/pages/FeatureFlags";
+import AuditLogs from "./admin/pages/AuditLogs";
+import AdminSettings from "./admin/pages/AdminSettings";
 
 const queryClient = new QueryClient();
 
@@ -112,7 +129,34 @@ function AnimatedRoutes() {
             </AdminRoute>
           }
         />
+        
+        {/* Admin Portal Routes */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route
+          path="/admin/*"
+          element={
+            <AdminProtectedRoute>
+              <AdminApp />
+            </AdminProtectedRoute>
+          }
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="analytics" element={<Analytics />} />
+          <Route path="users" element={<UserManagement />} />
+          <Route path="prompts" element={<PromptManagement />} />
+          <Route path="revenue" element={<RevenueManagement />} />
+          <Route path="ai-models" element={<AIModelConfig />} />
+          <Route path="tickets" element={<SupportTickets />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="feature-flags" element={<FeatureFlags />} />
+          <Route path="audit-logs" element={<AuditLogs />} />
+          <Route path="settings" element={<AdminSettings />} />
+        </Route>
+        
         <Route path="/blogs" element={<Blogs />} />
+        <Route path="/blog" element={<Blogs />} />
+        <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/about" element={<AboutUs />} />
         <Route path="/contact" element={<ContactUs />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

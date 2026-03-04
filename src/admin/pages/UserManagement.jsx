@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Search,
   Download,
@@ -13,11 +13,13 @@ import {
   Coins,
   Plus,
   Minus,
+  Loader2,
+  RefreshCw,
 } from 'lucide-react';
 import Badge from '../components/Badge';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
-import { mockUsers } from '../mockData';
+import { supabase } from '@/lib/supabase';
 
 const statusVariants = {
   Active: 'success',
@@ -27,12 +29,16 @@ const statusVariants = {
 
 const planVariants = {
   Free: 'neutral',
+  free: 'neutral',
   Pro: 'purple',
+  pro: 'purple',
   Enterprise: 'success',
+  enterprise: 'success',
 };
 
 export default function UserManagement() {
-  const [users, setUsers] = useState(mockUsers);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [planFilter, setPlanFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -50,6 +56,59 @@ export default function UserManagement() {
   const [creditReason, setCreditReason] = useState('');
 
   const pageSize = 10;
+
+  // Fetch users from Supabase
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  async function fetchUsers() {
+    setLoading(true);
+    try {
+      // Fetch profiles with credits
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (profilesError) throw profilesError;
+
+      // Fetch credits for all users
+      const { data: credits, error: creditsError } = await supabase
+        .from('user_credits')
+        .select('user_id, credits_balance, used_credits');
+
+      // Fetch user_profiles for status
+      const { data: userProfiles, error: upError } = await supabase
+        .from('user_profiles')
+        .select('user_id, is_active, last_login');
+
+      // Map to user format
+      const usersData = profiles.map(profile => {
+        const userCredit = credits?.find(c => c.user_id === profile.id);
+        const userProfile = userProfiles?.find(up => up.user_id === profile.id);
+        
+        return {
+          id: profile.id,
+          name: profile.full_name || profile.email?.split('@')[0] || 'Unknown',
+          email: profile.email || '',
+          avatar: (profile.full_name || profile.email || 'U').substring(0, 2).toUpperCase(),
+          plan: (profile.plan || 'free').charAt(0).toUpperCase() + (profile.plan || 'free').slice(1),
+          promptsUsed: userCredit?.used_credits || 0,
+          joinedDate: profile.created_at,
+          lastActive: userProfile?.last_login || profile.updated_at,
+          status: userProfile?.is_active === false ? 'Suspended' : 'Active',
+          credits: userCredit?.credits_balance || 0,
+        };
+      });
+
+      setUsers(usersData);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   // Filter users
   const filteredUsers = useMemo(() => {
@@ -71,56 +130,185 @@ export default function UserManagement() {
 
   const totalPages = Math.ceil(filteredUsers.length / pageSize);
 
-  const handleSuspend = (user) => {
-    setUsers(users.map(u => 
-      u.id === user.id ? { ...u, status: u.status === 'Suspended' ? 'Active' : 'Suspended' } : u
-    ));
+  const handleSuspend = async (user) => {
+    try {
+      const newStatus = user.status === 'Suspended' ? true : false;
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({ is_active: newStatus })
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      setUsers(users.map(u => 
+        u.id === user.id ? { ...u, status: newStatus ? 'Active' : 'Suspended' } : u
+      ));
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      alert('Failed to update user status');
+    }
     setConfirmAction(null);
   };
 
-  const handleBan = (user) => {
-    setUsers(users.map(u => 
-      u.id === user.id ? { ...u, status: 'Banned' } : u
-    ));
+  const handleBan = async (user) => {
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({ is_active: false })
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      setUsers(users.map(u => 
+        u.id === user.id ? { ...u, status: 'Banned' } : u
+      ));
+    } catch (error) {
+      console.error('Error banning user:', error);
+      alert('Failed to ban user');
+    }
     setConfirmAction(null);
   };
 
-  const handleDelete = (user) => {
-    setUsers(users.filter(u => u.id !== user.id));
+  const handleDelete = async (user) => {
+    try {
+      // Note: Deleting from profiles will cascade due to FK constraints
+      // In production, you might want to soft-delete instead
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', user.id);
+      
+      if (error) throw error;
+      
+      setUsers(users.filter(u => u.id !== user.id));
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      alert('Failed to delete user');
+    }
     setConfirmAction(null);
   };
 
-  const handleUpgrade = (user, newPlan) => {
-    setUsers(users.map(u => 
-      u.id === user.id ? { ...u, plan: newPlan } : u
-    ));
+  const handleUpgrade = async (user, newPlan) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ plan: newPlan.toLowerCase() })
+        .eq('id', user.id);
+      
+      if (error) throw error;
+      
+      setUsers(users.map(u => 
+        u.id === user.id ? { ...u, plan: newPlan } : u
+      ));
+    } catch (error) {
+      console.error('Error upgrading user:', error);
+      alert('Failed to upgrade user');
+    }
     setUpgradeUser(null);
   };
 
-  const handleAddCredits = (user) => {
-    setUsers(users.map(u => 
-      u.id === user.id ? { ...u, credits: (u.credits || 0) + creditAmount } : u
-    ));
-    setCreditAmount(100);
-    setCreditReason('');
-    setCreditsModal(null);
-    alert(`Added ${creditAmount} credits to ${user.name}`);
+  const handleAddCredits = async (user) => {
+    try {
+      // First get current credits
+      const { data: currentCredits, error: fetchError } = await supabase
+        .from('user_credits')
+        .select('credits_balance')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
+      
+      const newBalance = (currentCredits?.credits_balance || 0) + creditAmount;
+      
+      // Update or insert credits
+      const { error: updateError } = await supabase
+        .from('user_credits')
+        .upsert({
+          user_id: user.id,
+          credits_balance: newBalance,
+          total_credits: newBalance,
+        }, { onConflict: 'user_id' });
+      
+      if (updateError) throw updateError;
+      
+      // Log transaction
+      await supabase.from('credit_transactions').insert({
+        user_id: user.id,
+        amount: creditAmount,
+        transaction_type: 'admin_grant',
+        description: creditReason || 'Admin credit grant',
+      });
+      
+      setUsers(users.map(u => 
+        u.id === user.id ? { ...u, credits: newBalance } : u
+      ));
+      setCreditAmount(100);
+      setCreditReason('');
+      setCreditsModal(null);
+      alert(`Added ${creditAmount} credits to ${user.name}`);
+    } catch (error) {
+      console.error('Error adding credits:', error);
+      alert('Failed to add credits');
+    }
   };
 
-  const handleDeductCredits = (user) => {
-    setUsers(users.map(u => 
-      u.id === user.id ? { ...u, credits: Math.max(0, (u.credits || 0) - creditAmount) } : u
-    ));
-    setCreditAmount(100);
-    setCreditReason('');
-    setCreditsModal(null);
-    alert(`Deducted ${creditAmount} credits from ${user.name}`);
+  const handleDeductCredits = async (user) => {
+    try {
+      const { data: currentCredits, error: fetchError } = await supabase
+        .from('user_credits')
+        .select('credits_balance')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (fetchError) throw fetchError;
+      
+      const newBalance = Math.max(0, (currentCredits?.credits_balance || 0) - creditAmount);
+      
+      const { error: updateError } = await supabase
+        .from('user_credits')
+        .update({ credits_balance: newBalance })
+        .eq('user_id', user.id);
+      
+      if (updateError) throw updateError;
+      
+      // Log transaction
+      await supabase.from('credit_transactions').insert({
+        user_id: user.id,
+        amount: creditAmount,
+        transaction_type: 'deduction',
+        description: creditReason || 'Admin credit deduction',
+      });
+      
+      setUsers(users.map(u => 
+        u.id === user.id ? { ...u, credits: newBalance } : u
+      ));
+      setCreditAmount(100);
+      setCreditReason('');
+      setCreditsModal(null);
+      alert(`Deducted ${creditAmount} credits from ${user.name}`);
+    } catch (error) {
+      console.error('Error deducting credits:', error);
+      alert('Failed to deduct credits');
+    }
   };
 
-  const handleSetCredits = (user, amount) => {
-    setUsers(users.map(u => 
-      u.id === user.id ? { ...u, credits: amount } : u
-    ));
+  const handleSetCredits = async (user, amount) => {
+    try {
+      const { error } = await supabase
+        .from('user_credits')
+        .upsert({
+          user_id: user.id,
+          credits_balance: amount,
+        }, { onConflict: 'user_id' });
+      
+      if (error) throw error;
+      
+      setUsers(users.map(u => 
+        u.id === user.id ? { ...u, credits: amount } : u
+      ));
+    } catch (error) {
+      console.error('Error setting credits:', error);
+    }
   };
 
   const handleImpersonate = (user) => {
@@ -158,9 +346,19 @@ export default function UserManagement() {
         <div className="flex items-center gap-3">
           <h2 className="text-xl font-semibold text-white">Users</h2>
           <Badge label={`${filteredUsers.length} total`} variant="neutral" />
+          {loading && <Loader2 className="w-4 h-4 text-indigo-500 animate-spin" />}
         </div>
         
         <div className="flex flex-wrap items-center gap-3">
+          {/* Refresh Button */}
+          <button
+            onClick={fetchUsers}
+            disabled={loading}
+            className="p-2 bg-[#111827] border border-gray-800 rounded-lg text-gray-400 hover:text-white hover:border-gray-700 transition-colors"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+          
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />

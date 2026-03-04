@@ -66,7 +66,7 @@ export default function AdminSidebar({ isOpen, onClose }) {
 
   const handleLogout = () => {
     adminLogout();
-    navigate('/admin/login');
+    navigate('/auth');
   };
 
   return (
@@ -79,12 +79,12 @@ export default function AdminSidebar({ isOpen, onClose }) {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - always visible on lg screens, toggle on mobile */}
       <aside
-        className={`fixed left-0 top-0 h-full w-64 bg-[#111827]/100 backdrop-blur-none border-r border-gray-800 z-50 transform transition-transform duration-200 lg:translate-x-0 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-        style={{ backgroundColor: '#111827' }}
+        className={`fixed left-0 top-0 h-full w-64 bg-[#111827] border-r border-gray-800 z-50 transition-transform duration-200 
+          lg:translate-x-0 
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
       >
         {/* Logo */}
         <div className="flex items-center gap-3 px-6 h-16 border-b border-gray-800">

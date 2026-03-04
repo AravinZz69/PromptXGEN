@@ -338,7 +338,7 @@ const Pricing = () => {
               <p className="text-muted-foreground text-sm mb-4">
                 Contact us for a personalized recommendation or custom enterprise solutions.
               </p>
-              <Button variant="outline" onClick={() => window.open('mailto:support@promptgenius.in', '_blank')}>
+              <Button variant="outline" onClick={() => window.open('mailto:support@askjai.in', '_blank')}>
                 Contact Support
               </Button>
             </motion.div>

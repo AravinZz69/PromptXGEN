@@ -3,11 +3,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { AdminRoute } from "@/components/auth/AdminRoute";
 import CustomCursor from "@/components/ui/CustomCursor";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -21,7 +20,6 @@ import History from "./pages/History";
 import Settings from "./pages/Settings";
 import Pricing from "./pages/Pricing";
 import GenerativeAI from "./pages/GenerativeAI";
-import Admin from "./pages/Admin";
 import Blogs from "./pages/Blogs";
 import BlogPost from "./pages/BlogPost";
 import AboutUs from "./pages/AboutUs";
@@ -31,7 +29,6 @@ import NotFound from "./pages/NotFound";
 // Admin Portal imports
 import AdminApp from "./admin/AdminApp";
 import AdminProtectedRoute from "./admin/AdminProtectedRoute";
-import AdminLogin from "./admin/pages/AdminLogin";
 import AdminDashboard from "./admin/pages/AdminDashboard";
 import Analytics from "./admin/pages/Analytics";
 import UserManagement from "./admin/pages/UserManagement";
@@ -121,17 +118,12 @@ function AnimatedRoutes() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/admin"
-          element={
-            <AdminRoute>
-              <Admin />
-            </AdminRoute>
-          }
-        />
         
         {/* Admin Portal Routes */}
-        <Route path="/admin/login" element={<AdminLogin />} />
+        {/* Redirect /admin to /admin/dashboard */}
+        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+        {/* Redirect old /admin/login to unified /auth */}
+        <Route path="/admin/login" element={<Navigate to="/auth" replace />} />
         <Route
           path="/admin/*"
           element={

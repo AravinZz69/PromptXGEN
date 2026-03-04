@@ -65,10 +65,10 @@ export function ChatMessage({
       {/* Message Bubble */}
       <div
         className={`
-          max-w-[85%] px-4 py-3
+          group
           ${isUser
-            ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-2xl rounded-br-sm'
-            : 'bg-muted/50 border border-border rounded-2xl rounded-bl-sm'
+            ? 'max-w-[85%] px-4 py-3 bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-2xl rounded-br-sm'
+            : 'max-w-[88%] pl-4 pr-4 py-3 bg-white/[0.03] border-l-2 border-indigo-500 rounded-r-lg'
           }
           ${hasAnimated ? '' : 'opacity-0'}
           transition-opacity duration-300
@@ -85,58 +85,58 @@ export function ChatMessage({
 
         {/* Timestamp & Actions for Assistant */}
         {!isUser && !isStreaming && message.content && (
-          <div className="flex items-center justify-between gap-2 mt-3 pt-2 border-t border-border/50">
+          <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/5">
             <span className="text-xs text-muted-foreground">
               {formatTime(message.timestamp)}
             </span>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               {/* Copy */}
               <button
                 onClick={handleCopy}
-                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
+                className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
                 title="Copy message"
               >
                 {copied ? (
-                  <Check className="h-4 w-4 text-green-500" />
+                  <Check className="h-[15px] w-[15px] text-green-500" />
                 ) : (
-                  <Copy className="h-4 w-4" />
+                  <Copy className="h-[15px] w-[15px]" />
                 )}
               </button>
 
               {/* Thumbs Up */}
               <button
                 onClick={() => setLiked(liked === 'up' ? null : 'up')}
-                className={`p-1.5 rounded-lg transition-colors ${
+                className={`p-1 rounded-md transition-colors ${
                   liked === 'up'
                     ? 'text-green-500 bg-green-500/10'
                     : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
                 }`}
                 title="Good response"
               >
-                <ThumbsUp className="h-4 w-4" />
+                <ThumbsUp className="h-[15px] w-[15px]" />
               </button>
 
               {/* Thumbs Down */}
               <button
                 onClick={() => setLiked(liked === 'down' ? null : 'down')}
-                className={`p-1.5 rounded-lg transition-colors ${
+                className={`p-1 rounded-md transition-colors ${
                   liked === 'down'
                     ? 'text-red-500 bg-red-500/10'
                     : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
                 }`}
                 title="Bad response"
               >
-                <ThumbsDown className="h-4 w-4" />
+                <ThumbsDown className="h-[15px] w-[15px]" />
               </button>
 
               {/* Regenerate */}
               {onRegenerate && (
                 <button
                   onClick={onRegenerate}
-                  className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
+                  className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
                   title="Regenerate response"
                 >
-                  <RotateCcw className="h-4 w-4" />
+                  <RotateCcw className="h-[15px] w-[15px]" />
                 </button>
               )}
             </div>

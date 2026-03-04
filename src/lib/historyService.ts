@@ -13,7 +13,7 @@ export interface HistoryItem {
   isFavorite?: boolean;
 }
 
-const HISTORY_KEY = 'promptGenius_history';
+const HISTORY_KEY = 'askjai_history';
 const MAX_HISTORY_ITEMS = 100;
 
 // Generate unique ID

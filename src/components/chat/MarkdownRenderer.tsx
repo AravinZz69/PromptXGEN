@@ -1,9 +1,56 @@
 import { useState, useMemo, ReactNode } from 'react';
 import { Copy, Check } from 'lucide-react';
+import katex from 'katex';
 
 interface MarkdownRendererProps {
   content: string;
   isStreaming?: boolean;
+}
+
+// ── KATEX MATH RENDERER ──────────────────────────────────────────────────────
+function renderMath(expression: string, displayMode = false): string {
+  try {
+    return katex.renderToString(expression.trim(), {
+      displayMode,
+      throwOnError: false,
+      strict: false,
+    });
+  } catch {
+    return expression;
+  }
+}
+
+// Math display block component with copy button
+function MathBlock({ expression, raw }: { expression: string; raw: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(raw);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="relative group katex-display-wrapper my-4">
+      <span dangerouslySetInnerHTML={{ __html: expression }} />
+      <button
+        onClick={handleCopy}
+        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-xs text-indigo-400 bg-indigo-500/20 px-2 py-0.5 rounded transition-opacity"
+      >
+        {copied ? 'Copied!' : 'Copy'}
+      </button>
+    </div>
+  );
+}
+
+// Inline math component
+function MathInline({ expression }: { expression: string }) {
+  return (
+    <span
+      className="katex-inline-wrapper"
+      dangerouslySetInnerHTML={{ __html: expression }}
+    />
+  );
 }
 
 // ── BLINKING CURSOR ──────────────────────────────────────────────────────────
@@ -54,15 +101,81 @@ function CodeBlock({ language, code }: { language: string; code: string }) {
   );
 }
 
-// ── INLINE PARSING ───────────────────────────────────────────────────────────
+// ── STEP HEADING COMPONENT ───────────────────────────────────────────────────
+function StepHeading({ text }: { text: string }) {
+  return (
+    <div className="flex items-center gap-3 my-4">
+      <div className="flex items-center gap-2 bg-indigo-500/15 border border-indigo-500/30 rounded-lg px-3 py-1.5">
+        <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+        <span className="text-indigo-300 font-semibold text-xs tracking-widest uppercase">
+          {text}
+        </span>
+      </div>
+      <div className="flex-1 h-px bg-indigo-500/15" />
+    </div>
+  );
+}
+
+// ── INLINE PARSING WITH MATH PROTECTION ──────────────────────────────────────
+interface MathToken {
+  type: 'display' | 'inline';
+  expr: string;
+  raw: string;
+}
+
 function parseInline(text: string): ReactNode[] {
   const elements: ReactNode[] = [];
-  let remaining = text;
+  const mathTokens: MathToken[] = [];
   let key = 0;
 
+  // STEP 1: Extract and protect math expressions FIRST (before bold/italic)
+  let protectedText = text
+    // Display math: $$...$$
+    .replace(/\$\$(.+?)\$\$/gs, (match, expr) => {
+      mathTokens.push({ type: 'display', expr, raw: match });
+      return `%%MATH_${mathTokens.length - 1}%%`;
+    })
+    // Inline math: $...$
+    .replace(/\$([^\$\n]+?)\$/g, (match, expr) => {
+      mathTokens.push({ type: 'inline', expr, raw: match });
+      return `%%MATH_${mathTokens.length - 1}%%`;
+    })
+    // \boxed{} standalone (fallback if not wrapped in $)
+    .replace(/\\boxed\{(.+?)\}/g, (match, val) => {
+      mathTokens.push({ type: 'inline', expr: `\\boxed{${val}}`, raw: match });
+      return `%%MATH_${mathTokens.length - 1}%%`;
+    })
+    // \frac, \sqrt, etc without $ wrapper
+    .replace(/\\(frac|sqrt|sum|int|prod|lim|infty|alpha|beta|gamma|delta|theta|pi|sigma|omega)\{/g, (match) => {
+      // Find the full expression - this is a simple heuristic
+      return match; // Keep as-is for now, will be handled by $ wrapper
+    });
+
+  // STEP 2: Parse the protected text for bold/italic/code
+  let remaining = protectedText;
+
   while (remaining.length > 0) {
+    // Check for math placeholder
+    let match = remaining.match(/^%%MATH_(\d+)%%/);
+    if (match) {
+      const tokenIndex = parseInt(match[1], 10);
+      const token = mathTokens[tokenIndex];
+      if (token) {
+        const rendered = renderMath(token.expr, token.type === 'display');
+        if (token.type === 'display') {
+          elements.push(
+            <MathBlock key={key++} expression={rendered} raw={token.expr} />
+          );
+        } else {
+          elements.push(<MathInline key={key++} expression={rendered} />);
+        }
+      }
+      remaining = remaining.slice(match[0].length);
+      continue;
+    }
+
     // Bold + Italic: ***text***
-    let match = remaining.match(/^\*\*\*(.+?)\*\*\*/);
+    match = remaining.match(/^\*\*\*(.+?)\*\*\*/);
     if (match) {
       elements.push(
         <strong key={key++} className="font-semibold text-foreground">
@@ -77,7 +190,7 @@ function parseInline(text: string): ReactNode[] {
     match = remaining.match(/^\*\*(.+?)\*\*/);
     if (match) {
       elements.push(
-        <strong key={key++} className="font-semibold text-foreground">
+        <strong key={key++} className="font-semibold text-white">
           {match[1]}
         </strong>
       );
@@ -112,11 +225,18 @@ function parseInline(text: string): ReactNode[] {
       continue;
     }
 
-    // Plain text (up to next special character)
-    match = remaining.match(/^[^*`]+/);
+    // Plain text (up to next special character or math placeholder)
+    match = remaining.match(/^[^*`%]+/);
     if (match) {
       elements.push(<span key={key++}>{match[0]}</span>);
       remaining = remaining.slice(match[0].length);
+      continue;
+    }
+
+    // Handle % that's not part of placeholder
+    if (remaining.startsWith('%') && !remaining.startsWith('%%MATH_')) {
+      elements.push(<span key={key++}>%</span>);
+      remaining = remaining.slice(1);
       continue;
     }
 
@@ -144,10 +264,10 @@ function parseMarkdown(content: string): ReactNode[] {
 
     if (listType === 'ul') {
       elements.push(
-        <ul key={key++} className="space-y-1 my-2 ml-2">
+        <ul key={key++} className="space-y-2 my-3 ml-1">
           {listItems.map((item, i) => (
-            <li key={i} className="flex gap-2 items-start">
-              <span className="mt-2 w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+            <li key={i} className="flex items-start gap-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-2.5 flex-shrink-0" />
               <span className="leading-7 text-gray-200">{parseInline(item)}</span>
             </li>
           ))}
@@ -210,11 +330,28 @@ function parseMarkdown(content: string): ReactNode[] {
       continue;
     }
 
+    // Step headings: "STEP 1:", "STEP 2.", "SOLUTION:", etc.
+    const stepMatch = line.match(/^(STEP\s+\d+[:.]?|SOLUTION[:.]?|ANSWER[:.]?|METHOD[:.]?|APPROACH[:.]?|RESULT[:.]?)\s*(.*)/i);
+    if (stepMatch) {
+      flushList();
+      const stepLabel = stepMatch[1].replace(/[:.]\s*$/, '').toUpperCase();
+      const restOfLine = stepMatch[2];
+      elements.push(<StepHeading key={key++} text={stepLabel} />);
+      if (restOfLine.trim()) {
+        elements.push(
+          <p key={key++} className="leading-7 text-gray-200 mb-2">
+            {parseInline(restOfLine)}
+          </p>
+        );
+      }
+      continue;
+    }
+
     // ## Heading 2
     if (line.startsWith('## ')) {
       flushList();
       elements.push(
-        <h2 key={key++} className="text-lg font-bold text-primary mt-4 mb-2 font-display">
+        <h2 key={key++} className="text-indigo-300 font-semibold text-xs tracking-wide uppercase mt-5 mb-2">
           {parseInline(line.slice(3))}
         </h2>
       );
@@ -225,7 +362,7 @@ function parseMarkdown(content: string): ReactNode[] {
     if (line.startsWith('### ')) {
       flushList();
       elements.push(
-        <h3 key={key++} className="text-base font-semibold text-primary mt-3 mb-1 font-display">
+        <h3 key={key++} className="text-indigo-300 font-semibold text-xs tracking-wide uppercase mt-4 mb-1">
           {parseInline(line.slice(4))}
         </h3>
       );
@@ -236,7 +373,7 @@ function parseMarkdown(content: string): ReactNode[] {
     if (line.startsWith('# ')) {
       flushList();
       elements.push(
-        <h1 key={key++} className="text-xl font-bold text-primary mt-4 mb-2 font-display">
+        <h1 key={key++} className="text-indigo-300 font-semibold text-sm tracking-wide uppercase mt-5 mb-2">
           {parseInline(line.slice(2))}
         </h1>
       );
@@ -249,9 +386,10 @@ function parseMarkdown(content: string): ReactNode[] {
       elements.push(
         <blockquote
           key={key++}
-          className="border-l-2 border-primary pl-4 my-2 text-gray-300 italic bg-primary/5 py-2 rounded-r-lg"
+          className="relative border-l-2 border-indigo-500 pl-6 pr-4 my-3 py-3 bg-indigo-500/[0.08] rounded-r-lg"
         >
-          {parseInline(line.slice(2))}
+          <span className="absolute -top-2 left-2 text-6xl text-indigo-500/20 font-serif leading-none select-none">"</span>
+          <p className="italic text-gray-200 relative z-10">{parseInline(line.slice(2))}</p>
         </blockquote>
       );
       continue;

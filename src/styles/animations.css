@@ -428,3 +428,93 @@ html.custom-cursor * {
   opacity: 1;
   transform: scale(1);
 }
+
+/* ========================================
+   Chat Scrollbar Styles
+   ======================================== */
+
+.chat-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.chat-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-scroll::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 999px;
+}
+
+.chat-scroll::-webkit-scrollbar-thumb:hover {
+  background: #6366f1;
+}
+
+/* Firefox scrollbar */
+.chat-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #374151 transparent;
+}
+
+/* ========================================
+   KaTeX Math Rendering Styles
+   ======================================== */
+
+/* Display math block wrapper */
+.katex-display-wrapper {
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 0.75rem;
+  padding: 1rem 1.5rem;
+  text-align: center;
+  overflow-x: auto;
+}
+
+/* Inline math wrapper */
+.katex-inline-wrapper {
+  display: inline;
+  padding: 0 0.15rem;
+}
+
+/* KaTeX dark theme overrides */
+.katex {
+  color: #e5e7eb !important;
+  font-size: 1.05em;
+}
+
+.katex .mord,
+.katex .mrel,
+.katex .mbin,
+.katex .mopen,
+.katex .mclose,
+.katex .mpunct,
+.katex .minner {
+  color: #e5e7eb;
+}
+
+.katex .mop {
+  color: #a5b4fc;
+}
+
+.katex .mathrm {
+  color: #c7d2fe;
+}
+
+.katex .mfrac .frac-line {
+  border-color: #6366f1;
+}
+
+.katex .sqrt > .root {
+  color: #a5b4fc;
+}
+
+.katex .sqrt > .sqrt-line {
+  border-color: #6366f1;
+}
+
+/* Boxed answers special styling */
+.katex .boxed {
+  border-color: #6366f1;
+  padding: 0.2em 0.4em;
+}
+

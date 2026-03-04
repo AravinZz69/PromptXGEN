@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Flag,
   Save,
@@ -14,14 +14,17 @@ import {
   Edit,
   ChevronDown,
   ChevronRight,
+  Loader2,
 } from 'lucide-react';
 import Badge from '../components/Badge';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
-import { mockFeatureFlags } from '../mockData';
+import { supabase } from '../../lib/supabase';
 
 export default function FeatureFlags() {
-  const [flags, setFlags] = useState(mockFeatureFlags);
+  const [flags, setFlags] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [hasChanges, setHasChanges] = useState(false);
   const [editFlag, setEditFlag] = useState(null);
@@ -40,6 +43,43 @@ export default function FeatureFlags() {
     enabledForPlans: [],
   });
 
+  // Fetch feature flags from Supabase
+  const fetchFlags = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('feature_flags')
+        .select('*')
+        .order('section', { ascending: true })
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+
+      const mappedFlags = (data || []).map(flag => ({
+        id: flag.id,
+        name: flag.name,
+        key: flag.key,
+        description: flag.description || '',
+        section: flag.section || 'Experimental',
+        enabled: flag.enabled || false,
+        rolloutPercentage: flag.rollout_percentage || 100,
+        enabledForPlans: flag.enabled_for_plans || [],
+        createdAt: flag.created_at,
+      }));
+
+      setFlags(mappedFlags);
+    } catch (error) {
+      console.error('Error fetching feature flags:', error);
+      setFlags([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFlags();
+  }, []);
+
   const sections = [...new Set(flags.map(f => f.section))];
 
   const toggleSection = (section) => {
@@ -50,9 +90,12 @@ export default function FeatureFlags() {
     );
   };
 
-  const toggleFlag = (flagId) => {
+  const toggleFlag = async (flagId) => {
+    const flag = flags.find(f => f.id === flagId);
+    const newEnabled = !flag?.enabled;
+    
     setFlags(prev => prev.map(f =>
-      f.id === flagId ? { ...f, enabled: !f.enabled } : f
+      f.id === flagId ? { ...f, enabled: newEnabled } : f
     ));
     setHasChanges(true);
   };
@@ -64,42 +107,113 @@ export default function FeatureFlags() {
     setHasChanges(true);
   };
 
-  const handleSave = () => {
-    console.log('Saving feature flags:', flags);
-    setHasChanges(false);
-    alert('Feature flags saved successfully!');
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      // Update all flags that have changes
+      for (const flag of flags) {
+        const { error } = await supabase
+          .from('feature_flags')
+          .update({
+            enabled: flag.enabled,
+            rollout_percentage: flag.rolloutPercentage,
+            enabled_for_plans: flag.enabledForPlans,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', flag.id);
+
+        if (error) throw error;
+      }
+      
+      setHasChanges(false);
+      alert('Feature flags saved successfully!');
+    } catch (error) {
+      console.error('Error saving feature flags:', error);
+      alert('Error saving feature flags');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleDelete = () => {
-    setFlags(prev => prev.filter(f => f.id !== deleteConfirm.id));
-    setDeleteConfirm(null);
-    setHasChanges(true);
+  const handleDelete = async () => {
+    try {
+      const { error } = await supabase
+        .from('feature_flags')
+        .delete()
+        .eq('id', deleteConfirm.id);
+
+      if (error) throw error;
+
+      setFlags(prev => prev.filter(f => f.id !== deleteConfirm.id));
+      setDeleteConfirm(null);
+      setHasChanges(false);
+    } catch (error) {
+      console.error('Error deleting feature flag:', error);
+    }
   };
 
-  const handleAddFlag = () => {
-    const flag = {
-      id: flags.length + 1,
-      ...newFlag,
-      createdAt: new Date().toISOString(),
-    };
-    setFlags([...flags, flag]);
-    setNewFlag({
-      name: '',
-      key: '',
-      description: '',
-      section: 'Experimental',
-      enabled: false,
-      rolloutPercentage: 100,
-      enabledForPlans: [],
-    });
-    setAddFlagOpen(false);
-    setHasChanges(true);
+  const handleAddFlag = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('feature_flags')
+        .insert({
+          name: newFlag.name,
+          key: newFlag.key,
+          description: newFlag.description,
+          section: newFlag.section,
+          enabled: newFlag.enabled,
+          rollout_percentage: newFlag.rolloutPercentage,
+          enabled_for_plans: newFlag.enabledForPlans,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const flag = {
+        id: data.id,
+        ...newFlag,
+        createdAt: data.created_at,
+      };
+      setFlags([...flags, flag]);
+      setNewFlag({
+        name: '',
+        key: '',
+        description: '',
+        section: 'Experimental',
+        enabled: false,
+        rolloutPercentage: 100,
+        enabledForPlans: [],
+      });
+      setAddFlagOpen(false);
+    } catch (error) {
+      console.error('Error adding feature flag:', error);
+    }
   };
 
-  const handleEditSave = () => {
-    setFlags(prev => prev.map(f => f.id === editFlag.id ? editFlag : f));
-    setEditFlag(null);
-    setHasChanges(true);
+  const handleEditSave = async () => {
+    try {
+      const { error } = await supabase
+        .from('feature_flags')
+        .update({
+          name: editFlag.name,
+          key: editFlag.key,
+          description: editFlag.description,
+          section: editFlag.section,
+          enabled: editFlag.enabled,
+          rollout_percentage: editFlag.rolloutPercentage,
+          enabled_for_plans: editFlag.enabledForPlans,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', editFlag.id);
+
+      if (error) throw error;
+
+      setFlags(prev => prev.map(f => f.id === editFlag.id ? editFlag : f));
+      setEditFlag(null);
+    } catch (error) {
+      console.error('Error updating feature flag:', error);
+    }
   };
 
   const filteredFlags = flags.filter(f =>

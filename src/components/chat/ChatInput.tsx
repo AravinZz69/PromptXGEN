@@ -58,7 +58,7 @@ export function ChatInput({
   };
 
   return (
-    <div className="border-t border-border pt-4">
+    <div className="pt-4">
       {/* Suggestion Chips */}
       {showSuggestions && suggestions.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
@@ -81,11 +81,14 @@ export function ChatInput({
         {/* Input Pill */}
         <div
           className={`
-            flex items-end gap-2 p-2 rounded-2xl border
-            bg-card/50 backdrop-blur-sm
-            transition-all duration-200
+            flex items-end gap-2 p-3 rounded-2xl
+            bg-white/[0.03] backdrop-blur-sm
+            transition-all duration-300
             ${disabled ? 'opacity-50' : ''}
-            ${input.trim() ? 'border-primary/30 ring-2 ring-primary/10' : 'border-border'}
+            ${input.trim() 
+              ? 'border border-indigo-500/60 shadow-[0_0_15px_rgba(99,102,241,0.2)]' 
+              : 'border border-white/10 hover:border-white/20'
+            }
           `}
         >
           {/* Paperclip Button (mock) */}

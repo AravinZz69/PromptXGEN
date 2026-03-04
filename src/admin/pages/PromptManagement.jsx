@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Search,
   Filter,
@@ -10,11 +10,13 @@ import {
   Edit,
   Star,
   Save,
+  RefreshCw,
+  Loader2,
 } from 'lucide-react';
 import Badge from '../components/Badge';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
-import { mockPrompts, mockTemplates } from '../mockData';
+import { supabase } from '../../lib/supabase';
 
 const categoryOptions = ['All', 'Coding', 'Marketing', 'Creative Writing', 'Business', 'Research', 'Other'];
 const modelOptions = ['All', 'GPT-4o', 'GPT-3.5 Turbo', 'Claude 3.5 Sonnet', 'Claude 3 Haiku'];
@@ -28,8 +30,9 @@ const planLimits = [
 
 export default function PromptManagement() {
   const [activeTab, setActiveTab] = useState('generated');
-  const [prompts, setPrompts] = useState(mockPrompts);
-  const [templates, setTemplates] = useState(mockTemplates);
+  const [prompts, setPrompts] = useState([]);
+  const [templates, setTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
   
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -44,6 +47,80 @@ export default function PromptManagement() {
   const [limits, setLimits] = useState(planLimits);
 
   const pageSize = 10;
+
+  // Fetch prompts and templates from Supabase
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      // Fetch prompt_history
+      const { data: promptData, error: promptError } = await supabase
+        .from('prompt_history')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(500);
+
+      if (promptError) {
+        console.error('Error fetching prompts:', promptError);
+      }
+
+      // Fetch all profiles for user lookup
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, email, full_name');
+
+      const profileMap = {};
+      (profilesData || []).forEach(p => {
+        profileMap[p.id] = p;
+      });
+
+      // Map to expected format
+      const mappedPrompts = (promptData || []).map(p => {
+        const profile = profileMap[p.user_id] || {};
+        return {
+          id: p.id,
+          userEmail: profile.email || 'Unknown',
+          userName: profile.full_name || 'Unknown',
+          input: p.prompt_text || p.prompt || '',
+          output: p.ai_response || p.response || '',
+          category: p.category || 'Other',
+          model: p.model || 'GPT-4o',
+          status: p.metadata?.flagged ? 'Flagged' : 'Completed',
+          createdAt: p.created_at,
+          tokens: p.metadata?.tokens || 0,
+        };
+      });
+
+      setPrompts(mappedPrompts);
+
+      // Fetch templates (if table exists)
+      const { data: templateData, error: templateError } = await supabase
+        .from('prompt_templates')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!templateError && templateData) {
+        const mappedTemplates = templateData.map(t => ({
+          id: t.id,
+          name: t.name,
+          category: t.category || 'Other',
+          description: t.description || '',
+          template: t.template_text || '',
+          isFeatured: t.is_featured || false,
+          timesUsed: t.times_used || 0,
+          lastEdited: t.updated_at || t.created_at,
+        }));
+        setTemplates(mappedTemplates);
+      }
+    } catch (error) {
+      console.error('Error fetching prompt data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   // Filter prompts
   const filteredPrompts = prompts.filter(prompt => {
@@ -62,44 +139,152 @@ export default function PromptManagement() {
 
   const totalPages = Math.ceil(filteredPrompts.length / pageSize);
 
-  const handleFlag = (promptId) => {
-    setPrompts(prompts.map(p => 
-      p.id === promptId ? { ...p, status: p.status === 'Flagged' ? 'Completed' : 'Flagged' } : p
-    ));
-  };
+  const handleFlag = async (promptId) => {
+    const prompt = prompts.find(p => p.id === promptId);
+    const newFlaggedState = prompt?.status !== 'Flagged';
+    
+    try {
+      const { error } = await supabase
+        .from('prompt_history')
+        .update({ 
+          metadata: { flagged: newFlaggedState }
+        })
+        .eq('id', promptId);
 
-  const handleDeletePrompt = (promptId) => {
-    setPrompts(prompts.filter(p => p.id !== promptId));
-    setConfirmDelete(null);
-  };
+      if (error) throw error;
 
-  const handleDeleteTemplate = (templateId) => {
-    setTemplates(templates.filter(t => t.id !== templateId));
-    setConfirmDelete(null);
-  };
-
-  const handleSaveTemplate = (template) => {
-    if (template.id) {
-      setTemplates(templates.map(t => t.id === template.id ? template : t));
-    } else {
-      setTemplates([...templates, { ...template, id: templates.length + 1, timesUsed: 0, lastEdited: new Date().toISOString() }]);
+      setPrompts(prompts.map(p => 
+        p.id === promptId ? { ...p, status: newFlaggedState ? 'Flagged' : 'Completed' } : p
+      ));
+    } catch (error) {
+      console.error('Error flagging prompt:', error);
     }
-    setEditTemplate(null);
   };
 
-  const handleDuplicate = (template) => {
-    const newTemplate = {
-      ...template,
-      id: templates.length + 1,
-      name: `${template.name} (Copy)`,
-      timesUsed: 0,
-      lastEdited: new Date().toISOString(),
-    };
-    setTemplates([...templates, newTemplate]);
+  const handleDeletePrompt = async (promptId) => {
+    try {
+      const { error } = await supabase
+        .from('prompt_history')
+        .delete()
+        .eq('id', promptId);
+
+      if (error) throw error;
+
+      setPrompts(prompts.filter(p => p.id !== promptId));
+      setConfirmDelete(null);
+    } catch (error) {
+      console.error('Error deleting prompt:', error);
+    }
+  };
+
+  const handleDeleteTemplate = async (templateId) => {
+    try {
+      const { error } = await supabase
+        .from('prompt_templates')
+        .delete()
+        .eq('id', templateId);
+
+      if (error) throw error;
+
+      setTemplates(templates.filter(t => t.id !== templateId));
+      setConfirmDelete(null);
+    } catch (error) {
+      console.error('Error deleting template:', error);
+    }
+  };
+
+  const handleSaveTemplate = async (template) => {
+    try {
+      if (template.id) {
+        // Update existing
+        const { error } = await supabase
+          .from('prompt_templates')
+          .update({
+            name: template.name,
+            category: template.category,
+            description: template.description,
+            template_text: template.template,
+            is_featured: template.isFeatured,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', template.id);
+
+        if (error) throw error;
+
+        setTemplates(templates.map(t => t.id === template.id ? template : t));
+      } else {
+        // Insert new
+        const { data, error } = await supabase
+          .from('prompt_templates')
+          .insert({
+            name: template.name,
+            category: template.category,
+            description: template.description,
+            template_text: template.template,
+            is_featured: template.isFeatured || false,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        setTemplates([...templates, { 
+          ...template, 
+          id: data.id, 
+          timesUsed: 0, 
+          lastEdited: new Date().toISOString() 
+        }]);
+      }
+      setEditTemplate(null);
+    } catch (error) {
+      console.error('Error saving template:', error);
+    }
+  };
+
+  const handleDuplicate = async (template) => {
+    try {
+      const { data, error } = await supabase
+        .from('prompt_templates')
+        .insert({
+          name: `${template.name} (Copy)`,
+          category: template.category,
+          description: template.description,
+          template_text: template.template,
+          is_featured: false,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const newTemplate = {
+        ...template,
+        id: data.id,
+        name: `${template.name} (Copy)`,
+        timesUsed: 0,
+        lastEdited: new Date().toISOString(),
+      };
+      setTemplates([...templates, newTemplate]);
+    } catch (error) {
+      console.error('Error duplicating template:', error);
+    }
   };
 
   return (
     <div className="space-y-6">
+      {/* Header with Refresh */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-white">Prompt Management</h2>
+        <button
+          onClick={fetchData}
+          disabled={loading}
+          className="flex items-center gap-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm transition-colors disabled:opacity-50"
+        >
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+          Refresh
+        </button>
+      </div>
+
       {/* Tabs */}
       <div className="flex gap-4 border-b border-gray-800">
         <button

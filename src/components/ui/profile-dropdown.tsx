@@ -2,9 +2,10 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Settings, CreditCard, FileText, LogOut, User, Sparkles } from "lucide-react";
+import { Settings, CreditCard, FileText, LogOut, User, Sparkles, Shield } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { isAdmin, logout as adminLogout } from "@/admin/adminAuth";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -116,6 +117,8 @@ export function ProfileDropdown({
     ];
 
     const handleSignOut = async () => {
+        // Clear both Supabase session and admin session
+        adminLogout();
         await signOut();
         navigate('/');
     };
@@ -243,6 +246,21 @@ export function ProfileDropdown({
                         </div>
 
                         <DropdownMenuSeparator className="my-3 bg-gradient-to-r from-transparent via-border to-transparent" />
+
+                        {/* Admin Panel Link - only visible to admins */}
+                        {isAdmin() && (
+                            <DropdownMenuItem asChild>
+                                <Link
+                                    to="/admin/dashboard"
+                                    className="flex items-center gap-3 p-3 mb-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 cursor-pointer border border-indigo-500/20 hover:border-indigo-500/30 transition-all group"
+                                >
+                                    <Shield className="w-4 h-4 text-indigo-400" />
+                                    <span className="text-sm font-medium text-indigo-400">
+                                        Admin Panel
+                                    </span>
+                                </Link>
+                            </DropdownMenuItem>
+                        )}
 
                         <DropdownMenuItem asChild>
                             <button

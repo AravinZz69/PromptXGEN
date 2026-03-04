@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Search,
   Filter,
@@ -18,10 +18,11 @@ import {
   Globe,
   Laptop,
   RefreshCw,
+  Loader2,
 } from 'lucide-react';
 import Badge from '../components/Badge';
 import Modal from '../components/Modal';
-import { mockAuditLogs } from '../mockData';
+import { supabase } from '../../lib/supabase';
 
 const actionIcons = {
   login: Shield,
@@ -54,7 +55,8 @@ const actionVariants = {
 };
 
 export default function AuditLogs() {
-  const [logs, setLogs] = useState(mockAuditLogs);
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterAction, setFilterAction] = useState('all');
   const [filterDateRange, setFilterDateRange] = useState('7days');
@@ -64,6 +66,43 @@ export default function AuditLogs() {
 
   const pageSize = 15;
   const actions = [...new Set(logs.map(l => l.action))];
+
+  // Fetch audit logs from Supabase
+  const fetchLogs = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('audit_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1000);
+
+      if (error) throw error;
+
+      const mappedLogs = (data || []).map(log => ({
+        id: log.id,
+        user: log.user_email || log.user_id || 'System',
+        action: log.action || 'unknown',
+        description: log.description || '',
+        timestamp: log.created_at,
+        ip: log.ip_address || null,
+        userAgent: log.user_agent || null,
+        metadata: log.metadata || {},
+        status: log.status || 'success',
+      }));
+
+      setLogs(mappedLogs);
+    } catch (error) {
+      console.error('Error fetching audit logs:', error);
+      setLogs([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLogs();
+  }, []);
 
   // Filter logs
   const filteredLogs = logs.filter(log => {
@@ -129,6 +168,19 @@ export default function AuditLogs() {
 
   return (
     <div className="space-y-6">
+      {/* Header with Refresh */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-white">Audit Logs</h2>
+        <button
+          onClick={fetchLogs}
+          disabled={loading}
+          className="flex items-center gap-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm transition-colors disabled:opacity-50"
+        >
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+          Refresh
+        </button>
+      </div>
+
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {stats.map((stat, i) => (

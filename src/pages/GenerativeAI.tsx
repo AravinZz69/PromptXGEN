@@ -2,8 +2,6 @@ import { useRef, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { MiniNavbar } from '@/components/ui/mini-navbar';
-import Sidebar from '@/components/ui/sidebar-menu';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useCredits } from '@/hooks/useCredits';
@@ -18,10 +16,11 @@ import {
   MessageSquare,
   Sparkles,
   ChevronDown,
+  ArrowLeft,
 } from 'lucide-react';
 
 const GenerativeAI = () => {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { refetch: refetchCredits, hasCredits, isLowCredits } = useCredits();
@@ -132,72 +131,63 @@ const GenerativeAI = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* Sidebar */}
-      <Sidebar
-        userName={userName}
-        userRole="Free Plan"
-        userInitials={userInitials}
-        onNavigate={(id) => {
-          if (id === 'dashboard') navigate('/dashboard');
-          else if (id === 'generate') navigate('/generate');
-          else if (id === 'generative-ai') navigate('/generative-ai');
-          else if (id === 'templates') navigate('/templates');
-          else if (id === 'bookmarks') navigate('/templates?bookmarks=true');
-          else if (id === 'history') navigate('/history');
-          else if (id === 'settings') navigate('/settings');
-          else if (id === 'upgrade') navigate('/upgrade');
-        }}
-        onLogout={() => {
-          signOut();
-          navigate('/');
-        }}
-      />
+    <div className="min-h-screen bg-background flex flex-col h-screen">
+      {/* Top Header with Back Button */}
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
+        <div className="flex items-center justify-between px-4 py-3 max-w-4xl mx-auto w-full">
+          {/* Left: Back Button + AI Status */}
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(-1)}
+              className="text-muted-foreground hover:text-foreground h-9 w-9"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
 
-      {/* Main Content */}
-      <div className="flex-1 relative ml-[70px] flex flex-col h-screen">
-        <MiniNavbar />
-
-        {/* Chat Container */}
-        <div className="flex-1 flex flex-col pt-24 pb-4 px-4 max-w-4xl mx-auto w-full">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <ColorOrb dimension="40px" tones={{ base: "oklch(22.64% 0 0)" }} />
-                {/* Status Dot */}
-                <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ${getStatusColor()} ring-2 ring-background`} />
+                <ColorOrb dimension="36px" tones={{ base: "oklch(22.64% 0 0)" }} />
+                <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ${getStatusColor()} ring-2 ring-background`} />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-semibold text-foreground">AI Assistant</h1>
-                  <span className="px-2 py-0.5 text-[10px] font-medium bg-primary/10 text-primary rounded-full">
+                  <h1 className="text-lg font-semibold text-foreground">AI Assistant</h1>
+                  <span className="text-xs bg-white/10 text-gray-400 px-2 py-0.5 rounded-full">
                     Llama 3.3
                   </span>
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   {isThinking ? 'Thinking...' : isStreaming ? 'Generating...' : 'Ready to help'}
                 </p>
               </div>
             </div>
-            {messages.length > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleClearChat}
-                disabled={isBusy}
-                className="gap-1 text-muted-foreground hover:text-destructive hover:border-destructive/50"
-              >
-                <Trash2 className="h-4 w-4" />
-                Clear
-              </Button>
-            )}
           </div>
 
+          {/* Right: Clear Button */}
+          {messages.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleClearChat}
+              disabled={isBusy}
+              className="gap-1 text-muted-foreground hover:text-destructive hover:border-destructive/50"
+            >
+              <Trash2 className="h-4 w-4" />
+              Clear
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Chat Container */}
+      <div className="flex-1 flex flex-col px-4 pb-4 max-w-4xl mx-auto w-full overflow-hidden">
           {/* Messages Area */}
           <div
             ref={chatContainerRef}
-            className="flex-1 overflow-y-auto space-y-4 mb-4 relative"
+            className="flex-1 overflow-y-auto space-y-4 mb-4 relative pt-4 chat-scroll"
           >
             {messages.length === 0 ? (
               /* Empty State */
@@ -335,7 +325,6 @@ const GenerativeAI = () => {
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 };

@@ -107,7 +107,7 @@ export default function PromptChat({ onGenerate, isLoading = false }: PromptChat
             <Sparkles className="w-10 h-10 text-primary" />
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold text-white drop-shadow-lg">
-            Prompt Genius
+            AskJai
           </h1>
           <p className="mt-3 text-neutral-300 text-lg max-w-md mx-auto">
             Generate powerful, optimized prompts for any AI model

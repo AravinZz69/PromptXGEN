@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   MessageSquare,
   Clock,
@@ -14,10 +14,12 @@ import {
   Tag,
   X,
   ChevronDown,
+  RefreshCw,
+  Loader2,
 } from 'lucide-react';
 import Badge from '../components/Badge';
 import Modal from '../components/Modal';
-import { mockTickets } from '../mockData';
+import { supabase } from '../../lib/supabase';
 
 const statusVariants = {
   Open: 'warning',
@@ -33,14 +35,15 @@ const priorityVariants = {
 };
 
 export default function SupportTickets() {
-  const [tickets, setTickets] = useState(mockTickets);
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('open');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [replyText, setReplyText] = useState('');
   const [filterPriority, setFilterPriority] = useState('all');
 
-  // MOCK DATA - Canned responses
+  // Canned responses
   const cannedResponses = [
     { id: 1, title: 'Welcome', text: 'Thank you for reaching out! I\'d be happy to help you with this.' },
     { id: 2, title: 'Need More Info', text: 'Could you please provide more details about the issue you\'re experiencing?' },
@@ -49,11 +52,67 @@ export default function SupportTickets() {
     { id: 5, title: 'Follow Up', text: 'Just checking in - were you able to resolve the issue with the steps provided?' },
   ];
 
-  // MOCK DATA - Stats
+  // Fetch tickets from Supabase
+  const fetchTickets = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('support_tickets')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching tickets:', error);
+        setTickets([]);
+        return;
+      }
+
+      // Fetch profiles for user lookup
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, email, full_name');
+
+      const profileMap = {};
+      (profilesData || []).forEach(p => {
+        profileMap[p.id] = p;
+      });
+
+      const mappedTickets = (data || []).map(t => {
+        const profile = profileMap[t.user_id] || {};
+        return {
+          id: t.id,
+          subject: t.subject || '',
+          user: profile.email || t.user_email || 'Unknown',
+          userName: profile.full_name || 'Unknown',
+          status: t.status || 'Open',
+          priority: t.priority || 'Medium',
+          category: t.category || 'General',
+          assignee: t.assigned_to || null,
+          createdAt: t.created_at,
+          updatedAt: t.updated_at,
+          messages: t.messages || [{ id: 1, sender: 'user', text: t.description || '', timestamp: t.created_at }],
+        };
+      });
+
+      setTickets(mappedTickets);
+    } catch (error) {
+      console.error('Error fetching tickets:', error);
+      // If table doesn't exist, show empty state
+      setTickets([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTickets();
+  }, []);
+
+  // Stats computed from tickets
   const stats = [
     { label: 'Open Tickets', value: tickets.filter(t => t.status === 'Open').length, icon: AlertCircle, color: 'amber' },
     { label: 'In Progress', value: tickets.filter(t => t.status === 'In Progress').length, icon: Clock, color: 'blue' },
-    { label: 'Resolved Today', value: 8, icon: CheckCircle, color: 'emerald' },
+    { label: 'Resolved Today', value: tickets.filter(t => t.status === 'Resolved' && new Date(t.updatedAt).toDateString() === new Date().toDateString()).length, icon: CheckCircle, color: 'emerald' },
     { label: 'Avg Response Time', value: '2.4h', icon: MessageSquare, color: 'indigo' },
   ];
 
@@ -71,7 +130,7 @@ export default function SupportTickets() {
     return matchesTab && matchesSearch && matchesPriority;
   });
 
-  const handleReply = () => {
+  const handleReply = async () => {
     if (!replyText.trim() || !selectedTicket) return;
     
     const newMessage = {
@@ -81,41 +140,99 @@ export default function SupportTickets() {
       timestamp: new Date().toISOString(),
     };
 
-    setTickets(prev => prev.map(t => 
-      t.id === selectedTicket.id 
-        ? { ...t, messages: [...t.messages, newMessage] } 
-        : t
-    ));
+    try {
+      const updatedMessages = [...selectedTicket.messages, newMessage];
+      
+      const { error } = await supabase
+        .from('support_tickets')
+        .update({ 
+          messages: updatedMessages,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', selectedTicket.id);
 
-    setSelectedTicket(prev => ({
-      ...prev,
-      messages: [...prev.messages, newMessage]
-    }));
+      if (error) throw error;
 
-    setReplyText('');
-  };
+      setTickets(prev => prev.map(t => 
+        t.id === selectedTicket.id 
+          ? { ...t, messages: updatedMessages } 
+          : t
+      ));
 
-  const handleStatusChange = (ticketId, newStatus) => {
-    setTickets(prev => prev.map(t => 
-      t.id === ticketId ? { ...t, status: newStatus } : t
-    ));
-    
-    if (selectedTicket?.id === ticketId) {
-      setSelectedTicket(prev => ({ ...prev, status: newStatus }));
+      setSelectedTicket(prev => ({
+        ...prev,
+        messages: updatedMessages
+      }));
+
+      setReplyText('');
+    } catch (error) {
+      console.error('Error sending reply:', error);
     }
   };
 
-  const handleAssign = (ticketId) => {
+  const handleStatusChange = async (ticketId, newStatus) => {
+    try {
+      const { error } = await supabase
+        .from('support_tickets')
+        .update({ 
+          status: newStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', ticketId);
+
+      if (error) throw error;
+
+      setTickets(prev => prev.map(t => 
+        t.id === ticketId ? { ...t, status: newStatus } : t
+      ));
+      
+      if (selectedTicket?.id === ticketId) {
+        setSelectedTicket(prev => ({ ...prev, status: newStatus }));
+      }
+    } catch (error) {
+      console.error('Error updating status:', error);
+    }
+  };
+
+  const handleAssign = async (ticketId) => {
     const assignee = prompt('Enter agent name:');
     if (assignee) {
-      setTickets(prev => prev.map(t => 
-        t.id === ticketId ? { ...t, assignee, status: 'In Progress' } : t
-      ));
+      try {
+        const { error } = await supabase
+          .from('support_tickets')
+          .update({ 
+            assigned_to: assignee,
+            status: 'In Progress',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', ticketId);
+
+        if (error) throw error;
+
+        setTickets(prev => prev.map(t => 
+          t.id === ticketId ? { ...t, assignee, status: 'In Progress' } : t
+        ));
+      } catch (error) {
+        console.error('Error assigning ticket:', error);
+      }
     }
   };
 
   return (
     <div className="space-y-6">
+      {/* Header with Refresh */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-white">Support Tickets</h2>
+        <button
+          onClick={fetchTickets}
+          disabled={loading}
+          className="flex items-center gap-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm transition-colors disabled:opacity-50"
+        >
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+          Refresh
+        </button>
+      </div>
+
       {/* Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {stats.map((stat, i) => (

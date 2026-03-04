@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   DollarSign,
   TrendingUp,
@@ -11,6 +11,7 @@ import {
   Plus,
   Eye,
   Percent,
+  Loader2,
 } from 'lucide-react';
 import {
   AreaChart,
@@ -27,13 +28,8 @@ import ChartCard from '../components/ChartCard';
 import Badge from '../components/Badge';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
-import {
-  mockRevenueData,
-  mockTransactions,
-  mockFailedPayments,
-  mockCoupons,
-  mockChartData,
-} from '../mockData';
+import { supabase } from '../../lib/supabase';
+import { mockChartData } from '../mockData';
 
 const statusVariants = {
   Active: 'success',
@@ -44,9 +40,12 @@ const statusVariants = {
 };
 
 export default function RevenueManagement() {
-  const [subscriptions, setSubscriptions] = useState(mockTransactions);
-  const [failedPayments] = useState(mockFailedPayments);
-  const [coupons, setCoupons] = useState(mockCoupons);
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [failedPayments, setFailedPayments] = useState([]);
+  const [coupons, setCoupons] = useState([]);
+  const [chartData, setChartData] = useState([]);
+  const [kpis, setKpis] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   
   // Modals
@@ -58,19 +57,92 @@ export default function RevenueManagement() {
   // New coupon form
   const [newCoupon, setNewCoupon] = useState({ code: '', discount: '', expiry: '', maxUses: '' });
 
+  // Fetch revenue data from Supabase
+  const fetchRevenueData = async () => {
+    setLoading(true);
+    try {
+      // Fetch subscriptions
+      const { data: subsData, error: subsError } = await supabase
+        .from('subscriptions')
+        .select(`
+          *,
+          profiles(email, full_name)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (!subsError && subsData) {
+        const mappedSubs = subsData.map(s => ({
+          id: s.id,
+          user: s.profiles?.email || s.user_email || 'Unknown',
+          userName: s.profiles?.full_name || 'Unknown',
+          plan: s.plan || 'Free',
+          status: s.status || 'Active',
+          amount: s.amount || 0,
+          startDate: s.start_date || s.created_at,
+          nextBilling: s.next_billing_date || '-',
+          paymentMethod: s.payment_method || 'card',
+        }));
+        setSubscriptions(mappedSubs);
+      }
+
+      // Fetch credit transactions for revenue data
+      const { data: transactions } = await supabase
+        .from('credit_transactions')
+        .select('*')
+        .eq('type', 'purchase')
+        .order('created_at', { ascending: false });
+
+      // Calculate KPIs
+      const totalRevenue = (transactions || []).reduce((acc, t) => acc + Math.abs(t.amount || 0), 0);
+      const proUsers = (subsData || []).filter(s => s.plan === 'Pro' || s.plan === 'pro').length;
+      const enterpriseUsers = (subsData || []).filter(s => s.plan === 'Enterprise' || s.plan === 'enterprise').length;
+      
+      const mrr = proUsers * 19 + enterpriseUsers * 99;
+      const arr = mrr * 12;
+      const arpu = (subsData?.length || 1) > 0 ? mrr / (subsData?.length || 1) : 0;
+
+      setKpis([
+        { title: 'MRR', value: `$${mrr.toLocaleString()}`, icon: DollarSign, color: 'emerald' },
+        { title: 'ARR', value: `$${arr.toLocaleString()}`, icon: TrendingUp, color: 'green' },
+        { title: 'ARPU', value: `$${arpu.toFixed(2)}`, icon: Users, color: 'blue' },
+        { title: 'Pro Users', value: proUsers.toString(), changeType: 'positive', icon: TrendingUp, color: 'indigo' },
+        { title: 'Enterprise', value: enterpriseUsers.toString(), changeType: 'positive', icon: CreditCard, color: 'purple' },
+        { title: 'Total Revenue', value: `$${totalRevenue.toLocaleString()}`, changeType: 'positive', icon: DollarSign, color: 'emerald' },
+      ]);
+
+      // Generate chart data from transactions
+      const dayMap = {};
+      (transactions || []).forEach(t => {
+        const day = new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        dayMap[day] = (dayMap[day] || 0) + Math.abs(t.amount || 0);
+      });
+
+      const chartDataMapped = Object.entries(dayMap)
+        .slice(-14)
+        .map(([name, Revenue]) => ({ name, Revenue }));
+
+      setChartData(chartDataMapped.length > 0 ? chartDataMapped : [
+        { name: 'No Data', Revenue: 0 }
+      ]);
+
+      // Set empty arrays for tables that need the admin_tables migration
+      setFailedPayments([]);
+      setCoupons([]);
+
+    } catch (error) {
+      console.error('Error fetching revenue data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRevenueData();
+  }, []);
+
   const pageSize = 10;
   const totalPages = Math.ceil(subscriptions.length / pageSize);
   const paginatedSubs = subscriptions.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-
-  // MOCK DATA - KPIs
-  const kpis = [
-    { title: 'MRR', value: '$48,290', icon: DollarSign, color: 'emerald' },
-    { title: 'ARR', value: '$579,480', icon: TrendingUp, color: 'green' },
-    { title: 'ARPU', value: '$14.90', icon: Users, color: 'blue' },
-    { title: 'New MRR', value: '$6,200', change: '+12%', changeType: 'positive', icon: TrendingUp, color: 'indigo' },
-    { title: 'Churned MRR', value: '$1,100', change: '-$200', changeType: 'negative', icon: TrendingDown, color: 'red' },
-    { title: 'Net MRR Growth', value: '+$5,100', change: '+8.5%', changeType: 'positive', icon: CreditCard, color: 'emerald' },
-  ];
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
@@ -86,12 +158,13 @@ export default function RevenueManagement() {
     );
   };
 
-  const handleRetryPayment = (payment) => {
+  const handleRetryPayment = async (payment) => {
     console.log('Retrying payment for:', payment.user);
     alert(`Retrying payment for ${payment.user}`);
   };
 
-  const handleCreateCoupon = () => {
+  const handleCreateCoupon = async () => {
+    // For now, just add to local state - full implementation requires coupons table
     const coupon = {
       id: coupons.length + 1,
       ...newCoupon,
@@ -103,23 +176,64 @@ export default function RevenueManagement() {
     setCreateCouponOpen(false);
   };
 
-  const handleRefund = (sub) => {
-    console.log('Processing refund for:', sub.user);
-    setSubscriptions(subscriptions.map(s => 
-      s.id === sub.id ? { ...s, status: 'Cancelled' } : s
-    ));
-    setConfirmAction(null);
+  const handleRefund = async (sub) => {
+    try {
+      const { error } = await supabase
+        .from('subscriptions')
+        .update({ 
+          status: 'Cancelled',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', sub.id);
+
+      if (error) throw error;
+
+      setSubscriptions(subscriptions.map(s => 
+        s.id === sub.id ? { ...s, status: 'Cancelled' } : s
+      ));
+      setConfirmAction(null);
+    } catch (error) {
+      console.error('Error processing refund:', error);
+    }
   };
 
-  const handleCancel = (sub) => {
-    setSubscriptions(subscriptions.map(s => 
-      s.id === sub.id ? { ...s, status: 'Cancelled', nextBilling: '-' } : s
-    ));
-    setConfirmAction(null);
+  const handleCancel = async (sub) => {
+    try {
+      const { error } = await supabase
+        .from('subscriptions')
+        .update({ 
+          status: 'Cancelled',
+          next_billing_date: null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', sub.id);
+
+      if (error) throw error;
+
+      setSubscriptions(subscriptions.map(s => 
+        s.id === sub.id ? { ...s, status: 'Cancelled', nextBilling: '-' } : s
+      ));
+      setConfirmAction(null);
+    } catch (error) {
+      console.error('Error cancelling subscription:', error);
+    }
   };
 
   return (
     <div className="space-y-6">
+      {/* Header with Refresh */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-white">Revenue Management</h2>
+        <button
+          onClick={fetchRevenueData}
+          disabled={loading}
+          className="flex items-center gap-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm transition-colors disabled:opacity-50"
+        >
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+          Refresh
+        </button>
+      </div>
+
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {kpis.map((kpi, i) => (
@@ -130,10 +244,10 @@ export default function RevenueManagement() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* MRR Over Time */}
-        <ChartCard title="MRR Over Time" subtitle="Last 12 Months">
+        <ChartCard title="Revenue Over Time" subtitle="Last 14 Days">
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={mockRevenueData}>
+              <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="mrrGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
@@ -168,7 +282,7 @@ export default function RevenueManagement() {
         </ChartCard>
 
         {/* Revenue by Plan */}
-        <ChartCard title="Revenue by Plan">
+        <ChartCard title={<span>Revenue by Plan <span className="text-xs text-amber-500 ml-2">(Sample Data)</span></span>}>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={mockChartData.revenueByPlan}>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Bell,
   Send,
@@ -14,11 +14,13 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
+  RefreshCw,
+  Loader2,
 } from 'lucide-react';
 import Badge from '../components/Badge';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
-import { mockNotifications } from '../mockData';
+import { supabase } from '../../lib/supabase';
 
 const channelIcons = {
   email: Mail,
@@ -34,7 +36,8 @@ const statusVariants = {
 };
 
 export default function Notifications() {
-  const [notifications, setNotifications] = useState(mockNotifications);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [composeOpen, setComposeOpen] = useState(false);
   const [viewNotification, setViewNotification] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
@@ -50,45 +53,118 @@ export default function Notifications() {
     priority: 'normal',
   });
 
-  // MOCK DATA - Stats
+  // Fetch notifications from Supabase
+  const fetchNotifications = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('admin_notifications')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const mappedNotifications = (data || []).map(n => ({
+        id: n.id,
+        title: n.title,
+        message: n.message,
+        audience: n.audience || 'all',
+        channels: n.channels || ['email', 'in-app'],
+        status: n.status || 'Draft',
+        sentAt: n.sent_at,
+        scheduledFor: n.scheduled_for,
+        recipients: n.recipients || 0,
+        openRate: n.open_rate || 0,
+        priority: n.priority || 'normal',
+      }));
+
+      setNotifications(mappedNotifications);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      setNotifications([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  // Stats computed from data
   const stats = [
-    { label: 'Total Sent', value: '12,847', icon: Send, color: 'emerald' },
-    { label: 'Open Rate', value: '68.4%', icon: Eye, color: 'blue' },
-    { label: 'Scheduled', value: '5', icon: Calendar, color: 'amber' },
-    { label: 'Active Users', value: '3,241', icon: Users, color: 'indigo' },
+    { label: 'Total Sent', value: notifications.filter(n => n.status === 'Sent').length.toLocaleString(), icon: Send, color: 'emerald' },
+    { label: 'Open Rate', value: notifications.length > 0 ? `${(notifications.reduce((acc, n) => acc + (n.openRate || 0), 0) / notifications.length).toFixed(1)}%` : '0%', icon: Eye, color: 'blue' },
+    { label: 'Scheduled', value: notifications.filter(n => n.status === 'Scheduled').length, icon: Calendar, color: 'amber' },
+    { label: 'Drafts', value: notifications.filter(n => n.status === 'Draft').length, icon: Clock, color: 'indigo' },
   ];
 
   const filteredNotifications = notifications.filter(n =>
     filterStatus === 'all' || n.status === filterStatus
   );
 
-  const handleSendNotification = (schedule = false) => {
-    const notification = {
-      id: notifications.length + 1,
-      ...newNotification,
-      status: schedule ? 'Scheduled' : 'Sent',
-      sentAt: schedule ? null : new Date().toISOString(),
-      recipients: newNotification.audience === 'all' ? 3241 : 
-        newNotification.audience === 'pro' ? 890 : 
-        newNotification.audience === 'free' ? 2351 : 0,
-      openRate: 0,
-    };
+  const handleSendNotification = async (schedule = false) => {
+    try {
+      const { data, error } = await supabase
+        .from('admin_notifications')
+        .insert({
+          title: newNotification.title,
+          message: newNotification.message,
+          audience: newNotification.audience,
+          channels: newNotification.channels,
+          status: schedule ? 'Scheduled' : 'Sent',
+          sent_at: schedule ? null : new Date().toISOString(),
+          scheduled_for: schedule ? newNotification.scheduledFor : null,
+          priority: newNotification.priority,
+          recipients: newNotification.audience === 'all' ? 3241 : 
+            newNotification.audience === 'pro' ? 890 : 
+            newNotification.audience === 'free' ? 2351 : 0,
+        })
+        .select()
+        .single();
 
-    setNotifications([notification, ...notifications]);
-    setNewNotification({
-      title: '',
-      message: '',
-      audience: 'all',
-      channels: ['email', 'in-app'],
-      scheduledFor: '',
-      priority: 'normal',
-    });
-    setComposeOpen(false);
+      if (error) throw error;
+
+      const notification = {
+        id: data.id,
+        ...newNotification,
+        status: schedule ? 'Scheduled' : 'Sent',
+        sentAt: schedule ? null : new Date().toISOString(),
+        recipients: newNotification.audience === 'all' ? 3241 : 
+          newNotification.audience === 'pro' ? 890 : 
+          newNotification.audience === 'free' ? 2351 : 0,
+        openRate: 0,
+      };
+
+      setNotifications([notification, ...notifications]);
+      setNewNotification({
+        title: '',
+        message: '',
+        audience: 'all',
+        channels: ['email', 'in-app'],
+        scheduledFor: '',
+        priority: 'normal',
+      });
+      setComposeOpen(false);
+    } catch (error) {
+      console.error('Error sending notification:', error);
+    }
   };
 
-  const handleDelete = () => {
-    setNotifications(prev => prev.filter(n => n.id !== deleteConfirm.id));
-    setDeleteConfirm(null);
+  const handleDelete = async () => {
+    try {
+      const { error } = await supabase
+        .from('admin_notifications')
+        .delete()
+        .eq('id', deleteConfirm.id);
+
+      if (error) throw error;
+
+      setNotifications(prev => prev.filter(n => n.id !== deleteConfirm.id));
+      setDeleteConfirm(null);
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+    }
   };
 
   const toggleChannel = (channel) => {
@@ -102,6 +178,19 @@ export default function Notifications() {
 
   return (
     <div className="space-y-6">
+      {/* Header with Refresh */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-white">Notifications</h2>
+        <button
+          onClick={fetchNotifications}
+          disabled={loading}
+          className="flex items-center gap-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm transition-colors disabled:opacity-50"
+        >
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+          Refresh
+        </button>
+      </div>
+
       {/* Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {stats.map((stat, i) => (

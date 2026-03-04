@@ -90,10 +90,8 @@ const ResetPassword = () => {
         <div className="glass-card p-8">
           {/* Logo */}
           <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <Zap className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="font-display text-xl font-bold">Prompt Genius</span>
+            <img src="/askjai-logo.png" alt="AskJai" className="h-8 w-8" />
+            <span className="font-display text-xl font-bold">AskJai</span>
           </Link>
 
           {/* Title */}

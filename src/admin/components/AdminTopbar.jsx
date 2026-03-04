@@ -39,7 +39,7 @@ export default function AdminTopbar({ onMenuClick }) {
 
   const handleLogout = () => {
     adminLogout();
-    navigate('/admin/login');
+    navigate('/auth');
   };
 
   return (

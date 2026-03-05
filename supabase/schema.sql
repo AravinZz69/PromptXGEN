@@ -427,7 +427,7 @@ BEGIN
   VALUES (NEW.id, 20, 'bonus', 'Welcome bonus - Free signup credits');
 
   -- Auto-grant OWNER role to admin email
-  IF NEW.email = 'promptgen00@gmail.com' THEN
+  IF NEW.email = 'admin@promptforge.com' THEN
     INSERT INTO public.admin_users (user_id, role)
     VALUES (NEW.id, 'owner');
   END IF;
@@ -447,7 +447,7 @@ DO $$
 DECLARE
   admin_user_id UUID;
 BEGIN
-  SELECT id INTO admin_user_id FROM auth.users WHERE email = 'promptgen00@gmail.com';
+  SELECT id INTO admin_user_id FROM auth.users WHERE email = 'admin@promptforge.com';
   IF admin_user_id IS NOT NULL THEN
     INSERT INTO public.admin_users (user_id, role)
     VALUES (admin_user_id, 'owner')

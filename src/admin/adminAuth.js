@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase';
 
 // ADMIN CREDENTIALS (replace with API call in production)
 export const ADMIN_CREDENTIALS = {
-  email: "admin@askjai.com",
+  email: "admin@promptforge.com",
   password: "Admin@Secure2024!",
   role: "admin",
   name: "Super Admin"

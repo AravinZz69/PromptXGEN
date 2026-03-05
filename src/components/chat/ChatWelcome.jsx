@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { Layers, Globe2, ImageIcon, Code2, Paperclip, ArrowUp, Star } from 'lucide-react'
+import { Layers, Globe2, ImageIcon, Code2, ArrowUp, Star } from 'lucide-react'
 
 // Sparkle particle positions: [top%, left%, duration, delay]
 const SPARKLE_POSITIONS = [
@@ -300,11 +300,6 @@ const ChatWelcome = ({ onSend }) => {
         >
           {/* Top Row */}
           <div className="flex items-center px-4 py-1 gap-2">
-            {/* Paperclip Button */}
-            <button className="text-white/[0.28] hover:text-white/[0.65] transition-colors">
-              <Paperclip size={16} />
-            </button>
-
             {/* Textarea */}
             <textarea
               ref={textareaRef}
@@ -360,14 +355,10 @@ const ChatWelcome = ({ onSend }) => {
           </div>
 
           {/* Bottom Row */}
-          <div className="flex justify-between px-4 pb-2.5">
+          <div className="flex justify-center px-4 pb-2.5">
             <button className="text-white/[0.28] text-xs flex items-center gap-1.5 hover:text-white/[0.58] transition-colors cursor-pointer">
               <Star size={13} />
               Saved prompts
-            </button>
-            <button className="text-white/[0.28] text-xs flex items-center gap-1.5 hover:text-white/[0.58] transition-colors cursor-pointer">
-              <Paperclip size={13} />
-              Attach content
             </button>
           </div>
         </div>

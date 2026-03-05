@@ -26,7 +26,7 @@ const Footer = () => {
               <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent">
                 <Sparkles className="h-3.5 w-3.5 text-primary-foreground" />
               </div>
-              <span className="font-display text-lg font-bold">PromptForge</span>
+              <span className="font-display text-lg font-bold">AskJai</span>
             </Link>
             <p className="text-sm text-muted-foreground">
               AI prompt engineering, simplified.
@@ -57,7 +57,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="border-t border-border/50 pt-6 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} PromptForge. All rights reserved.
+          © {new Date().getFullYear()} AskJai. All rights reserved.
         </div>
       </div>
     </footer>

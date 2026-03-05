@@ -35,7 +35,7 @@ export const ContactHero = () => {
 
           {/* Subtitle */}
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Have questions about PromptForge? Need help with your account? 
+            Have questions about AskJai? Need help with your account? 
             Our team is here to help.
           </p>
         </div>

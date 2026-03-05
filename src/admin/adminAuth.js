@@ -2,9 +2,11 @@
 // Unified auth system - single login for both users and admins
 // Role is determined by credentials, stored in unified session
 
+import { supabase } from '../lib/supabase';
+
 // ADMIN CREDENTIALS (replace with API call in production)
 export const ADMIN_CREDENTIALS = {
-  email: "admin@promptforge.com",
+  email: "admin@askjai.com",
   password: "Admin@Secure2024!",
   role: "admin",
   name: "Super Admin"
@@ -28,12 +30,27 @@ export function isAdminCredentials(email, password) {
 
 /**
  * Login as admin (called when admin credentials are detected)
+ * Also signs into Supabase for RLS policies to work
  * @param {string} email 
  * @param {string} password 
- * @returns {{ success: boolean, role: string, error?: string }}
+ * @returns {Promise<{ success: boolean, role: string, error?: string }>}
  */
-export function adminLogin(email, password) {
+export async function adminLogin(email, password) {
   if (isAdminCredentials(email, password)) {
+    // Sign into Supabase as well for RLS to work
+    try {
+      const { error: supabaseError } = await supabase.auth.signInWithPassword({
+        email: ADMIN_CREDENTIALS.email,
+        password: ADMIN_CREDENTIALS.password,
+      });
+      
+      if (supabaseError) {
+        console.warn('Admin Supabase login failed, some features may be limited:', supabaseError.message);
+      }
+    } catch (err) {
+      console.warn('Admin Supabase login error:', err);
+    }
+
     const session = {
       token: "admin-jwt-" + Date.now(),
       role: "admin",
@@ -53,9 +70,15 @@ export function adminLogin(email, password) {
 /**
  * Clear all sessions and logout
  */
-export function logout() {
+export async function logout() {
   localStorage.removeItem(SESSION_KEY);
   localStorage.removeItem(LEGACY_ADMIN_KEY);
+  // Also sign out from Supabase
+  try {
+    await supabase.auth.signOut();
+  } catch (err) {
+    console.warn('Supabase signout error:', err);
+  }
 }
 
 // Alias for backward compatibility

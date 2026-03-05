@@ -119,7 +119,7 @@ export const companyTimeline: TimelineEvent[] = [
     id: 1,
     year: "2022",
     title: "The Idea Was Born",
-    description: "Alex and Sarah met at an AI hackathon and realized prompt engineering was a massive unsolved problem. PromptForge started as a weekend project."
+    description: "Alex and Sarah met at an AI hackathon and realized prompt engineering was a massive unsolved problem. AskJai started as a weekend project."
   },
   {
     id: 2,
@@ -143,7 +143,7 @@ export const companyTimeline: TimelineEvent[] = [
     id: 5,
     year: "2025",
     title: "Today & Beyond",
-    description: "500,000+ users trust PromptForge. Continuing to innovate with AI agents, multimodal prompts, and the next generation of tools."
+    description: "500,000+ users trust AskJai. Continuing to innovate with AI agents, multimodal prompts, and the next generation of tools."
   }
 ];
 

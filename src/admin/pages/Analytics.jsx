@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Activity,
   Clock,
   AlertCircle,
   Users,
@@ -46,7 +45,6 @@ export default function Analytics() {
   const [cohortData, setCohortData] = useState([]);
   const [topTemplates, setTopTemplates] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
-  const [countryData, setCountryData] = useState([]);
   const [tokenData, setTokenData] = useState([]);
   const [conversionData, setConversionData] = useState([]);
   const [errorLatencyData, setErrorLatencyData] = useState([]);
@@ -93,17 +91,29 @@ export default function Analytics() {
         .select('*', { count: 'exact', head: true })
         .gte('created_at', today.toISOString());
 
-      // Build KPIs with real data
+      // Build KPIs with real data (removed Total Prompts)
       setAnalyticsKPIs([
         { title: 'Total Users', value: (totalUsers || 0).toLocaleString(), change: '+12%', changeType: 'positive', icon: Users, color: 'blue' },
-        { title: 'Total Prompts', value: (totalPrompts || 0).toLocaleString(), change: '+18%', changeType: 'positive', icon: Activity, color: 'green' },
         { title: 'Credits Used', value: creditsUsed.toLocaleString(), change: '+8%', changeType: 'positive', icon: Coins, color: 'amber' },
         { title: 'New Today', value: (usersToday || 0).toLocaleString(), change: '+3%', changeType: 'positive', icon: TrendingUp, color: 'emerald' },
       ]);
 
-      setActiveUsers(Math.max(1, Math.floor((totalUsers || 1) * 0.1)));
-      setPromptsPerMin(Math.floor(Math.random() * 20 + 5));
-      setApiCallsPerMin(Math.floor(Math.random() * 50 + 20));
+      // Calculate active users and prompts per minute from recent activity
+      const { data: recentActiveData } = await supabase
+        .from('prompt_history')
+        .select('user_id')
+        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+      
+      const recentActiveUsers = new Set((recentActiveData || []).map(u => u.user_id)).size;
+      setActiveUsers(recentActiveUsers || Math.max(1, Math.floor((totalUsers || 1) * 0.1)));
+      
+      const { count: recentPromptsCount } = await supabase
+        .from('prompt_history')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', new Date(Date.now() - 60 * 60 * 1000).toISOString());
+      
+      setPromptsPerMin(Math.max(1, Math.floor((recentPromptsCount || 0) / 60)));
+      setApiCallsPerMin(Math.max(1, Math.floor((recentPromptsCount || 0) / 60) * 2));
 
       // Fetch prompt history for daily chart
       const { data: promptsByDay } = await supabase
@@ -171,35 +181,7 @@ export default function Analytics() {
       }));
       setTopTemplates(templatesMapped);
 
-      // Fetch country data from analytics_events
-      const { data: countryStats } = await supabase
-        .from('analytics_events')
-        .select('country');
-
-      const countryMap = {};
-      (countryStats || []).forEach(e => {
-        if (e.country) countryMap[e.country] = (countryMap[e.country] || 0) + 1;
-      });
-      const totalCountry = Object.values(countryMap).reduce((a, b) => a + b, 0) || 1;
-      const countryDataMapped = Object.entries(countryMap)
-        .map(([country, users]) => ({
-          country,
-          users,
-          share: Math.round((users / totalCountry) * 100),
-        }))
-        .sort((a, b) => b.users - a.users)
-        .slice(0, 6);
-
-      setCountryData(countryDataMapped.length > 0 ? countryDataMapped : [
-        { country: 'United States', users: 12500, share: 35 },
-        { country: 'India', users: 8200, share: 23 },
-        { country: 'United Kingdom', users: 4100, share: 12 },
-        { country: 'Germany', users: 3200, share: 9 },
-        { country: 'Canada', users: 2800, share: 8 },
-        { country: 'Australia', users: 2100, share: 6 },
-      ]);
-
-      // Generate cohort data from user registrations
+      // Generate cohort data from user registrations with activity tracking
       const { data: usersWithDates } = await supabase
         .from('profiles')
         .select('id, created_at')
@@ -209,46 +191,151 @@ export default function Analytics() {
       const cohortMap = {};
       (usersWithDates || []).forEach(u => {
         const week = new Date(u.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        if (!cohortMap[week]) cohortMap[week] = { users: 0 };
+        if (!cohortMap[week]) cohortMap[week] = { users: 0, userIds: [] };
         cohortMap[week].users++;
+        cohortMap[week].userIds.push(u.id);
+      });
+
+      // Get activity data for retention calculation
+      const { data: recentActivity } = await supabase
+        .from('prompt_history')
+        .select('user_id, created_at')
+        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+
+      const userLastActivity = {};
+      (recentActivity || []).forEach(a => {
+        if (!userLastActivity[a.user_id] || new Date(a.created_at) > new Date(userLastActivity[a.user_id])) {
+          userLastActivity[a.user_id] = a.created_at;
+        }
       });
 
       const cohortDataMapped = Object.entries(cohortMap)
         .slice(0, 4)
-        .map(([cohort, data]) => ({
-          cohort,
-          users: data.users,
-          day1: Math.floor(70 + Math.random() * 30),
-          day7: Math.floor(50 + Math.random() * 25),
-          day14: Math.floor(35 + Math.random() * 20),
-          day30: Math.floor(25 + Math.random() * 20),
-          revenuePerUser: (Math.random() * 15 + 5).toFixed(2),
-        }));
+        .map(([cohort, data]) => {
+          const activeIn1Day = data.userIds.filter(id => userLastActivity[id]).length;
+          const activeIn7Days = data.userIds.filter(id => {
+            const lastActive = userLastActivity[id];
+            return lastActive && (Date.now() - new Date(lastActive).getTime()) < 7 * 24 * 60 * 60 * 1000;
+          }).length;
+          return {
+            cohort,
+            users: data.users,
+            day1: data.users > 0 ? Math.round((activeIn1Day / data.users) * 100) : 0,
+            day7: data.users > 0 ? Math.round((activeIn7Days / data.users) * 100) : 0,
+            day14: Math.floor(35 + Math.random() * 20),
+            day30: Math.floor(25 + Math.random() * 20),
+            revenuePerUser: (Math.random() * 15 + 5).toFixed(2),
+          };
+        });
 
       setCohortData(cohortDataMapped.length > 0 ? cohortDataMapped : generateSampleCohortData());
 
-      // Generate token consumption data (estimated from prompts)
-      const tokenDataMapped = Object.entries(dayMap).slice(-14).map(([date, count]) => ({
+      // Fetch token consumption from prompt_history with tokens_used
+      const { data: promptsWithTokens } = await supabase
+        .from('prompt_history')
+        .select('created_at, tokens_used, credits_used')
+        .gte('created_at', new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString())
+        .order('created_at', { ascending: true });
+
+      const tokensByDay = {};
+      (promptsWithTokens || []).forEach(p => {
+        const day = new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        if (!tokensByDay[day]) tokensByDay[day] = { input: 0, output: 0 };
+        const tokens = p.tokens_used || (p.credits_used || 1) * 500;
+        tokensByDay[day].input += Math.floor(tokens * 0.4);
+        tokensByDay[day].output += Math.floor(tokens * 0.6);
+      });
+
+      const tokenDataMapped = Object.entries(tokensByDay).map(([date, data]) => ({
         date,
-        inputTokens: count * 500 + Math.floor(Math.random() * 1000),
-        outputTokens: count * 800 + Math.floor(Math.random() * 1500),
+        inputTokens: data.input,
+        outputTokens: data.output,
       }));
       setTokenData(tokenDataMapped.length > 0 ? tokenDataMapped : generateSampleTokenData());
 
-      // Generate conversion rates (would need subscription data)
-      setConversionData(generateConversionData());
+      // Fetch conversion data from user plan distribution
+      const { data: planDistribution } = await supabase
+        .from('profiles')
+        .select('plan, created_at')
+        .gte('created_at', new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString());
 
-      // Generate error/latency data (would need API monitoring)
-      setErrorLatencyData(generateErrorLatencyData());
+      const weeklyConversions = {};
+      (planDistribution || []).forEach(p => {
+        const weekNum = Math.floor((Date.now() - new Date(p.created_at).getTime()) / (7 * 24 * 60 * 60 * 1000));
+        const weekLabel = `W${4 - Math.min(weekNum, 3)}`;
+        if (!weeklyConversions[weekLabel]) weeklyConversions[weekLabel] = { free: 0, pro: 0, enterprise: 0 };
+        weeklyConversions[weekLabel][p.plan || 'free']++;
+      });
 
-      // Generate funnel data from real user stats
-      const funnelTotal = totalUsers || 100;
+      const conversionDataMapped = Object.entries(weeklyConversions)
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([week, data]) => {
+          const total = data.free + data.pro + data.enterprise || 1;
+          return {
+            week,
+            freeToPro: ((data.pro / total) * 100).toFixed(1),
+            proToEnterprise: ((data.enterprise / total) * 100).toFixed(1),
+          };
+        });
+      setConversionData(conversionDataMapped.length > 0 ? conversionDataMapped : generateConversionData());
+
+      // Fetch error/latency from analytics_events if available
+      const { data: analyticsEvents } = await supabase
+        .from('analytics_events')
+        .select('event_type, event_data, created_at')
+        .in('event_type', ['api_call', 'error', 'latency'])
+        .gte('created_at', new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString());
+
+      const errorLatencyByDay = {};
+      (analyticsEvents || []).forEach(e => {
+        const day = new Date(e.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        if (!errorLatencyByDay[day]) errorLatencyByDay[day] = { errors: 0, total: 0, latencySum: 0 };
+        errorLatencyByDay[day].total++;
+        if (e.event_type === 'error') errorLatencyByDay[day].errors++;
+        if (e.event_data?.latency) errorLatencyByDay[day].latencySum += e.event_data.latency;
+      });
+
+      const errorLatencyMapped = Object.entries(errorLatencyByDay).map(([date, data]) => ({
+        date,
+        errorRate: data.total > 0 ? (data.errors / data.total) * 100 : 0,
+        p95Latency: data.total > 0 ? Math.floor(data.latencySum / data.total) : 150,
+      }));
+      setErrorLatencyData(errorLatencyMapped.length > 0 ? errorLatencyMapped : generateErrorLatencyData());
+
+      // Generate funnel data from real user stats and activity
+      const { data: activeUsersData } = await supabase
+        .from('prompt_history')
+        .select('user_id')
+        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+      
+      const uniqueActiveUsers = new Set((activeUsersData || []).map(u => u.user_id)).size;
+      
+      const { data: paidUsersData } = await supabase
+        .from('profiles')
+        .select('id')
+        .in('plan', ['pro', 'enterprise']);
+      
+      const paidUsers = paidUsersData?.length || 0;
+      
+      const { data: powerUsersData } = await supabase
+        .from('prompt_history')
+        .select('user_id')
+        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+      
+      const userPromptCounts = {};
+      (powerUsersData || []).forEach(p => {
+        userPromptCounts[p.user_id] = (userPromptCounts[p.user_id] || 0) + 1;
+      });
+      const powerUsers = Object.values(userPromptCounts).filter(count => count >= 10).length;
+      
+      const funnelTotal = totalUsers || 1;
+      const estimatedVisitors = funnelTotal * 10;
       setFunnelData([
-        { stage: 'Visitors', value: funnelTotal * 10, conversion: 100 },
-        { stage: 'Sign Ups', value: funnelTotal, conversion: 10 },
-        { stage: 'Active Users', value: Math.floor(funnelTotal * 0.6), conversion: 60 },
-        { stage: 'Paid Users', value: Math.floor(funnelTotal * 0.15), conversion: 15 },
-        { stage: 'Power Users', value: Math.floor(funnelTotal * 0.05), conversion: 5 },
+        { stage: 'Visitors', value: estimatedVisitors, conversion: 100 },
+        { stage: 'Sign Ups', value: funnelTotal, conversion: Math.round((funnelTotal / estimatedVisitors) * 100) },
+        { stage: 'Active Users', value: uniqueActiveUsers, conversion: Math.round((uniqueActiveUsers / funnelTotal) * 100) || 0 },
+        { stage: 'Paid Users', value: paidUsers, conversion: Math.round((paidUsers / funnelTotal) * 100) || 0 },
+        { stage: 'Power Users', value: powerUsers, conversion: Math.round((powerUsers / funnelTotal) * 100) || 0 },
       ]);
 
     } catch (error) {
@@ -538,47 +625,6 @@ export default function Analytics() {
 
       {/* Charts Row 3 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Geographic Distribution */}
-        <ChartCard title="Geographic Distribution">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-800">
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Rank</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Country</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Users</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">% Share</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Growth</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase w-32">Distribution</th>
-                </tr>
-              </thead>
-              <tbody>
-                {countryData.map((country, i) => (
-                  <tr key={country.country} className="border-b border-gray-800/50">
-                    <td className="px-4 py-3 text-sm text-gray-500">{i + 1}</td>
-                    <td className="px-4 py-3 text-sm text-white">{country.country}</td>
-                    <td className="px-4 py-3 text-sm text-gray-300">{country.users.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-sm text-gray-300">{country.share}%</td>
-                    <td className="px-4 py-3">
-                      <span className={`text-sm ${i % 2 === 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                        {i % 2 === 0 ? '+' : '-'}{(Math.random() * 5 + 1).toFixed(1)}%
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-indigo-500 rounded-full"
-                          style={{ width: `${country.share}%` }}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </ChartCard>
-
         {/* Error Rate & Latency */}
         <ChartCard title="Error Rate & P95 Latency">
           <div className="h-64">

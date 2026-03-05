@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useCredits } from "@/hooks/useCredits";
+import { recordCreditUsage } from "@/utils/creditGuard";
 import { MiniNavbar } from "@/components/ui/mini-navbar";
 import Sidebar from "@/components/ui/sidebar-menu";
 import PromptChat from "@/components/ui/prompt-chat";
@@ -27,6 +29,7 @@ const PromptGenerator = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { credits, hasCredits, refetch: refetchCredits } = useCredits();
   
   const [isLoading, setIsLoading] = useState(false);
   const [generatedPrompt, setGeneratedPrompt] = useState<string | null>(null);
@@ -35,6 +38,17 @@ const PromptGenerator = () => {
   const [copied, setCopied] = useState(false);
 
   const generatePrompt = async (input: string, type: string) => {
+    // Check if user has credits before generating
+    if (!hasCredits || (credits && credits.remainingCredits <= 0)) {
+      toast({
+        title: "No Credits Available",
+        description: "You have run out of credits. Please upgrade your plan to continue generating prompts.",
+        variant: "destructive",
+      });
+      navigate('/pricing');
+      return;
+    }
+
     setIsLoading(true);
     setInputText(input);
     setPromptType(type);
@@ -126,6 +140,20 @@ Return ONLY the optimized prompt, nothing else.`;
         input: input,
         output: generatedContent,
       });
+
+      // Deduct credits after successful generation
+      try {
+        await recordCreditUsage(
+          'llama-3.3-70b-versatile',
+          userPrompt,
+          generatedContent,
+          `Prompt generation (${type})`
+        );
+        // Refresh credits display
+        refetchCredits();
+      } catch (creditError) {
+        console.error('Failed to deduct credits:', creditError);
+      }
       
       toast({
         title: "Prompt Generated!",

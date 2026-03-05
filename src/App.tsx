@@ -38,7 +38,6 @@ import UserManagement from "./admin/pages/UserManagement";
 import PromptManagement from "./admin/pages/PromptManagement";
 import RevenueManagement from "./admin/pages/RevenueManagement";
 import AIModelConfig from "./admin/pages/AIModelConfig";
-import SupportTickets from "./admin/pages/SupportTickets";
 import Notifications from "./admin/pages/Notifications";
 import FeatureFlags from "./admin/pages/FeatureFlags";
 import AuditLogs from "./admin/pages/AuditLogs";
@@ -158,7 +157,6 @@ function AnimatedRoutes() {
           <Route path="prompts" element={<PromptManagement />} />
           <Route path="revenue" element={<RevenueManagement />} />
           <Route path="ai-models" element={<AIModelConfig />} />
-          <Route path="tickets" element={<SupportTickets />} />
           <Route path="notifications" element={<Notifications />} />
           <Route path="feature-flags" element={<FeatureFlags />} />
           <Route path="audit-logs" element={<AuditLogs />} />

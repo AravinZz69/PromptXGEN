@@ -239,3 +239,30 @@ export const getFavoriteChatHistory = async (): Promise<ChatConversation[]> => {
 
   return data || [];
 };
+
+// Save individual AI interaction to prompt_history for admin tracking
+export const saveAiInteraction = async (
+  input: string,
+  output: string,
+  model: string = 'llama-3.3-70b-versatile',
+  promptType: string = 'chat'
+): Promise<void> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase.from('prompt_history').insert({
+      user_id: user.id,
+      input_text: input,
+      output_text: output,
+      model: model,
+      prompt_type: promptType,
+      tokens_used: Math.ceil((input.length + output.length) / 4),
+      credits_used: 1,
+      metadata: { source: 'generative-ai' },
+    });
+    console.log('AI interaction saved to prompt_history');
+  } catch (error) {
+    console.error('Error saving AI interaction:', error);
+  }
+};

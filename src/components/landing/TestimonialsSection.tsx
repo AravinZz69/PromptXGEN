@@ -4,7 +4,7 @@ const testimonials = [
   {
     name: "Sarah Chen",
     role: "Content Marketer",
-    text: "PromptForge cut my prompt writing time by 80%. The advanced prompts are incredibly well-structured.",
+    text: "AskJai cut my prompt writing time by 80%. The advanced prompts are incredibly well-structured.",
     avatar: "SC",
   },
   {

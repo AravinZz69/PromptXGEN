@@ -65,23 +65,64 @@ export default function UserManagement() {
   async function fetchUsers() {
     setLoading(true);
     try {
-      // Fetch profiles with credits
+      // Try to fetch using admin function first (bypasses RLS)
+      const { data: adminData, error: adminError } = await supabase.rpc('get_all_users_admin');
+      
+      if (!adminError && adminData && adminData.length > 0) {
+        console.log('Fetched users via admin function:', adminData.length);
+        setUsers(adminData.map(user => ({
+          id: user.id,
+          name: user.full_name || user.email?.split('@')[0] || 'Unknown',
+          email: user.email || '',
+          avatar: (user.full_name || user.email || 'U').substring(0, 2).toUpperCase(),
+          plan: (user.plan || 'free').charAt(0).toUpperCase() + (user.plan || 'free').slice(1),
+          promptsUsed: user.used_credits || 0,
+          joinedDate: user.created_at,
+          lastActive: user.last_login || user.updated_at,
+          status: user.is_active === false ? 'Suspended' : 'Active',
+          credits: user.credits_balance || 0,
+        })));
+        setLoading(false);
+        return;
+      }
+      
+      if (adminError) {
+        console.log('Admin function not available, falling back to direct query:', adminError.message);
+      }
+
+      // Fallback: Fetch profiles with credits directly
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (profilesError) throw profilesError;
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        throw profilesError;
+      }
+
+      console.log('Fetched profiles:', profiles?.length || 0);
+
+      if (!profiles || profiles.length === 0) {
+        console.log('No profiles found. Checking if data exists...');
+        setUsers([]);
+        setLoading(false);
+        return;
+      }
 
       // Fetch credits for all users
       const { data: credits, error: creditsError } = await supabase
         .from('user_credits')
         .select('user_id, credits_balance, used_credits');
 
+      if (creditsError) console.error('Error fetching credits:', creditsError);
+
       // Fetch user_profiles for status
       const { data: userProfiles, error: upError } = await supabase
         .from('user_profiles')
         .select('user_id, is_active, last_login');
+
+      if (upError) console.error('Error fetching user_profiles:', upError);
 
       // Map to user format
       const usersData = profiles.map(profile => {
@@ -209,103 +250,95 @@ export default function UserManagement() {
 
   const handleAddCredits = async (user) => {
     try {
-      // First get current credits
-      const { data: currentCredits, error: fetchError } = await supabase
-        .from('user_credits')
-        .select('credits_balance')
-        .eq('user_id', user.id)
-        .single();
+      console.log('Adding credits to user:', user.id, 'Amount:', creditAmount);
       
-      if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
-      
-      const newBalance = (currentCredits?.credits_balance || 0) + creditAmount;
-      
-      // Update or insert credits
-      const { error: updateError } = await supabase
-        .from('user_credits')
-        .upsert({
-          user_id: user.id,
-          credits_balance: newBalance,
-          total_credits: newBalance,
-        }, { onConflict: 'user_id' });
-      
-      if (updateError) throw updateError;
-      
-      // Log transaction
-      await supabase.from('credit_transactions').insert({
-        user_id: user.id,
-        amount: creditAmount,
-        transaction_type: 'admin_grant',
-        description: creditReason || 'Admin credit grant',
+      // Use admin RPC function to bypass RLS
+      const { data, error } = await supabase.rpc('admin_add_credits', {
+        p_user_id: user.id,
+        p_amount: creditAmount,
+        p_reason: creditReason || 'Admin credit grant'
       });
       
-      setUsers(users.map(u => 
-        u.id === user.id ? { ...u, credits: newBalance } : u
-      ));
+      console.log('RPC response:', { data, error });
+      
+      if (error) {
+        console.error('RPC error:', error);
+        throw error;
+      }
+      if (!data?.success) {
+        console.error('Function returned error:', data);
+        throw new Error(data?.error || 'Failed to add credits');
+      }
+      
+      // Refresh user list to get updated data from database
+      await fetchUsers();
+      
       setCreditAmount(100);
       setCreditReason('');
       setCreditsModal(null);
-      alert(`Added ${creditAmount} credits to ${user.name}`);
+      alert(`Added ${creditAmount} credits to ${user.name}. New balance: ${data.new_balance}`);
     } catch (error) {
       console.error('Error adding credits:', error);
-      alert('Failed to add credits');
+      alert('Failed to add credits: ' + (error.message || 'Unknown error'));
     }
   };
 
   const handleDeductCredits = async (user) => {
     try {
-      const { data: currentCredits, error: fetchError } = await supabase
-        .from('user_credits')
-        .select('credits_balance')
-        .eq('user_id', user.id)
-        .single();
+      console.log('Deducting credits from user:', user.id, 'Amount:', creditAmount);
       
-      if (fetchError) throw fetchError;
-      
-      const newBalance = Math.max(0, (currentCredits?.credits_balance || 0) - creditAmount);
-      
-      const { error: updateError } = await supabase
-        .from('user_credits')
-        .update({ credits_balance: newBalance })
-        .eq('user_id', user.id);
-      
-      if (updateError) throw updateError;
-      
-      // Log transaction
-      await supabase.from('credit_transactions').insert({
-        user_id: user.id,
-        amount: creditAmount,
-        transaction_type: 'deduction',
-        description: creditReason || 'Admin credit deduction',
+      // Use admin RPC function to bypass RLS
+      const { data, error } = await supabase.rpc('admin_deduct_credits', {
+        p_user_id: user.id,
+        p_amount: creditAmount,
+        p_reason: creditReason || 'Admin credit deduction'
       });
       
-      setUsers(users.map(u => 
-        u.id === user.id ? { ...u, credits: newBalance } : u
-      ));
+      console.log('RPC response:', { data, error });
+      
+      if (error) {
+        console.error('RPC error:', error);
+        throw error;
+      }
+      if (!data?.success) {
+        console.error('Function returned error:', data);
+        throw new Error(data?.error || 'Failed to deduct credits');
+      }
+      
+      // Refresh user list to get updated data from database
+      await fetchUsers();
+      
       setCreditAmount(100);
       setCreditReason('');
       setCreditsModal(null);
-      alert(`Deducted ${creditAmount} credits from ${user.name}`);
+      alert(`Deducted ${creditAmount} credits from ${user.name}. New balance: ${data.new_balance}`);
     } catch (error) {
       console.error('Error deducting credits:', error);
-      alert('Failed to deduct credits');
+      alert('Failed to deduct credits: ' + (error.message || 'Unknown error'));
     }
   };
 
   const handleSetCredits = async (user, amount) => {
     try {
-      const { error } = await supabase
-        .from('user_credits')
-        .upsert({
-          user_id: user.id,
-          credits_balance: amount,
-        }, { onConflict: 'user_id' });
+      console.log('Setting credits for user:', user.id, 'Amount:', amount);
       
-      if (error) throw error;
+      // Use admin RPC function to bypass RLS
+      const { data, error } = await supabase.rpc('admin_set_credits', {
+        p_user_id: user.id,
+        p_amount: amount,
+        p_reason: 'Admin set credits'
+      });
       
-      setUsers(users.map(u => 
-        u.id === user.id ? { ...u, credits: amount } : u
-      ));
+      console.log('RPC response:', { data, error });
+      
+      if (error) {
+        console.error('RPC error:', error);
+        throw error;
+      }
+      if (!data?.success) throw new Error(data?.error || 'Failed to set credits');
+      
+      // Refresh user list to get updated data from database
+      await fetchUsers();
     } catch (error) {
       console.error('Error setting credits:', error);
     }

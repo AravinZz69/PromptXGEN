@@ -24,7 +24,7 @@ export const BlogHero = () => {
           {/* Eyebrow */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 text-sm font-medium bg-primary/10 text-primary rounded-full border border-primary/20">
             <Sparkles className="w-4 h-4" />
-            <span>PromptForge Blog</span>
+            <span>AskJai Blog</span>
           </div>
 
           {/* Headline */}

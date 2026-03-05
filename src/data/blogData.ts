@@ -29,7 +29,7 @@ export const blogPosts: BlogPost[] = [
     slug: "how-to-write-perfect-ai-prompts",
     title: "How to Write Perfect AI Prompts That Actually Work",
     excerpt: "Master the art of prompt engineering with these proven techniques that will transform how you interact with AI models and get consistently better results.",
-    content: `The quality of your AI output directly depends on the quality of your input. After analyzing over 100,000 prompts generated through PromptForge, we've identified the key patterns that separate mediocre prompts from exceptional ones.
+    content: `The quality of your AI output directly depends on the quality of your input. After analyzing over 100,000 prompts generated through AskJai, we've identified the key patterns that separate mediocre prompts from exceptional ones.
 
 ## The Foundation: Be Specific and Contextual
 
@@ -151,10 +151,10 @@ Few-shot prompting is particularly powerful when combined with clear instruction
   },
   {
     id: 4,
-    slug: "promptforge-v2-launch",
-    title: "Introducing PromptForge 2.0: Smarter Prompts, Better Results",
-    excerpt: "We're excited to announce the biggest update to PromptForge yet, featuring AI model comparison, collaborative workspaces, and advanced analytics.",
-    content: `Today marks a major milestone for PromptForge. After months of development and feedback from our amazing community, we're thrilled to launch PromptForge 2.0.
+    slug: "AskJai-v2-launch",
+    title: "Introducing AskJai 2.0: Smarter Prompts, Better Results",
+    excerpt: "We're excited to announce the biggest update to AskJai yet, featuring AI model comparison, collaborative workspaces, and advanced analytics.",
+    content: `Today marks a major milestone for AskJai. After months of development and feedback from our amazing community, we're thrilled to launch AskJai 2.0.
 
 ## What's New
 
@@ -176,7 +176,7 @@ We've added 50+ new templates covering use cases from SaaS marketing to legal do
 
 We're introducing a new Team plan at $49/month for up to 5 users. Enterprise customers get priority access to new features and dedicated support.
 
-Thank you to everyone who provided feedback during beta. Your input directly shaped these features, and we can't wait to see what you create with PromptForge 2.0.`,
+Thank you to everyone who provided feedback during beta. Your input directly shaped these features, and we can't wait to see what you create with AskJai 2.0.`,
     category: "Product Updates",
     tags: ["Launch", "Features", "V2", "Announcement"],
     author: {
@@ -193,9 +193,9 @@ Thank you to everyone who provided feedback during beta. Your input directly sha
   {
     id: 5,
     slug: "api-access-announcement",
-    title: "PromptForge API: Integrate AI Prompts Into Your Workflow",
+    title: "AskJai API: Integrate AI Prompts Into Your Workflow",
     excerpt: "Our new API lets you generate optimized prompts programmatically, opening up endless possibilities for automation and integration.",
-    content: `We've heard your requests, and today we're delivering: the PromptForge API is now available for Pro and Enterprise customers.
+    content: `We've heard your requests, and today we're delivering: the AskJai API is now available for Pro and Enterprise customers.
 
 ## What You Can Do
 
@@ -517,7 +517,7 @@ Ignoring format: Specify if you want bullets, numbered lists, or paragraphs
 
 Once you're comfortable with basics, explore chain-of-thought prompting, few-shot learning, and prompt chaining. Each technique builds on these fundamentals.
 
-The best way to learn is by doing. Open PromptForge and start experimenting!`,
+The best way to learn is by doing. Open AskJai and start experimenting!`,
     category: "Tutorials",
     tags: ["Beginner", "Tutorial", "Basics", "Getting Started"],
     author: {
@@ -578,7 +578,7 @@ Schedule regular reviews to update underperforming templates. Gather feedback fr
 
 ## Tools and Infrastructure
 
-Consider using PromptForge's team features for template management, or integrate with your existing knowledge base. The key is making templates as accessible as possible.
+Consider using AskJai's team features for template management, or integrate with your existing knowledge base. The key is making templates as accessible as possible.
 
 Start small, prove value, then expand. Your template library will become more valuable over time.`,
     category: "Tutorials",

@@ -12,7 +12,6 @@ import {
   UserPlus,
   Zap,
   Banknote,
-  HeadphonesIcon,
   ArrowDown,
   Loader2,
 } from 'lucide-react';
@@ -40,7 +39,6 @@ const activityIcons = {
   signup: UserPlus,
   prompt: Zap,
   payment: Banknote,
-  support: HeadphonesIcon,
   downgrade: ArrowDown,
 };
 
@@ -49,7 +47,6 @@ const activityColors = {
   signup: 'text-blue-400 bg-blue-400/20',
   prompt: 'text-indigo-400 bg-indigo-400/20',
   payment: 'text-amber-400 bg-amber-400/20',
-  support: 'text-purple-400 bg-purple-400/20',
   downgrade: 'text-red-400 bg-red-400/20',
 };
 
@@ -89,132 +86,141 @@ export default function AdminDashboard() {
   async function fetchDashboardData() {
     setLoading(true);
     try {
-      // Fetch all data in parallel
-      const [
-        statsResult,
-        promptsResult,
-        profilesResult,
-        creditsResult,
-        ticketsResult,
-      ] = await Promise.all([
-        // Dashboard stats
-        supabase.rpc('get_admin_dashboard_stats'),
-        // Prompts for last 30 days
-        supabase.from('prompt_history')
-          .select('created_at')
-          .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
-          .order('created_at', { ascending: true }),
-        // Profiles for signups
-        supabase.from('profiles')
-          .select('created_at, plan')
-          .gte('created_at', new Date(Date.now() - 56 * 24 * 60 * 60 * 1000).toISOString())
-          .order('created_at', { ascending: true }),
-        // Recent credit transactions (activity)
-        supabase.from('credit_transactions')
-          .select('*, profiles(email)')
-          .order('created_at', { ascending: false })
-          .limit(10),
-        // Open tickets count
-        supabase.from('support_tickets')
-          .select('status', { count: 'exact', head: true })
-          .in('status', ['Open', 'In Progress']),
-      ]);
-
-      // Process stats
-      if (statsResult.data) {
-        setStats(statsResult.data);
-      } else {
-        // Fallback: calculate from individual queries
-        const { count: totalUsers } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
-        const { count: totalPrompts } = await supabase.from('prompt_history').select('*', { count: 'exact', head: true });
-        const { count: promptsToday } = await supabase.from('prompt_history')
-          .select('*', { count: 'exact', head: true })
-          .gte('created_at', new Date().toISOString().split('T')[0]);
-        
-        setStats({
-          total_users: totalUsers || 0,
-          total_prompts: totalPrompts || 0,
-          prompts_today: promptsToday || 0,
-          new_users_today: 0,
-          new_users_week: 0,
-        });
+      // Try to use admin RPC functions first, fallback to direct queries
+      let promptsData = [];
+      let profilesData = [];
+      
+      // Fetch prompts using admin function or direct query
+      try {
+        const { data: adminPrompts } = await supabase.rpc('get_all_prompts_admin');
+        if (adminPrompts && adminPrompts.length > 0) {
+          promptsData = adminPrompts;
+        }
+      } catch (e) {
+        console.log('Admin prompts RPC not available, trying direct query');
+      }
+      
+      if (promptsData.length === 0) {
+        const { data } = await supabase
+          .from('prompt_history')
+          .select('created_at, user_id')
+          .order('created_at', { ascending: true });
+        promptsData = data || [];
       }
 
-      // Process prompts daily chart
-      if (promptsResult.data) {
-        const dailyMap = {};
-        for (let i = 29; i >= 0; i--) {
-          const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-          const key = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-          dailyMap[key] = 0;
+      // Fetch profiles using admin function or direct query
+      try {
+        const { data: adminUsers } = await supabase.rpc('get_all_users_admin');
+        if (adminUsers && adminUsers.length > 0) {
+          profilesData = adminUsers;
         }
-        promptsResult.data.forEach(p => {
-          const date = new Date(p.created_at);
-          const key = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      } catch (e) {
+        console.log('Admin users RPC not available, trying direct query');
+      }
+      
+      if (profilesData.length === 0) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('id, created_at, plan, email')
+          .order('created_at', { ascending: true });
+        profilesData = data || [];
+      }
+
+      // Calculate stats
+      const totalUsers = profilesData.length;
+      const totalPrompts = promptsData.length;
+      const today = new Date().toISOString().split('T')[0];
+      const promptsToday = promptsData.filter(p => p.created_at?.startsWith(today)).length;
+      const usersToday = profilesData.filter(p => p.created_at?.startsWith(today)).length;
+      
+      setStats({
+        total_users: totalUsers,
+        total_prompts: totalPrompts,
+        prompts_today: promptsToday,
+        new_users_today: usersToday,
+        new_users_week: profilesData.filter(p => {
+          const created = new Date(p.created_at);
+          return (Date.now() - created.getTime()) < 7 * 24 * 60 * 60 * 1000;
+        }).length,
+      });
+
+      // Process prompts daily chart (last 30 days)
+      const dailyMap = {};
+      for (let i = 29; i >= 0; i--) {
+        const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+        const key = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        dailyMap[key] = 0;
+      }
+      
+      promptsData.forEach(p => {
+        const created = new Date(p.created_at);
+        if (Date.now() - created.getTime() <= 30 * 24 * 60 * 60 * 1000) {
+          const key = created.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
           if (dailyMap[key] !== undefined) dailyMap[key]++;
-        });
-        setPromptsDaily(Object.entries(dailyMap).map(([date, prompts]) => ({ date, prompts })));
-      }
-
-      // Process signups weekly chart
-      if (profilesResult.data) {
-        const weeklyMap = {};
-        for (let i = 7; i >= 0; i--) {
-          weeklyMap[`W${8 - i}`] = 0;
         }
-        profilesResult.data.forEach(p => {
-          const date = new Date(p.created_at);
-          const weekNum = Math.floor((Date.now() - date.getTime()) / (7 * 24 * 60 * 60 * 1000));
+      });
+      setPromptsDaily(Object.entries(dailyMap).map(([date, prompts]) => ({ date, prompts })));
+
+      // Process signups weekly chart (last 8 weeks)
+      const weeklyMap = {};
+      for (let i = 7; i >= 0; i--) {
+        weeklyMap[`W${8 - i}`] = 0;
+      }
+      
+      profilesData.forEach(p => {
+        const created = new Date(p.created_at);
+        const weekNum = Math.floor((Date.now() - created.getTime()) / (7 * 24 * 60 * 60 * 1000));
+        if (weekNum <= 7) {
           const weekKey = `W${8 - weekNum}`;
           if (weeklyMap[weekKey] !== undefined) weeklyMap[weekKey]++;
-        });
-        setSignupsWeekly(Object.entries(weeklyMap).map(([week, signups]) => ({ week, signups })));
-
-        // Process subscription breakdown
-        const planCounts = { free: 0, pro: 0, enterprise: 0 };
-        profilesResult.data.forEach(p => {
-          const plan = (p.plan || 'free').toLowerCase();
-          if (planCounts[plan] !== undefined) planCounts[plan]++;
-        });
-        // Get fresh count from all profiles
-        const { data: allProfiles } = await supabase.from('profiles').select('plan');
-        if (allProfiles) {
-          const counts = { free: 0, pro: 0, enterprise: 0 };
-          allProfiles.forEach(p => {
-            const plan = (p.plan || 'free').toLowerCase();
-            if (counts[plan] !== undefined) counts[plan]++;
-          });
-          const total = counts.free + counts.pro + counts.enterprise;
-          setSubscriptionBreakdown([
-            { name: 'Free', value: total ? Math.round((counts.free / total) * 100) : 45, color: '#6B7280' },
-            { name: 'Pro', value: total ? Math.round((counts.pro / total) * 100) : 35, color: '#6366F1' },
-            { name: 'Enterprise', value: total ? Math.round((counts.enterprise / total) * 100) : 20, color: '#10B981' },
-          ]);
         }
-      }
+      });
+      setSignupsWeekly(Object.entries(weeklyMap).map(([week, signups]) => ({ week, signups })));
 
-      // Process recent activity
-      if (creditsResult.data) {
-        const activity = creditsResult.data.map((t, i) => {
+      // Process subscription breakdown
+      const planCounts = { free: 0, pro: 0, enterprise: 0 };
+      profilesData.forEach(p => {
+        const plan = (p.plan || 'free').toLowerCase();
+        if (planCounts[plan] !== undefined) planCounts[plan]++;
+      });
+      const total = planCounts.free + planCounts.pro + planCounts.enterprise || 1;
+      setSubscriptionBreakdown([
+        { name: 'Free', value: Math.round((planCounts.free / total) * 100), color: '#6B7280' },
+        { name: 'Pro', value: Math.round((planCounts.pro / total) * 100), color: '#6366F1' },
+        { name: 'Enterprise', value: Math.round((planCounts.enterprise / total) * 100), color: '#10B981' },
+      ]);
+
+      // Fetch recent activity from credit transactions
+      const { data: creditsResult } = await supabase
+        .from('credit_transactions')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (creditsResult) {
+        const activity = creditsResult.map((t, i) => {
           const types = {
             deduction: { type: 'prompt', action: 'used credits' },
             topup: { type: 'payment', action: 'added credits' },
             bonus: { type: 'signup', action: 'received bonus' },
+            admin_grant: { type: 'payment', action: 'admin grant' },
           };
           const info = types[t.transaction_type] || { type: 'prompt', action: t.description || 'activity' };
           const timeAgo = getTimeAgo(new Date(t.created_at));
+          // Find user email from profilesData
+          const user = profilesData.find(p => p.user_id === t.user_id || p.id === t.user_id);
           return {
             id: t.id || i,
             type: info.type,
-            user: t.profiles?.email || 'Unknown user',
-            action: `${info.action} (${t.amount} credits)`,
+            user: user?.email || 'Unknown user',
+            action: `${info.action} (${Math.abs(t.amount)} credits)`,
             time: timeAgo,
           };
         });
         setRecentActivity(activity);
       }
 
-      // Set some sample alerts (in production, fetch from a system_alerts table)
+      // Set alerts
       setAlerts([
         { id: 1, severity: 'info', message: 'Dashboard connected to live Supabase data', timestamp: 'Just now' },
       ]);
@@ -261,7 +267,6 @@ export default function AdminDashboard() {
     { title: 'Active Subscriptions', value: stats.active_subscriptions?.toLocaleString() || '0', change: '-', changeType: 'neutral', icon: CreditCard, color: 'green' },
     { title: 'Prompts Today', value: stats.prompts_today?.toLocaleString() || '0', change: '-', changeType: 'neutral', icon: MessageSquare, color: 'indigo' },
     { title: 'MRR', value: '$' + (stats.mrr?.toLocaleString() || '0'), change: '-', changeType: 'neutral', icon: DollarSign, color: 'emerald' },
-    { title: 'Open Tickets', value: stats.open_tickets?.toString() || '0', change: '-', changeType: 'neutral', icon: HeadphonesIcon, color: 'purple' },
     { title: 'Total Prompts', value: stats.total_prompts?.toLocaleString() || '0', change: '-', changeType: 'neutral', icon: Clock, color: 'amber' },
   ] : [];
 

@@ -4,9 +4,8 @@ import {
   LayoutDashboard,
   BarChart3,
   Users,
-  HeadphonesIcon,
   DollarSign,
-  MessageSquare,
+  History,
   Cpu,
   ToggleLeft,
   Bell,
@@ -29,7 +28,6 @@ const navGroups = [
     label: 'USER CONTROL',
     items: [
       { to: '/admin/users', icon: Users, label: 'Users' },
-      { to: '/admin/support', icon: HeadphonesIcon, label: 'Support Tickets' },
     ],
   },
   {
@@ -41,7 +39,7 @@ const navGroups = [
   {
     label: 'PRODUCT',
     items: [
-      { to: '/admin/prompts', icon: MessageSquare, label: 'Prompts' },
+      { to: '/admin/prompts', icon: History, label: 'Prompts Management' },
       { to: '/admin/ai-models', icon: Cpu, label: 'AI Models' },
       { to: '/admin/feature-flags', icon: ToggleLeft, label: 'Feature Flags' },
     ],
@@ -91,7 +89,7 @@ export default function AdminSidebar({ isOpen, onClose }) {
           <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
-          <span className="text-lg font-bold text-white">PromptForge</span>
+          <span className="text-lg font-bold text-white">AskJai</span>
           <span className="px-2 py-0.5 rounded text-xs font-semibold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
             Admin
           </span>

@@ -10,7 +10,6 @@ import {
   MonitorIcon,
   CircleUserRound,
   ArrowUpIcon,
-  Paperclip,
   Code2,
   Palette,
   Layers,
@@ -174,15 +173,7 @@ export default function PromptChat({ onGenerate, isLoading = false }: PromptChat
           />
 
           {/* Footer Buttons */}
-          <div className="flex items-center justify-between p-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-white hover:bg-neutral-700"
-            >
-              <Paperclip className="w-4 h-4" />
-            </Button>
-
+          <div className="flex items-center justify-end p-3">
             <div className="flex items-center gap-2">
               <Button
                 onClick={handleSubmit}

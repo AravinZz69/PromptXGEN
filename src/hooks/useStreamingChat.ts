@@ -7,7 +7,7 @@
  */
 
 import { useState, useCallback, useRef } from 'react';
-import { saveChatConversation, ChatMessage as DbChatMessage } from '@/lib/chatHistoryService';
+import { saveChatConversation, ChatMessage as DbChatMessage, saveAiInteraction } from '@/lib/chatHistoryService';
 
 // ── CONSTANTS ──────────────────────────────────────────────────────────────
 const MODEL = 'llama-3.3-70b-versatile';
@@ -214,6 +214,9 @@ Be concise but thorough.`,
           if (saved && !conversationId) {
             setConversationId(saved.id);
           }
+          
+          // Also save individual interaction to prompt_history for admin tracking
+          await saveAiInteraction(userText, fullContent, MODEL, 'chat');
         } catch (saveError) {
           console.warn('Failed to save conversation:', saveError);
         }

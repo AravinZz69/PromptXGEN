@@ -1,4 +1,6 @@
-// History Service - Manages prompt generation history in localStorage
+// History Service - Manages prompt generation history in localStorage AND Supabase
+
+import { supabase } from './supabase';
 
 export interface HistoryItem {
   id: string;
@@ -33,7 +35,7 @@ export const getHistory = (): HistoryItem[] => {
   }
 };
 
-// Add new history item
+// Add new history item (saves to both localStorage and Supabase)
 export const addToHistory = (item: Omit<HistoryItem, 'id' | 'createdAt'>): HistoryItem => {
   const history = getHistory();
   
@@ -52,7 +54,43 @@ export const addToHistory = (item: Omit<HistoryItem, 'id' | 'createdAt'>): Histo
   }
   
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  
+  // Also save to Supabase for admin visibility (fire and forget)
+  saveToSupabase(newItem);
+  
   return newItem;
+};
+
+// Save prompt to Supabase prompt_history table
+const saveToSupabase = async (item: HistoryItem) => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return; // Not logged in, skip Supabase save
+    
+    const inputStr = typeof item.input === 'string' 
+      ? item.input 
+      : JSON.stringify(item.input);
+    
+    await supabase.from('prompt_history').insert({
+      user_id: user.id,
+      input_text: inputStr,
+      output_text: item.output,
+      prompt_type: item.promptType || item.type || 'basic',
+      model: 'groq',
+      tokens_used: Math.ceil((inputStr.length + item.output.length) / 4),
+      credits_used: 1,
+      metadata: {
+        category: item.category || 'Other',
+        templateId: item.templateId,
+        templateName: item.templateName,
+        type: item.type,
+        localId: item.id,
+      },
+    });
+    console.log('Prompt saved to Supabase for admin visibility');
+  } catch (error) {
+    console.error('Error saving to Supabase:', error);
+  }
 };
 
 // Delete history item

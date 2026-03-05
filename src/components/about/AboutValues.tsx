@@ -29,7 +29,7 @@ export const AboutValues = () => {
             Our Values
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            The principles that guide everything we do at PromptForge.
+            The principles that guide everything we do at AskJai.
           </p>
         </div>
 

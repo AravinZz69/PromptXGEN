@@ -21,19 +21,165 @@ import {
   RefreshCw,
   Copy,
   ExternalLink,
+  Download,
+  Loader2,
 } from 'lucide-react';
 import Badge from '../components/Badge';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { supabase } from '../../lib/supabase';
 
 export default function AdminSettings() {
   const [activeSection, setActiveSection] = useState('profile');
   const [hasChanges, setHasChanges] = useState(false);
 
+  // Danger Zone state
+  const [dangerAction, setDangerAction] = useState(null); // 'cache' | 'sessions' | 'export'
+  const [dangerLoading, setDangerLoading] = useState(null);
+  const [showDangerConfirm, setShowDangerConfirm] = useState(false);
+
+  // Danger Zone handlers
+  const handleClearCache = async () => {
+    setDangerLoading('cache');
+    try {
+      // Clear all localStorage cache items
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.includes('cache') || key.includes('prompt_history') || key.includes('chat_'))) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      
+      // Clear sessionStorage too
+      sessionStorage.clear();
+      
+      alert(`Cache cleared successfully! Removed ${keysToRemove.length} cached items.`);
+    } catch (error) {
+      console.error('Error clearing cache:', error);
+      alert('Failed to clear cache: ' + error.message);
+    } finally {
+      setDangerLoading(null);
+      setShowDangerConfirm(false);
+    }
+  };
+
+  const handleResetSessions = async () => {
+    setDangerLoading('sessions');
+    try {
+      // Sign out all users via Supabase
+      await supabase.auth.signOut({ scope: 'global' });
+      
+      // Clear all auth-related localStorage
+      const authKeys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.includes('auth') || key.includes('session') || key.includes('token') || key.includes('supabase'))) {
+          authKeys.push(key);
+        }
+      }
+      authKeys.forEach(key => localStorage.removeItem(key));
+      
+      alert('All user sessions have been reset. Users will need to log in again.');
+    } catch (error) {
+      console.error('Error resetting sessions:', error);
+      alert('Failed to reset sessions: ' + error.message);
+    } finally {
+      setDangerLoading(null);
+      setShowDangerConfirm(false);
+    }
+  };
+
+  const handleExportData = async () => {
+    setDangerLoading('export');
+    try {
+      // Fetch all data from Supabase
+      const [promptsResult, chatsResult, usersResult, creditsResult] = await Promise.all([
+        supabase.from('prompt_history').select('*').order('created_at', { ascending: false }),
+        supabase.from('chat_conversations').select('*').order('created_at', { ascending: false }),
+        supabase.from('profiles').select('*'),
+        supabase.from('user_credits').select('*'),
+      ]);
+
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        promptHistory: promptsResult.data || [],
+        chatConversations: chatsResult.data || [],
+        profiles: usersResult.data || [],
+        userCredits: creditsResult.data || [],
+        stats: {
+          totalPrompts: (promptsResult.data || []).length,
+          totalChats: (chatsResult.data || []).length,
+          totalUsers: (usersResult.data || []).length,
+        }
+      };
+
+      // Create and download file
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `promptxgen-backup-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      alert(`Data exported successfully! ${exportData.stats.totalPrompts} prompts, ${exportData.stats.totalChats} chats, ${exportData.stats.totalUsers} users.`);
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      alert('Failed to export data: ' + error.message);
+    } finally {
+      setDangerLoading(null);
+      setShowDangerConfirm(false);
+    }
+  };
+
+  const executeDangerAction = () => {
+    switch (dangerAction) {
+      case 'cache':
+        handleClearCache();
+        break;
+      case 'sessions':
+        handleResetSessions();
+        break;
+      case 'export':
+        handleExportData();
+        break;
+    }
+  };
+
+  const getDangerActionConfig = () => {
+    switch (dangerAction) {
+      case 'cache':
+        return {
+          title: 'Clear All Cache',
+          message: 'This will purge all cached data across the platform. This action cannot be undone.',
+          confirmLabel: 'Clear Cache',
+        };
+      case 'sessions':
+        return {
+          title: 'Reset All User Sessions',
+          message: 'This will force all users to log in again. All active sessions will be terminated immediately.',
+          confirmLabel: 'Reset Sessions',
+        };
+      case 'export':
+        return {
+          title: 'Export All Data',
+          message: 'This will download a complete backup of all platform data including prompts, chats, and user information.',
+          confirmLabel: 'Export Data',
+          variant: 'warning',
+        };
+      default:
+        return {};
+    }
+  };
+
   // MOCK DATA - Profile
   const [profile, setProfile] = useState({
-    name: 'John Admin',
-    email: 'admin@promptforge.com',
+    name: 'Super Admin',
+    email: 'admin@askjai.com',
     avatar: '',
     timezone: 'UTC',
     language: 'en',
@@ -47,11 +193,9 @@ export default function AdminSettings() {
     lastPasswordChange: '2024-01-15',
   });
 
-  // MOCK DATA - Admin Team
+  // Admin Team - Only main admin
   const [admins, setAdmins] = useState([
-    { id: 1, name: 'John Admin', email: 'admin@promptforge.com', role: 'Super Admin', lastLogin: '2024-01-20T10:30:00Z', status: 'Active' },
-    { id: 2, name: 'Sarah Manager', email: 'sarah@promptforge.com', role: 'Admin', lastLogin: '2024-01-19T14:22:00Z', status: 'Active' },
-    { id: 3, name: 'Mike Support', email: 'mike@promptforge.com', role: 'Support', lastLogin: '2024-01-18T09:15:00Z', status: 'Active' },
+    { id: 1, name: 'Super Admin', email: 'admin@askjai.com', role: 'Super Admin', lastLogin: new Date().toISOString(), status: 'Active' },
   ]);
 
   // MOCK DATA - App Config
@@ -60,7 +204,7 @@ export default function AdminSettings() {
     registrationEnabled: true,
     maxPromptsPerDay: 100,
     defaultPlan: 'free',
-    supportEmail: 'support@promptforge.com',
+    supportEmail: 'support@askjai.com',
   });
 
   // MOCK DATA - Webhooks
@@ -539,7 +683,12 @@ export default function AdminSettings() {
                     <h5 className="text-white font-medium">Clear All Cache</h5>
                     <p className="text-sm text-gray-500">Purge all cached data across the platform</p>
                   </div>
-                  <button className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg text-sm hover:bg-red-500/30">
+                  <button 
+                    onClick={() => { setDangerAction('cache'); setShowDangerConfirm(true); }}
+                    disabled={dangerLoading === 'cache'}
+                    className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg text-sm hover:bg-red-500/30 disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {dangerLoading === 'cache' && <Loader2 className="w-4 h-4 animate-spin" />}
                     Clear Cache
                   </button>
                 </div>
@@ -549,7 +698,12 @@ export default function AdminSettings() {
                     <h5 className="text-white font-medium">Reset All User Sessions</h5>
                     <p className="text-sm text-gray-500">Force all users to log in again</p>
                   </div>
-                  <button className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg text-sm hover:bg-red-500/30">
+                  <button 
+                    onClick={() => { setDangerAction('sessions'); setShowDangerConfirm(true); }}
+                    disabled={dangerLoading === 'sessions'}
+                    className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg text-sm hover:bg-red-500/30 disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {dangerLoading === 'sessions' && <Loader2 className="w-4 h-4 animate-spin" />}
                     Reset Sessions
                   </button>
                 </div>
@@ -559,7 +713,13 @@ export default function AdminSettings() {
                     <h5 className="text-white font-medium">Export All Data</h5>
                     <p className="text-sm text-gray-500">Download complete platform data backup</p>
                   </div>
-                  <button className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg text-sm hover:bg-red-500/30">
+                  <button 
+                    onClick={() => { setDangerAction('export'); setShowDangerConfirm(true); }}
+                    disabled={dangerLoading === 'export'}
+                    className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg text-sm hover:bg-red-500/30 disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {dangerLoading === 'export' && <Loader2 className="w-4 h-4 animate-spin" />}
+                    <Download className="w-4 h-4" />
                     Export Data
                   </button>
                 </div>
@@ -794,6 +954,17 @@ export default function AdminSettings() {
         message={`Are you sure you want to remove ${confirmDelete?.name} from the admin team?`}
         confirmLabel="Remove"
         variant="danger"
+      />
+
+      {/* Danger Zone Confirmation */}
+      <ConfirmDialog
+        isOpen={showDangerConfirm}
+        onClose={() => { setShowDangerConfirm(false); setDangerAction(null); }}
+        onConfirm={executeDangerAction}
+        title={getDangerActionConfig().title}
+        message={getDangerActionConfig().message}
+        confirmLabel={getDangerActionConfig().confirmLabel}
+        variant={getDangerActionConfig().variant || 'danger'}
       />
     </div>
   );

@@ -11,14 +11,14 @@ export interface FAQItem {
 export const faqItems: FAQItem[] = [
   {
     id: 1,
-    question: "What is PromptForge and how does it work?",
-    answer: "PromptForge is an AI-powered prompt engineering platform that helps you create, optimize, and manage prompts for any AI model. Simply describe what you want to achieve, select your target AI model and use case, and our optimization engine generates highly effective prompts tailored to your needs. You can also save, organize, and iterate on prompts over time.",
+    question: "What is AskJai and how does it work?",
+    answer: "AskJai is an AI-powered prompt engineering platform that helps you create, optimize, and manage prompts for any AI model. Simply describe what you want to achieve, select your target AI model and use case, and our optimization engine generates highly effective prompts tailored to your needs. You can also save, organize, and iterate on prompts over time.",
     category: "General"
   },
   {
     id: 2,
-    question: "Which AI models does PromptForge support?",
-    answer: "PromptForge works with all major AI models including GPT-4, GPT-3.5, Claude (all versions), Gemini, LLaMA, Mistral, and many more. Our prompt optimization adapts to each model's unique characteristics and capabilities. We continuously add support for new models as they're released.",
+    question: "Which AI models does AskJai support?",
+    answer: "AskJai works with all major AI models including GPT-4, GPT-3.5, Claude (all versions), Gemini, LLaMA, Mistral, and many more. Our prompt optimization adapts to each model's unique characteristics and capabilities. We continuously add support for new models as they're released.",
     category: "General"
   },
   {
@@ -29,7 +29,7 @@ export const faqItems: FAQItem[] = [
   },
   {
     id: 4,
-    question: "Can I try PromptForge before purchasing?",
+    question: "Can I try AskJai before purchasing?",
     answer: "Absolutely! We offer a generous free tier with 50 prompt generations per month—no credit card required. This gives you plenty of room to explore our features and see the quality of our prompt optimization. Pro and Team plans also come with a 14-day money-back guarantee.",
     category: "Pricing"
   },
@@ -42,7 +42,7 @@ export const faqItems: FAQItem[] = [
   {
     id: 6,
     question: "Do you offer an API for developers?",
-    answer: "Yes! Our API is available for Pro and Enterprise customers. You can generate optimized prompts programmatically and integrate PromptForge into your existing workflows, applications, or CI/CD pipelines. We provide SDKs for Python, JavaScript, and Go, along with comprehensive documentation and code examples.",
+    answer: "Yes! Our API is available for Pro and Enterprise customers. You can generate optimized prompts programmatically and integrate AskJai into your existing workflows, applications, or CI/CD pipelines. We provide SDKs for Python, JavaScript, and Go, along with comprehensive documentation and code examples.",
     category: "Technical"
   },
   {
@@ -104,7 +104,7 @@ export interface ContactInfo {
 }
 
 export const contactInfo: ContactInfo = {
-  email: "hello@promptforge.ai",
+  email: "hello@askjai.ai",
   phone: "+1 (555) 123-4567",
   address: {
     street: "548 Market Street, Suite 12345",
@@ -115,10 +115,10 @@ export const contactInfo: ContactInfo = {
   },
   hours: "Monday - Friday: 9AM - 6PM PST",
   socials: {
-    twitter: "https://twitter.com/promptforge",
-    linkedin: "https://linkedin.com/company/promptforge",
-    github: "https://github.com/promptforge",
-    discord: "https://discord.gg/promptforge"
+    twitter: "https://twitter.com/askjai",
+    linkedin: "https://linkedin.com/company/askjai",
+    github: "https://github.com/askjai",
+    discord: "https://discord.gg/askjai"
   }
 };
 
@@ -133,7 +133,7 @@ export const contactTypes: ContactType[] = [
   {
     id: "general",
     label: "General Inquiry",
-    description: "Questions about PromptForge or our services"
+    description: "Questions about AskJai or our services"
   },
   {
     id: "sales",
@@ -143,7 +143,7 @@ export const contactTypes: ContactType[] = [
   {
     id: "support",
     label: "Technical Support",
-    description: "Help with using PromptForge or troubleshooting issues"
+    description: "Help with using AskJai or troubleshooting issues"
   },
   {
     id: "partnership",
@@ -153,7 +153,7 @@ export const contactTypes: ContactType[] = [
   {
     id: "feedback",
     label: "Feedback & Suggestions",
-    description: "Share ideas or suggestions for improving PromptForge"
+    description: "Share ideas or suggestions for improving AskJai"
   },
   {
     id: "press",

@@ -113,7 +113,7 @@ export function MiniNavbar() {
   }, [isOpen]);
 
   const logoElement = (
-    <Link to={isDashboardPage ? "/dashboard" : "/"} className="flex items-center gap-2">
+    <Link to="/" className="flex items-center gap-2">
       <img src="/askjai-logo.png" alt="AskJai" className="h-7 w-7" />
       <span className="font-display text-sm font-bold text-white hidden sm:block">AskJai</span>
     </Link>

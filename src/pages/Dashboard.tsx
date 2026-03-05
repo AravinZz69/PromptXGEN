@@ -5,6 +5,9 @@ import { Button } from '@/components/ui/button';
 import { MiniNavbar } from '@/components/ui/mini-navbar';
 import Sidebar from '@/components/ui/sidebar-menu';
 import { useNavigate } from 'react-router-dom';
+import { useCredits } from '@/hooks/useCredits';
+import { getHistory, getRecentHistory, getFavorites, HistoryItem } from '@/lib/historyService';
+import { getChatHistory, ChatConversation } from '@/lib/chatHistoryService';
 import { 
   TrendingUp, 
   Star, 
@@ -16,13 +19,19 @@ import {
   History,
   LayoutTemplate,
   ChevronRight,
-  Zap
+  Zap,
+  MessageSquare
 } from 'lucide-react';
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { credits, isLoading: creditsLoading } = useCredits();
+  
   const [bookmarkCount, setBookmarkCount] = useState(0);
+  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
+  const [chatHistory, setChatHistory] = useState<ChatConversation[]>([]);
+  const [recentGenerations, setRecentGenerations] = useState<HistoryItem[]>([]);
 
   // Get user initials
   const userInitials = user?.email?.substring(0, 2).toUpperCase() || 'U';
@@ -33,19 +42,42 @@ const Dashboard = () => {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, []);
 
-  // Load bookmark count from localStorage
+  // Load history and stats
   useEffect(() => {
+    // Load from localStorage
+    const history = getHistory();
+    setHistoryItems(history);
+    
+    const recent = getRecentHistory(5);
+    setRecentGenerations(recent);
+    
+    const favorites = getFavorites();
+    setBookmarkCount(favorites.length);
+    
+    // Also check template bookmarks from localStorage
     const savedBookmarks = localStorage.getItem('templateBookmarks');
     if (savedBookmarks) {
-      setBookmarkCount(JSON.parse(savedBookmarks).length);
+      const bookmarks = JSON.parse(savedBookmarks);
+      setBookmarkCount(prev => Math.max(prev, bookmarks.length));
     }
+    
+    // Load chat history from Supabase
+    const loadChatHistory = async () => {
+      try {
+        const chats = await getChatHistory();
+        setChatHistory(chats);
+      } catch (error) {
+        console.error('Failed to load chat history:', error);
+      }
+    };
+    loadChatHistory();
   }, []);
 
-  // Stats data
-  const usageThisMonth = 0;
-  const maxUsage = 10;
-  const templatesUsed = 0;
-  const currentPlan = 'Free';
+  // Calculate usage stats from credits
+  const usedCredits = credits?.usedCredits || 0;
+  const totalCredits = credits?.totalCredits || 20;
+  const remainingCredits = credits?.remainingCredits || totalCredits;
+  const currentPlan = credits?.planType === 'pro' ? 'Pro' : credits?.planType === 'enterprise' ? 'Enterprise' : 'Free';
 
   // Popular templates data
   const popularTemplates = [
@@ -56,8 +88,8 @@ const Dashboard = () => {
     { id: 5, name: 'Code Debugger Pro', uses: 1432, category: 'Coding' },
   ];
 
-  // Recent generations (empty for new users)
-  const recentGenerations: any[] = [];
+  // Total generations count (prompts + chats)
+  const totalGenerations = historyItems.length + chatHistory.length;
 
   // Animation variants
   const containerVariants = {
@@ -210,22 +242,22 @@ const Dashboard = () => {
 
           {/* Stats Cards */}
           <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            {/* Usage This Month */}
+            {/* Credits Used */}
             <div className="bg-card border border-border rounded-xl p-5 hover:shadow-md transition-shadow duration-300">
               <div className="flex items-start justify-between mb-3">
-                <p className="text-sm font-medium text-foreground">Usage This Month</p>
+                <p className="text-sm font-medium text-foreground">Credits Used</p>
                 <TrendingUp className="h-5 w-5 text-muted-foreground" />
               </div>
-              <p className="text-3xl font-bold mb-2">{usageThisMonth}/{maxUsage}</p>
+              <p className="text-3xl font-bold mb-2">{usedCredits}/{totalCredits}</p>
               <div className="w-full h-1.5 bg-muted rounded-full mb-2 overflow-hidden">
                 <motion.div 
                   className="h-full bg-primary rounded-full"
                   initial={{ width: 0 }}
-                  animate={{ width: `${(usageThisMonth / maxUsage) * 100}%` }}
+                  animate={{ width: `${(usedCredits / totalCredits) * 100}%` }}
                   transition={{ duration: 0.8, ease: "easeOut" }}
                 />
               </div>
-              <p className="text-xs text-muted-foreground">{maxUsage - usageThisMonth} generations remaining</p>
+              <p className="text-xs text-muted-foreground">{remainingCredits} credits remaining</p>
             </div>
 
             {/* Favorites */}
@@ -241,11 +273,11 @@ const Dashboard = () => {
             {/* Templates Used */}
             <div className="bg-card border border-border rounded-xl p-5 hover:shadow-md transition-shadow duration-300">
               <div className="flex items-start justify-between mb-3">
-                <p className="text-sm font-medium text-foreground">Templates Used</p>
+                <p className="text-sm font-medium text-foreground">Total Generations</p>
                 <FileText className="h-5 w-5 text-muted-foreground" />
               </div>
-              <p className="text-3xl font-bold mb-2">{templatesUsed}</p>
-              <p className="text-xs text-muted-foreground">Different templates</p>
+              <p className="text-3xl font-bold mb-2">{totalGenerations}</p>
+              <p className="text-xs text-muted-foreground">Prompts & chats created</p>
             </div>
 
             {/* Current Plan */}
@@ -271,8 +303,8 @@ const Dashboard = () => {
             <div className="bg-card border border-border rounded-2xl p-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-xl font-semibold">Recent Generations</h2>
-                  <p className="text-sm text-muted-foreground">Your latest created content</p>
+                  <h2 className="text-xl font-semibold">Recent Activity</h2>
+                  <p className="text-sm text-muted-foreground">Your latest generations and chats</p>
                 </div>
                 <button 
                   onClick={() => navigate('/history')}
@@ -282,7 +314,7 @@ const Dashboard = () => {
                 </button>
               </div>
               
-              {recentGenerations.length === 0 ? (
+              {recentGenerations.length === 0 && chatHistory.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <div className="p-4 bg-muted/50 rounded-full mb-4">
                     <Clock className="h-8 w-8 text-muted-foreground" />
@@ -299,13 +331,46 @@ const Dashboard = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {recentGenerations.map((gen, index) => (
+                  {/* Recent prompt generations */}
+                  {recentGenerations.slice(0, 3).map((gen) => (
                     <div 
                       key={gen.id}
+                      onClick={() => navigate('/history')}
                       className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-medium">{gen.title}</span>
+                        {gen.type === 'template' ? (
+                          <FileText className="h-4 w-4 text-blue-400" />
+                        ) : (
+                          <Sparkles className="h-4 w-4 text-primary" />
+                        )}
+                        <div>
+                          <span className="text-sm font-medium">
+                            {gen.templateName || `${gen.promptType || 'Basic'} Prompt`}
+                          </span>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(gen.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  ))}
+                  {/* Recent chat conversations */}
+                  {chatHistory.slice(0, 2).map((chat) => (
+                    <div 
+                      key={chat.id}
+                      onClick={() => navigate('/history')}
+                      className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3">
+                        <MessageSquare className="h-4 w-4 text-emerald-400" />
+                        <div>
+                          <span className="text-sm font-medium">{chat.title}</span>
+                          <p className="text-xs text-muted-foreground">
+                            {chat.messages.length} messages · {new Date(chat.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
                       </div>
                       <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     </div>

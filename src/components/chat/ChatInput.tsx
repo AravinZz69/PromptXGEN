@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, KeyboardEvent } from 'react';
-import { Send, Square, Paperclip, Sparkles } from 'lucide-react';
+import { Send, Square, Sparkles } from 'lucide-react';
 import type { ChatPhase } from '@/hooks/useStreamingChat';
 
 interface ChatInputProps {
@@ -91,15 +91,6 @@ export function ChatInput({
             }
           `}
         >
-          {/* Paperclip Button (mock) */}
-          <button
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors flex-shrink-0"
-            title="Attach file (coming soon)"
-            disabled
-          >
-            <Paperclip className="h-5 w-5" />
-          </button>
-
           {/* Textarea */}
           <textarea
             ref={textareaRef}

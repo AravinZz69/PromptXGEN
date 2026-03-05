@@ -9,6 +9,9 @@ import {
   getUserCredits,
   type UserAnalytics as UserAnalyticsType
 } from '@/lib/profileService';
+import { getHistory, HistoryItem } from '@/lib/historyService';
+import { getChatHistory, ChatConversation } from '@/lib/chatHistoryService';
+import { useCredits } from '@/hooks/useCredits';
 import { MiniNavbar } from '@/components/ui/mini-navbar';
 import Sidebar from '@/components/ui/sidebar-menu';
 import { useToast } from '@/hooks/use-toast';
@@ -69,6 +72,7 @@ const UserAnalytics = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { credits: creditsFromHook, isLoading: creditsLoading } = useCredits();
 
   const [isLoading, setIsLoading] = useState(true);
   const [analytics, setAnalytics] = useState<UserAnalyticsType | null>(null);
@@ -84,18 +88,19 @@ const UserAnalytics = () => {
     transaction_type: string;
     description: string;
     created_at: string;
-  }>>([]);
+  }>>([]); 
   const [credits, setCredits] = useState<{ balance: number; plan: string; used: number; total: number } | null>(null);
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }, []);
+  
+  // Local data sources
+  const [localHistory, setLocalHistory] = useState<HistoryItem[]>([]);
+  const [chatHistory, setChatHistory] = useState<ChatConversation[]>([]);
 
   const loadAnalytics = useCallback(async () => {
     if (!user) return;
 
     setIsLoading(true);
     try {
+      // Load from Supabase
       const [analyticsData, statsData, transactionsData, creditsData] = await Promise.all([
         getUserAnalytics(user.id),
         getPromptHistoryStats(user.id),
@@ -103,11 +108,64 @@ const UserAnalytics = () => {
         getUserCredits(user.id),
       ]);
 
+      // Load from localStorage and chat history
+      const localHistoryData = getHistory();
+      const chatHistoryData = await getChatHistory();
+      
+      setLocalHistory(localHistoryData);
+      setChatHistory(chatHistoryData);
       setAnalytics(analyticsData);
-      setPromptStats(statsData);
       setTransactions(transactionsData);
       
-      if (creditsData) {
+      // Build combined prompt stats from localStorage history
+      const combinedPromptsByType: Record<string, number> = statsData?.promptsByType || {};
+      const combinedPromptsByModel: Record<string, number> = statsData?.promptsByModel || {};
+      const activityMap: Record<string, number> = {};
+      
+      // Process localStorage history
+      localHistoryData.forEach((item) => {
+        const type = item.promptType || item.type || 'basic';
+        combinedPromptsByType[type] = (combinedPromptsByType[type] || 0) + 1;
+        
+        // Add to activity map
+        const date = new Date(item.createdAt).toISOString().split('T')[0];
+        activityMap[date] = (activityMap[date] || 0) + 1;
+      });
+      
+      // Process chat history
+      chatHistoryData.forEach((chat) => {
+        combinedPromptsByType['chat'] = (combinedPromptsByType['chat'] || 0) + 1;
+        if (chat.model) {
+          combinedPromptsByModel[chat.model] = (combinedPromptsByModel[chat.model] || 0) + 1;
+        }
+        const date = new Date(chat.created_at).toISOString().split('T')[0];
+        activityMap[date] = (activityMap[date] || 0) + 1;
+      });
+      
+      // Build recent activity from combined data
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const recentActivity = Object.entries(activityMap)
+        .filter(([date]) => new Date(date) >= thirtyDaysAgo)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([date, count]) => ({ date, count }));
+      
+      setPromptStats({
+        totalPrompts: localHistoryData.length + chatHistoryData.length + (statsData?.totalPrompts || 0),
+        promptsByType: combinedPromptsByType,
+        promptsByModel: combinedPromptsByModel,
+        recentActivity,
+      });
+      
+      // Use credits from hook if available, otherwise from Supabase
+      if (creditsFromHook) {
+        setCredits({
+          balance: creditsFromHook.remainingCredits,
+          plan: 'Free',
+          used: creditsFromHook.usedCredits,
+          total: creditsFromHook.totalCredits,
+        });
+      } else if (creditsData) {
         setCredits({
           balance: creditsData.credits_balance,
           plan: creditsData.plan_type,
@@ -125,7 +183,7 @@ const UserAnalytics = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [user, toast]);
+  }, [user, toast, creditsFromHook]);
 
   useEffect(() => {
     if (user) {
@@ -184,6 +242,24 @@ const UserAnalytics = () => {
   // Calculate activity chart data
   const activityData = promptStats?.recentActivity || [];
   const maxActivity = Math.max(...activityData.map(a => a.count), 1);
+  
+  // Calculate this month and this week counts from combined data
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  
+  const thisMonthCount = localHistory.filter(item => 
+    new Date(item.createdAt) >= startOfMonth
+  ).length + chatHistory.filter(chat => 
+    new Date(chat.created_at) >= startOfMonth
+  ).length + (analytics?.prompts_this_month || 0);
+  
+  const thisWeekCount = localHistory.filter(item => 
+    new Date(item.createdAt) >= startOfWeek
+  ).length + chatHistory.filter(chat => 
+    new Date(chat.created_at) >= startOfWeek
+  ).length + (analytics?.prompts_this_week || 0);
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -235,28 +311,28 @@ const UserAnalytics = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                   <StatsCard
                     title="Total Prompts"
-                    value={analytics?.total_prompts_generated || promptStats?.totalPrompts || 0}
+                    value={promptStats?.totalPrompts || 0}
                     subtitle="All time"
                     icon={FileText}
                     color="from-blue-500 to-blue-600"
                   />
                   <StatsCard
                     title="Credits Used"
-                    value={credits?.used || analytics?.total_credits_spent || 0}
+                    value={credits?.used || 0}
                     subtitle={`of ${credits?.total || 0} total`}
                     icon={Zap}
                     color="from-purple-500 to-purple-600"
                   />
                   <StatsCard
                     title="This Month"
-                    value={analytics?.prompts_this_month || 0}
+                    value={thisMonthCount}
                     subtitle="Prompts generated"
                     icon={Calendar}
                     color="from-green-500 to-green-600"
                   />
                   <StatsCard
                     title="This Week"
-                    value={analytics?.prompts_this_week || 0}
+                    value={thisWeekCount}
                     subtitle="Prompts generated"
                     icon={TrendingUp}
                     color="from-orange-500 to-orange-600"

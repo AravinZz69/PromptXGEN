@@ -29,7 +29,7 @@ export const ContactFAQ = () => {
             Frequently Asked Questions
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Find quick answers to common questions about PromptForge, pricing, 
+            Find quick answers to common questions about AskJai, pricing, 
             and features.
           </p>
         </div>

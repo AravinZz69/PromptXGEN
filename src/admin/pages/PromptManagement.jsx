@@ -52,45 +52,62 @@ export default function PromptManagement() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch prompt_history
-      const { data: promptData, error: promptError } = await supabase
-        .from('prompt_history')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(500);
+      // Try admin RPC function first
+      const { data: adminPromptData, error: adminError } = await supabase.rpc('get_all_prompts_admin');
+      
+      let promptData = [];
+      let profileMap = {};
 
-      if (promptError) {
-        console.error('Error fetching prompts:', promptError);
+      if (!adminError && adminPromptData && adminPromptData.length > 0) {
+        console.log('Fetched prompts via admin function:', adminPromptData.length);
+        promptData = adminPromptData;
+      } else {
+        if (adminError) console.log('Admin function not available, using fallback:', adminError.message);
+        
+        // Fallback: Fetch prompt_history directly
+        const { data: fallbackData, error: promptError } = await supabase
+          .from('prompt_history')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1000);
+
+        if (promptError) {
+          console.error('Error fetching prompts:', promptError);
+        }
+
+        // Fetch all profiles for user lookup
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('id, email, full_name');
+
+        (profilesData || []).forEach(p => {
+          profileMap[p.id] = p;
+        });
+
+        promptData = fallbackData || [];
       }
-
-      // Fetch all profiles for user lookup
-      const { data: profilesData } = await supabase
-        .from('profiles')
-        .select('id, email, full_name');
-
-      const profileMap = {};
-      (profilesData || []).forEach(p => {
-        profileMap[p.id] = p;
-      });
 
       // Map to expected format
       const mappedPrompts = (promptData || []).map(p => {
         const profile = profileMap[p.user_id] || {};
         return {
           id: p.id,
-          userEmail: profile.email || 'Unknown',
-          userName: profile.full_name || 'Unknown',
-          input: p.prompt_text || p.prompt || '',
-          output: p.ai_response || p.response || '',
-          category: p.category || 'Other',
-          model: p.model || 'GPT-4o',
+          userId: p.user_id,
+          userEmail: p.user_email || profile.email || 'Unknown',
+          userName: p.user_name || profile.full_name || 'Unknown',
+          input: p.input_text || p.prompt_text || p.prompt || '',
+          output: p.output_text || p.ai_response || p.response || '',
+          category: p.prompt_type || p.category || 'basic',
+          model: p.model || 'groq',
           status: p.metadata?.flagged ? 'Flagged' : 'Completed',
           createdAt: p.created_at,
-          tokens: p.metadata?.tokens || 0,
+          tokens: p.tokens_used || p.metadata?.tokens || 0,
+          creditsUsed: p.credits_used || 1,
         };
       });
 
       setPrompts(mappedPrompts);
+      console.log('Total prompts loaded:', mappedPrompts.length);
 
       // Fetch templates (if table exists)
       const { data: templateData, error: templateError } = await supabase
@@ -274,7 +291,7 @@ export default function PromptManagement() {
     <div className="space-y-6">
       {/* Header with Refresh */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-white">Prompt Management</h2>
+        <h2 className="text-xl font-semibold text-white">Prompts Management</h2>
         <button
           onClick={fetchData}
           disabled={loading}
@@ -295,7 +312,7 @@ export default function PromptManagement() {
               : 'text-gray-400 border-transparent hover:text-white'
           }`}
         >
-          Generated Prompts
+          Generated Prompts ({prompts.length})
         </button>
         <button
           onClick={() => setActiveTab('templates')}

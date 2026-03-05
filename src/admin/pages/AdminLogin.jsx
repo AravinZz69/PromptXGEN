@@ -37,7 +37,7 @@ export default function AdminLogin() {
     // Simulate network delay (800ms as specified)
     await new Promise(resolve => setTimeout(resolve, 800));
 
-    const result = adminLogin(email, password);
+    const result = await adminLogin(email, password);
     
     if (result.success) {
       const from = location.state?.from?.pathname || '/admin/dashboard';
@@ -85,7 +85,7 @@ export default function AdminLogin() {
         {/* Header */}
         <h1 className="text-2xl font-bold text-white text-center mb-2">Admin Portal</h1>
         <p className="text-gray-400 text-center text-sm mb-8">
-          PromptForge Internal — Authorized Access Only
+          AskJai Internal — Authorized Access Only
         </p>
 
         {/* Error Banner */}
@@ -106,7 +106,7 @@ export default function AdminLogin() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@promptforge.com"
+                placeholder="admin@askjai.com"
                 required
                 className="w-full pl-11 pr-4 py-3 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
               />

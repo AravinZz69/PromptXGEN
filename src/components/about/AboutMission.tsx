@@ -28,7 +28,7 @@ export const AboutMission = () => {
                 get the results they want from AI tools.
               </p>
               <p className="text-muted-foreground leading-relaxed">
-                PromptForge exists to bridge this gap. We're building tools that help 
+                AskJai exists to bridge this gap. We're building tools that help 
                 anyone—regardless of technical background—to harness the full power 
                 of AI through better prompts.
               </p>
@@ -53,7 +53,7 @@ export const AboutMission = () => {
               <p className="text-muted-foreground leading-relaxed">
                 In this future, prompt engineering isn't a specialized skill—it's 
                 intuitive, accessible, and built into every AI interaction. That's 
-                the future we're building at PromptForge.
+                the future we're building at AskJai.
               </p>
             </div>
           </div>

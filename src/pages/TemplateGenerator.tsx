@@ -17,6 +17,9 @@ import {
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Sparkles, Loader2, Copy, Download, Check } from 'lucide-react';
 import { addToHistory } from '@/lib/historyService';
+import { useToast } from '@/hooks/use-toast';
+import { useCredits } from '@/hooks/useCredits';
+import { recordCreditUsage } from '@/utils/creditGuard';
 
 // Template configurations with form fields
 interface FormField {
@@ -259,6 +262,8 @@ const TemplateGenerator = () => {
   const { templateId } = useParams();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { toast } = useToast();
+  const { credits, hasCredits, refetch: refetchCredits } = useCredits();
   
   const [formData, setFormData] = useState<Record<string, string | number>>({});
   const [generatedContent, setGeneratedContent] = useState<string>('');
@@ -437,6 +442,17 @@ Provide comprehensive, well-formatted output with markdown formatting.`;
   };
 
   const handleGenerate = async () => {
+    // Check if user has credits before generating
+    if (!hasCredits || (credits && credits.remainingCredits <= 0)) {
+      toast({
+        title: "No Credits Available",
+        description: "You have run out of credits. Please upgrade your plan to continue generating content.",
+        variant: "destructive",
+      });
+      navigate('/pricing');
+      return;
+    }
+
     setIsGenerating(true);
     setGeneratedContent('');
     
@@ -496,6 +512,20 @@ Create a comprehensive, detailed prompt that a student can paste into any AI to 
         input: formData,
         output: content,
       });
+
+      // Deduct credits after successful generation
+      try {
+        await recordCreditUsage(
+          'llama-3.3-70b-versatile',
+          buildPrompt(template, formData),
+          content,
+          `Template generation (${template.title})`
+        );
+        // Refresh credits display
+        refetchCredits();
+      } catch (creditError) {
+        console.error('Failed to deduct credits:', creditError);
+      }
     } catch (error) {
       console.error('Generation error:', error);
       setGeneratedContent('Error generating prompt. Please try again.');

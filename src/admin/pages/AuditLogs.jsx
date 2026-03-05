@@ -71,13 +71,42 @@ export default function AuditLogs() {
   const fetchLogs = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('audit_logs')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(1000);
+      let data = null;
+      let error = null;
 
-      if (error) throw error;
+      // Try RPC function first (bypasses RLS)
+      try {
+        const rpcResult = await supabase.rpc('get_all_audit_logs');
+        if (!rpcResult.error && rpcResult.data && rpcResult.data.length > 0) {
+          data = rpcResult.data;
+          console.log('Fetched audit logs via RPC:', data.length);
+        } else if (rpcResult.error) {
+          console.log('RPC not available:', rpcResult.error.message);
+        }
+      } catch (e) {
+        console.log('RPC function not available, trying direct query');
+      }
+
+      // Fallback to direct query
+      if (!data || data.length === 0) {
+        const result = await supabase
+          .from('audit_logs')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1000);
+        
+        data = result.data;
+        error = result.error;
+      }
+
+      if (error) {
+        console.error('Error fetching audit logs:', error);
+        if (error.code === '42P01' || error.message?.includes('does not exist')) {
+          console.log('Audit logs table not found. Please run the fix_audit_logs.sql migration.');
+        }
+        setLogs([]);
+        return;
+      }
 
       const mappedLogs = (data || []).map(log => ({
         id: log.id,
@@ -92,6 +121,7 @@ export default function AuditLogs() {
       }));
 
       setLogs(mappedLogs);
+      console.log('Loaded audit logs:', mappedLogs.length);
     } catch (error) {
       console.error('Error fetching audit logs:', error);
       setLogs([]);

@@ -62,3 +62,26 @@ CREATE TRIGGER update_chat_conversations_updated_at
   BEFORE UPDATE ON public.chat_conversations
   FOR EACH ROW
   EXECUTE FUNCTION update_chat_conversations_updated_at();
+
+-- =============================================
+-- ADMIN POLICIES FOR CHAT_CONVERSATIONS
+-- =============================================
+-- Allow admins to view all chat conversations
+
+-- Admin can view all conversations (requires is_admin function)
+DROP POLICY IF EXISTS "Admins can view all conversations" ON public.chat_conversations;
+CREATE POLICY "Admins can view all conversations"
+  ON public.chat_conversations
+  FOR SELECT
+  USING (
+    public.is_admin(auth.uid())
+  );
+
+-- Admin can delete any conversation
+DROP POLICY IF EXISTS "Admins can delete any conversation" ON public.chat_conversations;
+CREATE POLICY "Admins can delete any conversation"
+  ON public.chat_conversations
+  FOR DELETE
+  USING (
+    public.is_admin(auth.uid())
+  );

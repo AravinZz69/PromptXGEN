@@ -16,13 +16,22 @@ const AnimatedNavLink = ({ to, children, onClick }: NavLinkProps) => {
   const defaultTextColor = 'text-gray-300';
   const hoverTextColor = 'text-white';
   const textSizeClass = 'text-sm';
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const handleClick = (e: React.MouseEvent) => {
     if (to.startsWith('#')) {
       e.preventDefault();
-      const element = document.querySelector(to);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
+      const hash = to;
+      // If on landing page, just scroll
+      if (location.pathname === '/') {
+        const element = document.querySelector(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      } else {
+        // Navigate to landing page with hash
+        navigate('/' + hash);
       }
     }
     onClick?.();
@@ -67,12 +76,17 @@ export function MiniNavbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Check if we're on a dashboard/app page
+  // Check if we're on a dashboard/app page (logged in user pages)
   const isDashboardPage = location.pathname.startsWith('/dashboard') || 
                           location.pathname.startsWith('/generate') ||
+                          location.pathname.startsWith('/generative-ai') ||
                           location.pathname.startsWith('/templates') ||
+                          location.pathname.startsWith('/template/') ||
                           location.pathname.startsWith('/history') ||
-                          location.pathname.startsWith('/settings');
+                          location.pathname.startsWith('/settings') ||
+                          location.pathname.startsWith('/profile') ||
+                          location.pathname.startsWith('/analytics') ||
+                          location.pathname.startsWith('/upgrade');
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -120,6 +134,9 @@ export function MiniNavbar() {
     { label: 'Generate', to: '/generate' },
     { label: 'Templates', to: '/templates' },
     { label: 'History', to: '/history' },
+    { label: 'Blogs', to: '/blogs' },
+    { label: 'About', to: '/about' },
+    { label: 'Contact', to: '/contact' },
   ];
 
   const navLinksData = isDashboardPage ? dashboardNavLinks : landingNavLinks;

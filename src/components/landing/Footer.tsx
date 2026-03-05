@@ -1,7 +1,22 @@
 import { Sparkles } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const Footer = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleHashClick = (e: React.MouseEvent<HTMLAnchorElement>, hash: string) => {
+    e.preventDefault();
+    if (location.pathname === '/') {
+      const element = document.querySelector(hash);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      navigate('/' + hash);
+    }
+  };
+
   return (
     <footer className="border-t border-border/50 section-padding py-12">
       <div className="container mx-auto">
@@ -20,16 +35,16 @@ const Footer = () => {
           <div>
             <h4 className="font-display text-sm font-semibold mb-3">Product</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#features" className="hover:text-foreground transition-colors">Features</a></li>
-              <li><a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a></li>
-              <li><a href="#templates" className="hover:text-foreground transition-colors">Templates</a></li>
+              <li><a href="#features" onClick={(e) => handleHashClick(e, '#features')} className="hover:text-foreground transition-colors">Features</a></li>
+              <li><a href="#pricing" onClick={(e) => handleHashClick(e, '#pricing')} className="hover:text-foreground transition-colors">Pricing</a></li>
+              <li><a href="#templates" onClick={(e) => handleHashClick(e, '#templates')} className="hover:text-foreground transition-colors">Templates</a></li>
             </ul>
           </div>
           <div>
             <h4 className="font-display text-sm font-semibold mb-3">Company</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link to="/about" className="hover:text-foreground transition-colors">About</Link></li>
-              <li><Link to="/blog" className="hover:text-foreground transition-colors">Blog</Link></li>
+              <li><Link to="/blogs" className="hover:text-foreground transition-colors">Blog</Link></li>
               <li><Link to="/contact" className="hover:text-foreground transition-colors">Contact</Link></li>
             </ul>
           </div>

@@ -4,7 +4,6 @@ import Footer from "@/components/landing/Footer";
 import { 
   AboutHero, 
   AboutMission, 
-  AboutStats, 
   AboutTeam, 
   AboutTimeline, 
   AboutValues 
@@ -71,17 +70,14 @@ const AboutUs = () => {
       {/* Hero */}
       <AboutHero />
       
-      {/* Stats */}
-      <AboutStats />
-      
       {/* Mission & Vision */}
       <AboutMission />
       
-      {/* Values */}
-      <AboutValues />
-      
       {/* Team */}
       <AboutTeam />
+      
+      {/* Values */}
+      <AboutValues />
       
       {/* Timeline */}
       <AboutTimeline />

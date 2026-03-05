@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Settings, CreditCard, FileText, LogOut, User, Sparkles, Shield } from "lucide-react";
+import { CreditCard, FileText, LogOut, User, Shield } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { isAdmin, logout as adminLogout } from "@/admin/adminAuth";
@@ -19,7 +19,6 @@ interface Profile {
     email: string;
     avatar: string;
     subscription?: string;
-    model?: string;
 }
 
 interface MenuItem {
@@ -29,40 +28,6 @@ interface MenuItem {
     icon: React.ReactNode;
     external?: boolean;
 }
-
-const AIIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg
-        height="1em"
-        style={{
-            flex: "none",
-            lineHeight: 1,
-        }}
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-        width="1em"
-        {...props}
-    >
-        <title>{"AI"}</title>
-        <defs>
-            <linearGradient
-                id="ai-icon-gradient"
-                x1="0%"
-                x2="68.73%"
-                y1="100%"
-                y2="30.395%"
-            >
-                <stop offset="0%" stopColor="#8B5CF6" />
-                <stop offset="52.021%" stopColor="#6366F1" />
-                <stop offset="100%" stopColor="#EC4899" />
-            </linearGradient>
-        </defs>
-        <path
-            d="M12 24A14.304 14.304 0 000 12 14.304 14.304 0 0012 0a14.305 14.305 0 0012 12 14.305 14.305 0 00-12 12"
-            fill="url(#ai-icon-gradient)"
-            fillRule="nonzero"
-        />
-    </svg>
-);
 
 interface ProfileDropdownProps extends React.HTMLAttributes<HTMLDivElement> {
     compact?: boolean;
@@ -82,35 +47,23 @@ export function ProfileDropdown({
         email: user?.email || "",
         avatar: user?.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${user?.email}`,
         subscription: "FREE",
-        model: "GPT-4",
     };
 
     const menuItems: MenuItem[] = [
         {
             label: "Profile",
-            href: "/dashboard",
+            href: "/profile",
             icon: <User className="w-4 h-4" />,
-        },
-        {
-            label: "Model",
-            value: profileData.model,
-            href: "/dashboard",
-            icon: <AIIcon className="w-4 h-4" />,
         },
         {
             label: "Subscription",
             value: profileData.subscription,
-            href: "/dashboard",
+            href: "/pricing",
             icon: <CreditCard className="w-4 h-4" />,
         },
         {
-            label: "Settings",
-            href: "/dashboard",
-            icon: <Settings className="w-4 h-4" />,
-        },
-        {
             label: "Terms & Policies",
-            href: "/",
+            href: "/terms",
             icon: <FileText className="w-4 h-4" />,
             external: false,
         },
@@ -229,12 +182,7 @@ export function ProfileDropdown({
                                         <div className="flex-shrink-0 ml-auto">
                                             {item.value && (
                                                 <span
-                                                    className={cn(
-                                                        "text-xs font-medium rounded-md py-1 px-2 tracking-tight",
-                                                        item.label === "Model"
-                                                            ? "text-blue-500 bg-blue-500/10 border border-blue-500/20"
-                                                            : "text-purple-500 bg-purple-500/10 border border-purple-500/20"
-                                                    )}
+                                                    className="text-xs font-medium rounded-md py-1 px-2 tracking-tight text-purple-500 bg-purple-500/10 border border-purple-500/20"
                                                 >
                                                     {item.value}
                                                 </span>

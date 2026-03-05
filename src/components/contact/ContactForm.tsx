@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Send, Loader2, Check, AlertCircle } from "lucide-react";
 import { contactTypes } from "@/data/faqData";
 import { useInView } from "@/hooks/useInView";
+import { supabase } from "@/lib/supabase";
 
 interface FormData {
   name: string;
@@ -69,20 +70,62 @@ export const ContactForm = () => {
 
     setStatus("loading");
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setStatus("success");
-    setFormData({
-      name: "",
-      email: "",
-      contactType: "",
-      subject: "",
-      message: ""
-    });
-    
-    // Reset status after 5 seconds
-    setTimeout(() => setStatus("idle"), 5000);
+    try {
+      // Get current user if logged in
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Determine priority based on contact type
+      const priorityMap: Record<string, string> = {
+        'technical': 'High',
+        'billing': 'High',
+        'account': 'Medium',
+        'general': 'Low',
+        'partnership': 'Medium',
+        'feedback': 'Low'
+      };
+      
+      // Create the initial message
+      const initialMessage = {
+        sender: 'user',
+        text: `[${formData.contactType.toUpperCase()}] ${formData.message}\n\nFrom: ${formData.name} (${formData.email})`,
+        timestamp: new Date().toISOString()
+      };
+      
+      // Insert into support_tickets table
+      const { error } = await supabase
+        .from('support_tickets')
+        .insert({
+          user_id: user?.id || null,
+          user_email: formData.email,
+          subject: `[${formData.contactType}] ${formData.subject}`,
+          priority: priorityMap[formData.contactType] || 'Medium',
+          status: 'Open',
+          messages: [initialMessage]
+        });
+      
+      if (error) {
+        console.error('Error creating support ticket:', error);
+        setStatus("error");
+        setTimeout(() => setStatus("idle"), 5000);
+        return;
+      }
+      
+      setStatus("success");
+      setFormData({
+        name: "",
+        email: "",
+        contactType: "",
+        subject: "",
+        message: ""
+      });
+      
+      // Reset status after 5 seconds
+      setTimeout(() => setStatus("idle"), 5000);
+    } catch (err) {
+      console.error('Error submitting contact form:', err);
+      setStatus("error");
+      setTimeout(() => setStatus("idle"), 5000);
+    }
   };
 
   const handleChange = (
@@ -117,6 +160,18 @@ export const ContactForm = () => {
           </h3>
           <p className="text-muted-foreground">
             We'll get back to you within 24-48 hours.
+          </p>
+        </div>
+      ) : status === "error" ? (
+        <div className="text-center py-12">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-500/10 text-red-500 mb-4">
+            <AlertCircle className="w-8 h-8" />
+          </div>
+          <h3 className="text-lg font-display font-semibold text-foreground mb-2">
+            Something went wrong
+          </h3>
+          <p className="text-muted-foreground">
+            Please try again or contact us directly at support@askjai.com
           </p>
         </div>
       ) : (

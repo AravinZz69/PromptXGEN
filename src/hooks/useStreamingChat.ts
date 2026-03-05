@@ -7,6 +7,7 @@
  */
 
 import { useState, useCallback, useRef } from 'react';
+import { saveChatConversation, ChatMessage as DbChatMessage } from '@/lib/chatHistoryService';
 
 // ── CONSTANTS ──────────────────────────────────────────────────────────────
 const MODEL = 'llama-3.3-70b-versatile';
@@ -26,6 +27,7 @@ interface UseStreamingChatOptions {
   systemPrompt?: string;
   onCreditCheck?: () => Promise<void>;
   onCreditRecord?: (model: string, input: string, output: string, action: string) => Promise<void>;
+  autoSave?: boolean; // Auto-save conversations to database
 }
 
 export function useStreamingChat(options: UseStreamingChatOptions = {}) {
@@ -34,6 +36,7 @@ export function useStreamingChat(options: UseStreamingChatOptions = {}) {
   const [phase, setPhase] = useState<ChatPhase>('idle');
   const [streamingContent, setStreamingContent] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const {
@@ -46,6 +49,7 @@ export function useStreamingChat(options: UseStreamingChatOptions = {}) {
 Be concise but thorough.`,
     onCreditCheck,
     onCreditRecord,
+    autoSave = true,
   } = options;
 
   const sendMessage = useCallback(async (userText: string) => {
@@ -170,11 +174,21 @@ Be concise but thorough.`,
       }
 
       // 10. Finalize: mark message as done (no longer streaming)
-      setMessages(prev => prev.map(m =>
+      const finalMessages = messages.map(m =>
         m.id === assistantMsgId
           ? { ...m, content: fullContent, isStreaming: false }
           : m
-      ));
+      );
+      // Add the user message that was added at the start
+      const allMessages = [...finalMessages.slice(0, -1), userMsg, { 
+        id: assistantMsgId, 
+        role: 'assistant' as const, 
+        content: fullContent, 
+        timestamp: new Date(),
+        isStreaming: false 
+      }];
+      
+      setMessages(allMessages);
 
       // Record credit usage if callback provided
       if (onCreditRecord && fullContent) {
@@ -182,6 +196,26 @@ Be concise but thorough.`,
           await onCreditRecord(MODEL, userText, fullContent, 'Generative AI chat');
         } catch (creditError) {
           console.warn('Failed to record credit usage:', creditError);
+        }
+      }
+
+      // 11. Auto-save conversation to database
+      if (autoSave && fullContent) {
+        try {
+          // Convert messages to database format
+          const dbMessages: DbChatMessage[] = allMessages.map(m => ({
+            id: m.id,
+            role: m.role,
+            content: m.content,
+            timestamp: m.timestamp.toISOString(),
+          }));
+          
+          const saved = await saveChatConversation(dbMessages, conversationId || undefined, MODEL);
+          if (saved && !conversationId) {
+            setConversationId(saved.id);
+          }
+        } catch (saveError) {
+          console.warn('Failed to save conversation:', saveError);
         }
       }
 
@@ -202,20 +236,21 @@ Be concise but thorough.`,
         setMessages(prev => prev.filter(m => m.id !== assistantMsgId));
       }
     }
-  }, [messages, phase, systemPrompt, onCreditCheck, onCreditRecord]);
+  }, [messages, phase, systemPrompt, onCreditCheck, onCreditRecord, autoSave, conversationId]);
 
   // Allow user to stop generation mid-stream
   const stopGeneration = useCallback(() => {
     abortRef.current?.abort();
   }, []);
 
-  // Clear entire conversation
+  // Clear entire conversation (starts a new chat)
   const clearChat = useCallback(() => {
     abortRef.current?.abort();
     setMessages([]);
     setStreamingContent('');
     setPhase('idle');
     setError(null);
+    setConversationId(null); // Reset to start a new conversation
   }, []);
 
   // Regenerate last response
@@ -244,6 +279,8 @@ Be concise but thorough.`,
     isThinking: phase === 'thinking',
     isStreaming: phase === 'streaming',
     isBusy: phase === 'thinking' || phase === 'streaming',
+    conversationId,
+    setConversationId,
     MODEL,
   };
 }

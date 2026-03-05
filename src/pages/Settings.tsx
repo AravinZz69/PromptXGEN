@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { getUserProfile, updateUserProfile } from '@/lib/profileService';
 import { MiniNavbar } from '@/components/ui/mini-navbar';
 import Sidebar from '@/components/ui/sidebar-menu';
 import { Button } from '@/components/ui/button';
@@ -43,6 +44,8 @@ const Settings = () => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Initialize profile from user data
   const [profile, setProfile] = useState<UserProfile>({
@@ -63,33 +66,64 @@ const Settings = () => {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, []);
 
-  useEffect(() => {
-    if (user) {
-      const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
-      const nameParts = fullName.split(' ');
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || '';
-
-      // Load saved profile from localStorage or use defaults
-      const savedProfile = localStorage.getItem(`profile_${user.id}`);
-      if (savedProfile) {
-        setProfile(JSON.parse(savedProfile));
-        setTempProfile(JSON.parse(savedProfile));
+  // Load profile from database
+  const loadProfile = useCallback(async () => {
+    if (!user) return;
+    
+    setIsLoadingProfile(true);
+    try {
+      const dbProfile = await getUserProfile(user.id);
+      
+      if (dbProfile) {
+        // Parse full name into first and last
+        const fullName = dbProfile.full_name || '';
+        const nameParts = fullName.split(' ');
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+        
+        const profileData: UserProfile = {
+          firstName,
+          lastName,
+          email: dbProfile.email || user.email || '',
+          phone: dbProfile.mobile || '',
+          location: dbProfile.city || '',
+          role: dbProfile.role || 'Student',
+          avatarUrl: dbProfile.avatar_url || user.user_metadata?.avatar_url || '',
+        };
+        setProfile(profileData);
+        setTempProfile(profileData);
       } else {
+        // Fallback to user metadata if no DB profile
+        const metadata = user.user_metadata || {};
+        const fullName = metadata.full_name || user.email?.split('@')[0] || 'User';
+        const nameParts = fullName.split(' ');
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+        
         const defaultProfile: UserProfile = {
           firstName,
           lastName,
           email: user.email || '',
-          phone: '',
-          location: '',
-          role: 'Student',
-          avatarUrl: user.user_metadata?.avatar_url || '',
+          phone: metadata.mobile || '',
+          location: metadata.city || '',
+          role: metadata.role || 'Student',
+          avatarUrl: metadata.avatar_url || '',
         };
         setProfile(defaultProfile);
         setTempProfile(defaultProfile);
       }
+    } catch (err) {
+      console.error('Error loading profile:', err);
+    } finally {
+      setIsLoadingProfile(false);
     }
   }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      loadProfile();
+    }
+  }, [user, loadProfile]);
 
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
   const userInitials = userName
@@ -99,24 +133,66 @@ const Settings = () => {
     .toUpperCase()
     .slice(0, 2);
 
-  const handleSaveProfile = () => {
-    setProfile(tempProfile);
-    localStorage.setItem(`profile_${user?.id}`, JSON.stringify(tempProfile));
-    setIsEditingProfile(false);
-    toast({
-      title: 'Profile Updated',
-      description: 'Your profile has been saved successfully.',
-    });
+  const handleSaveProfile = async () => {
+    if (!user) return;
+    
+    setIsSaving(true);
+    try {
+      const fullName = `${tempProfile.firstName} ${tempProfile.lastName}`.trim();
+      await updateUserProfile(user.id, {
+        full_name: fullName,
+        city: tempProfile.location,
+        avatar_url: tempProfile.avatarUrl,
+      });
+      
+      setProfile(tempProfile);
+      setIsEditingProfile(false);
+      toast({
+        title: 'Profile Updated',
+        description: 'Your profile has been saved successfully.',
+      });
+    } catch (err) {
+      console.error('Error saving profile:', err);
+      toast({
+        title: 'Error',
+        description: 'Failed to save profile. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleSavePersonal = () => {
-    setProfile(tempProfile);
-    localStorage.setItem(`profile_${user?.id}`, JSON.stringify(tempProfile));
-    setIsEditingPersonal(false);
-    toast({
-      title: 'Personal Information Updated',
-      description: 'Your information has been saved successfully.',
-    });
+  const handleSavePersonal = async () => {
+    if (!user) return;
+    
+    setIsSaving(true);
+    try {
+      const fullName = `${tempProfile.firstName} ${tempProfile.lastName}`.trim();
+      await updateUserProfile(user.id, {
+        full_name: fullName,
+        email: tempProfile.email,
+        mobile: tempProfile.phone,
+        city: tempProfile.location,
+        role: tempProfile.role,
+      });
+      
+      setProfile(tempProfile);
+      setIsEditingPersonal(false);
+      toast({
+        title: 'Personal Information Updated',
+        description: 'Your information has been saved successfully.',
+      });
+    } catch (err) {
+      console.error('Error saving profile:', err);
+      toast({
+        title: 'Error',
+        description: 'Failed to save profile. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancelProfile = () => {
@@ -218,6 +294,8 @@ const Settings = () => {
           else if (id === 'templates') navigate('/templates');
           else if (id === 'bookmarks') navigate('/templates?bookmarks=true');
           else if (id === 'history') navigate('/history');
+          else if (id === 'analytics') navigate('/analytics');
+          else if (id === 'profile') navigate('/profile');
           else if (id === 'settings') navigate('/settings');
           else if (id === 'upgrade') navigate('/upgrade');
         }}
@@ -243,6 +321,12 @@ const Settings = () => {
               <p className="text-muted-foreground mt-1">Manage your profile and preferences</p>
             </div>
 
+            {isLoadingProfile ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : (
+              <>
             {/* My Profile Section */}
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-foreground mb-4">My Profile</h2>
@@ -335,6 +419,7 @@ const Settings = () => {
                           size="sm"
                           onClick={handleCancelProfile}
                           className="gap-1"
+                          disabled={isSaving}
                         >
                           <X className="h-4 w-4" />
                           Cancel
@@ -343,8 +428,13 @@ const Settings = () => {
                           size="sm"
                           onClick={handleSaveProfile}
                           className="gap-1"
+                          disabled={isSaving}
                         >
-                          <Check className="h-4 w-4" />
+                          {isSaving ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Check className="h-4 w-4" />
+                          )}
                           Save
                         </Button>
                       </div>
@@ -378,6 +468,7 @@ const Settings = () => {
                       size="sm"
                       onClick={handleCancelPersonal}
                       className="gap-1"
+                      disabled={isSaving}
                     >
                       <X className="h-4 w-4" />
                       Cancel
@@ -386,8 +477,13 @@ const Settings = () => {
                       size="sm"
                       onClick={handleSavePersonal}
                       className="gap-1"
+                      disabled={isSaving}
                     >
-                      <Check className="h-4 w-4" />
+                      {isSaving ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Check className="h-4 w-4" />
+                      )}
                       Save
                     </Button>
                   </div>
@@ -536,20 +632,10 @@ const Settings = () => {
                 >
                   Sign Out
                 </Button>
-                <Button
-                  variant="outline"
-                  className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                  onClick={() => {
-                    toast({
-                      title: 'Coming Soon',
-                      description: 'Account deletion will be available soon.',
-                    });
-                  }}
-                >
-                  Delete Account
-                </Button>
               </div>
             </motion.div>
+              </>
+            )}
           </motion.div>
         </main>
       </div>

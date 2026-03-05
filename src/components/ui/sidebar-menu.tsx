@@ -6,7 +6,6 @@ import {
   Crown,
   History,
   Clock,
-  Settings,
   LayoutTemplate,
   BookOpen,
   LogOut,
@@ -14,6 +13,7 @@ import {
   Wand2,
   Bookmark,
   Shield,
+  UserCircle,
 } from 'lucide-react';
 import { CreditBadge } from '@/components/credits/CreditBadge';
 import { checkIsAdmin } from '@/lib/adminService';
@@ -35,9 +35,8 @@ const navItems: NavItem[] = [
   { id: 'templates', label: 'Templates', icon: LayoutTemplate },
   { id: 'bookmarks', label: 'Bookmarks', icon: Bookmark },
   { id: 'history', label: 'Prompt/Chat History', icon: History },
-  { id: 'study', label: 'Study Mode', icon: BookOpen },
-  { id: 'analytics', label: 'Analytics', icon: Clock },
-  { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'analytics', label: 'My Analytics', icon: Clock },
+  { id: 'profile', label: 'My Profile', icon: UserCircle },
   { id: 'admin', label: 'Admin Panel', icon: Shield, adminOnly: true },
 ];
 

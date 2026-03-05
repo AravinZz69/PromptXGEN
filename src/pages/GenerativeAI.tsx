@@ -11,10 +11,9 @@ import { CreditCostBadge } from '@/components/credits/CreditCostBadge';
 import { ColorOrb } from '@/components/ui/ai-input';
 import { useStreamingChat } from '@/hooks/useStreamingChat';
 import { ChatMessage, ErrorMessage, ThinkingIndicator, ChatInput } from '@/components/chat';
+import ChatWelcome from '@/components/chat/ChatWelcome';
 import {
   Trash2,
-  MessageSquare,
-  Sparkles,
   ChevronDown,
   ArrowLeft,
 } from 'lucide-react';
@@ -190,54 +189,8 @@ const GenerativeAI = () => {
             className="flex-1 overflow-y-auto space-y-4 mb-4 relative pt-4 chat-scroll"
           >
             {messages.length === 0 ? (
-              /* Empty State */
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col items-center justify-center h-full text-center"
-              >
-                <div className="relative mb-6">
-                  <Sparkles
-                    className="h-16 w-16 text-primary"
-                    style={{ animation: 'float 3s ease-in-out infinite' }}
-                  />
-                </div>
-                <h2 className="text-2xl font-bold text-foreground mb-2 font-display">
-                  Hello! I'm your AI assistant.
-                </h2>
-                <p className="text-muted-foreground max-w-md mb-6">
-                  I can help you with JEE, NEET, UPSC, GATE preparation, or any academic topic.
-                </p>
-
-                {/* Feature Pills */}
-                <div className="flex flex-wrap justify-center gap-2 mb-8">
-                  {['Generate prompts', 'Explain concepts', 'Solve problems', 'Study tips'].map(
-                    (feature, i) => (
-                      <span
-                        key={i}
-                        className="px-3 py-1.5 text-xs text-muted-foreground bg-muted/50 rounded-full border border-border"
-                      >
-                        ✦ {feature}
-                      </span>
-                    )
-                  )}
-                </div>
-
-                {/* Suggestion Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
-                  {suggestions.map((suggestion, i) => (
-                    <button
-                      key={i}
-                      onClick={() => sendMessage(suggestion)}
-                      disabled={!hasCredits}
-                      className="text-left p-3 rounded-xl border border-border bg-card hover:bg-muted/50 hover:border-primary/30 transition-all text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed group"
-                    >
-                      <MessageSquare className="h-4 w-4 mb-1 text-primary group-hover:scale-110 transition-transform" />
-                      {suggestion}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
+              /* Empty State - ChatWelcome */
+              <ChatWelcome onSend={sendMessage} />
             ) : (
               /* Messages List */
               <AnimatePresence mode="popLayout">
@@ -298,32 +251,34 @@ const GenerativeAI = () => {
             </AnimatePresence>
           </div>
 
-          {/* Input Area */}
-          <div>
-            {/* Low Credit Warning */}
-            {(isLowCredits || !hasCredits) && (
-              <div className="mb-3">
-                <LowCreditWarning variant="inline" />
+          {/* Input Area - Only show when there are messages */}
+          {messages.length > 0 && (
+            <div>
+              {/* Low Credit Warning */}
+              {(isLowCredits || !hasCredits) && (
+                <div className="mb-3">
+                  <LowCreditWarning variant="inline" />
+                </div>
+              )}
+
+              <ChatInput
+                onSend={sendMessage}
+                onStop={stopGeneration}
+                phase={phase}
+                disabled={!hasCredits}
+                placeholder="Ask me anything... (Press Enter to send)"
+                suggestions={suggestions}
+                showSuggestions={false}
+              />
+
+              <div className="flex items-center justify-between mt-2">
+                <CreditCostBadge model={MODEL} size="xs" variant="badge" />
+                <p className="text-xs text-muted-foreground text-center">
+                  AI can make mistakes. Consider checking important information.
+                </p>
               </div>
-            )}
-
-            <ChatInput
-              onSend={sendMessage}
-              onStop={stopGeneration}
-              phase={phase}
-              disabled={!hasCredits}
-              placeholder="Ask me anything... (Press Enter to send)"
-              suggestions={suggestions}
-              showSuggestions={false}
-            />
-
-            <div className="flex items-center justify-between mt-2">
-              <CreditCostBadge model={MODEL} size="xs" variant="badge" />
-              <p className="text-xs text-muted-foreground text-center">
-                AI can make mistakes. Consider checking important information.
-              </p>
             </div>
-          </div>
+          )}
         </div>
     </div>
   );

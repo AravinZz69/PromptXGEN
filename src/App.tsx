@@ -20,10 +20,13 @@ import History from "./pages/History";
 import Settings from "./pages/Settings";
 import Pricing from "./pages/Pricing";
 import GenerativeAI from "./pages/GenerativeAI";
+import UserProfile from "./pages/UserProfile";
+import UserAnalytics from "./pages/UserAnalytics";
 import Blogs from "./pages/Blogs";
 import BlogPost from "./pages/BlogPost";
 import AboutUs from "./pages/AboutUs";
 import ContactUs from "./pages/ContactUs";
+import TermsAndPolicies from "./pages/TermsAndPolicies";
 import NotFound from "./pages/NotFound";
 
 // Admin Portal imports
@@ -111,6 +114,22 @@ function AnimatedRoutes() {
           }
         />
         <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <UserProfile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <UserAnalytics />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/upgrade"
           element={
             <ProtectedRoute>
@@ -151,6 +170,8 @@ function AnimatedRoutes() {
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/about" element={<AboutUs />} />
         <Route path="/contact" element={<ContactUs />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/terms" element={<TermsAndPolicies />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

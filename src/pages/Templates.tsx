@@ -698,9 +698,10 @@ const Templates = () => {
           else if (id === "templates") { navigate("/templates"); setShowBookmarksOnly(false); }
           else if (id === "bookmarks") { navigate("/templates?bookmarks=true"); setShowBookmarksOnly(true); }
           else if (id === "history") navigate("/history");
+          else if (id === "analytics") navigate("/analytics");
+          else if (id === "profile") navigate("/profile");
           else if (id === "settings") navigate("/settings");
           else if (id === "upgrade") navigate("/upgrade");
-          else if (id === "analytics") navigate("/analytics");
         }}
         onLogout={() => {
           signOut();

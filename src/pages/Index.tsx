@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { MiniNavbar } from "@/components/ui/mini-navbar";
 import HeroSection from "@/components/landing/HeroSection";
 import FeaturesSection from "@/components/landing/FeaturesSection";
@@ -8,6 +10,21 @@ import TestimonialsSection from "@/components/landing/TestimonialsSection";
 import Footer from "@/components/landing/Footer";
 
 const Index = () => {
+  const location = useLocation();
+
+  // Handle scrolling to hash section when navigating from other pages
+  useEffect(() => {
+    if (location.hash) {
+      // Small delay to ensure the page is rendered
+      setTimeout(() => {
+        const element = document.querySelector(location.hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, [location.hash]);
+
   return (
     <div className="min-h-screen bg-background">
       <MiniNavbar />

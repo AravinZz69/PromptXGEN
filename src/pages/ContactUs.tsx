@@ -15,6 +15,9 @@ const ContactUs = () => {
       
       {/* Hero */}
       <ContactHero />
+
+      {/* FAQ Section */}
+      <ContactFAQ />
       
       {/* Main Content - Form & Info */}
       <section className="container mx-auto px-4 sm:px-6 lg:px-8 pb-16">
@@ -30,9 +33,6 @@ const ContactUs = () => {
           </div>
         </div>
       </section>
-
-      {/* FAQ Section */}
-      <ContactFAQ />
 
       <Footer />
     </div>

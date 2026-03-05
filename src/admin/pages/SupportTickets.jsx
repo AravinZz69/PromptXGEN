@@ -233,31 +233,51 @@ export default function SupportTickets() {
         </button>
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {stats.map((stat, i) => (
-          <div key={i} className="bg-[#111827] border border-gray-800 rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 bg-${stat.color}-500/20 rounded-lg flex items-center justify-center`}>
-                <stat.icon className={`w-5 h-5 text-${stat.color}-400`} />
-              </div>
-              <div>
-                <p className="text-xs text-gray-400">{stat.label}</p>
-                <p className="text-xl font-bold text-white">{stat.value}</p>
-              </div>
-            </div>
+      {/* Loading State */}
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 animate-spin text-indigo-500 mx-auto mb-3" />
+            <p className="text-gray-400">Loading tickets...</p>
           </div>
-        ))}
-      </div>
+        </div>
+      ) : (
+        <>
+          {/* Stats Row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {stats.map((stat, i) => (
+              <div key={i} className="bg-[#111827] border border-gray-800 rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                    stat.color === 'amber' ? 'bg-amber-500/20' :
+                    stat.color === 'blue' ? 'bg-blue-500/20' :
+                    stat.color === 'emerald' ? 'bg-emerald-500/20' :
+                    'bg-indigo-500/20'
+                  }`}>
+                    <stat.icon className={`w-5 h-5 ${
+                      stat.color === 'amber' ? 'text-amber-400' :
+                      stat.color === 'blue' ? 'text-blue-400' :
+                      stat.color === 'emerald' ? 'text-emerald-400' :
+                      'text-indigo-400'
+                    }`} />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">{stat.label}</p>
+                    <p className="text-xl font-bold text-white">{stat.value}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Tickets List */}
-        <div className="lg:col-span-2 bg-[#111827] border border-gray-800 rounded-xl overflow-hidden">
-          {/* Tabs */}
-          <div className="border-b border-gray-800">
-            <div className="flex">
-              {[
-                { id: 'open', label: 'Open' },
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Tickets List */}
+            <div className="lg:col-span-2 bg-[#111827] border border-gray-800 rounded-xl overflow-hidden">
+              {/* Tabs */}
+              <div className="border-b border-gray-800">
+                <div className="flex">
+                  {[
+                    { id: 'open', label: 'Open' },
                 { id: 'progress', label: 'In Progress' },
                 { id: 'resolved', label: 'Resolved' },
                 { id: 'all', label: 'All' },
@@ -323,7 +343,7 @@ export default function SupportTickets() {
                       <Badge label={ticket.status} variant={statusVariants[ticket.status]} size="sm" />
                     </div>
                     <span className="text-xs text-gray-500">
-                      {new Date(ticket.created).toLocaleDateString()}
+                      {new Date(ticket.createdAt).toLocaleDateString()}
                     </span>
                   </div>
                   <h4 className="text-white font-medium mb-1">{ticket.subject}</h4>
@@ -493,6 +513,8 @@ export default function SupportTickets() {
           </table>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }

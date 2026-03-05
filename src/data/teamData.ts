@@ -17,94 +17,46 @@ export interface TeamMember {
 export const teamMembers: TeamMember[] = [
   {
     id: 1,
-    name: "Alex Rivera",
-    role: "CEO & Co-Founder",
-    bio: "Former ML engineer at Google. Passionate about making AI accessible to everyone. Built the first prompt optimizer that actually works.",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&q=80",
+    name: "Deekshitha",
+    role: "Full Stack Developer",
+    bio: "Talented full-stack developer with expertise in React, Node.js, and cloud technologies. Builds scalable web applications from frontend to backend with modern best practices.",
+    avatar: "https://api.dicebear.com/7.x/initials/svg?seed=Deekshitha&backgroundColor=8b5cf6",
     social: {
-      twitter: "https://twitter.com",
-      linkedin: "https://linkedin.com",
-      github: "https://github.com"
+      linkedin: "https://www.linkedin.com/in/deekshitha-bonthu-48878a321",
+      github: "https://github.com/deekshu15"
     }
   },
   {
     id: 2,
-    name: "Sarah Chen",
-    role: "Head of AI Research",
-    bio: "PhD in Natural Language Processing from Stanford. Led research teams at OpenAI and Anthropic. Obsessed with prompt optimization algorithms.",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&q=80",
+    name: "Arvind Kumar",
+    role: "Backend Developer",
+    bio: "Backend specialist with deep expertise in Python, PostgreSQL, and microservices architecture. Designs robust APIs and database systems that power AI applications.",
+    avatar: "https://api.dicebear.com/7.x/initials/svg?seed=ArvindKumar&backgroundColor=6366f1",
     social: {
-      twitter: "https://twitter.com",
-      linkedin: "https://linkedin.com",
-      github: "https://github.com"
+      linkedin: "https://www.linkedin.com/in/arvind-kumar-79676031b",
+      github: "https://github.com/AravinZz69"
     }
   },
   {
     id: 3,
-    name: "David Park",
-    role: "CTO",
-    bio: "15+ years building scalable systems at Meta and Netflix. Architect of PromptForge's distributed infrastructure. Open source enthusiast.",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=80",
+    name: "Anuradha",
+    role: "AI/ML Engineer",
+    bio: "Machine learning engineer specializing in NLP and generative AI. Develops and fine-tunes AI models for intelligent prompt optimization and content generation.",
+    avatar: "https://api.dicebear.com/7.x/initials/svg?seed=Anuradha&backgroundColor=ec4899",
     social: {
-      twitter: "https://twitter.com",
-      linkedin: "https://linkedin.com",
-      github: "https://github.com"
+      linkedin: "https://www.linkedin.com/in/anuradha-gorle-675b0631b/",
+      github: "https://github.com/anu577"
     }
   },
   {
     id: 4,
-    name: "Emily Watson",
-    role: "Head of Marketing",
-    bio: "Growth leader who scaled three startups from $0 to $50M ARR. Believes great products deserve great stories. Recovering prompt addict.",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&q=80",
+    name: "Pujith Sai",
+    role: "Frontend Developer",
+    bio: "Creative frontend developer skilled in React, TypeScript, and UI/UX design. Crafts beautiful, responsive interfaces that deliver exceptional user experiences.",
+    avatar: "https://api.dicebear.com/7.x/initials/svg?seed=PujithSai&backgroundColor=10b981",
     social: {
-      twitter: "https://twitter.com",
-      linkedin: "https://linkedin.com"
-    }
-  },
-  {
-    id: 5,
-    name: "Marcus Johnson",
-    role: "Senior AI Engineer",
-    bio: "Former research scientist at DeepMind. Specializes in few-shot learning and prompt chain optimization. Author of 12 published papers.",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=80",
-    social: {
-      twitter: "https://twitter.com",
-      linkedin: "https://linkedin.com",
-      github: "https://github.com"
-    }
-  },
-  {
-    id: 6,
-    name: "Jessica Liu",
-    role: "Head of Product",
-    bio: "Product leader with experience at Notion and Figma. User obsessed. Turns customer insights into features that delight.",
-    avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=80",
-    social: {
-      twitter: "https://twitter.com",
-      linkedin: "https://linkedin.com"
-    }
-  },
-  {
-    id: 7,
-    name: "Ryan O'Connor",
-    role: "Lead Designer",
-    bio: "Design systems expert from Airbnb. Believes AI tools should feel magical, not mechanical. Former game designer turned SaaS enthusiast.",
-    avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&q=80",
-    social: {
-      twitter: "https://twitter.com",
-      linkedin: "https://linkedin.com"
-    }
-  },
-  {
-    id: 8,
-    name: "Priya Sharma",
-    role: "Head of Customer Success",
-    bio: "Built CS teams at Stripe and Datadog. Passionate about turning customers into advocates. Prompt engineering educator on the side.",
-    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&q=80",
-    social: {
-      twitter: "https://twitter.com",
-      linkedin: "https://linkedin.com"
+      linkedin: "https://www.linkedin.com/in/pujith-sai-cheeday-58078a321/",
+      github: "https://github.com/Pujithcheeday"
     }
   }
 ];

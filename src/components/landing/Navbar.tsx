@@ -52,14 +52,20 @@ const Navbar = () => {
 
   useEffect(() => {
     const fetchNavbar = async () => {
+      console.log('[Navbar] Fetching CMS config...');
       const { data, error } = await supabase
         .from('cms_config')
         .select('data')
         .eq('section', 'navbar')
         .single();
 
+      console.log('[Navbar] Response:', { data, error });
+      
       if (!error && data?.data) {
+        console.log('[Navbar] Applying config:', data.data);
         setConfig({ ...DEFAULT_NAVBAR, ...data.data });
+      } else {
+        console.log('[Navbar] Using defaults, error:', error?.message);
       }
     };
     fetchNavbar();

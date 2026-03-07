@@ -3,7 +3,8 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { MiniNavbar } from "@/components/ui/mini-navbar";
 import Footer from "@/components/landing/Footer";
 import { BlogCard, BlogNewsletter } from "@/components/blog";
-import { getPostBySlug, getRelatedPosts, blogPosts } from "@/data/blogData";
+import { BlogPost as BlogPostType } from "@/data/blogData";
+import { supabase } from "@/lib/supabase";
 import { 
   ArrowLeft, 
   Clock, 
@@ -14,9 +15,31 @@ import {
   Linkedin,
   Link as LinkIcon,
   ChevronUp,
-  Check
+  Check,
+  Loader2
 } from "lucide-react";
 import { useInView } from "@/hooks/useInView";
+
+// Transform DB row to BlogPost interface
+const transformBlogPost = (row: any): BlogPostType => ({
+  id: row.id,
+  slug: row.slug,
+  title: row.title,
+  excerpt: row.excerpt,
+  content: row.content,
+  category: row.category,
+  tags: row.tags || [],
+  author: {
+    name: row.author_name,
+    role: row.author_role,
+    avatar: row.author_avatar,
+  },
+  coverImage: row.cover_image,
+  readTime: row.read_time,
+  publishedAt: row.published_at,
+  featured: row.is_featured,
+  views: row.views || 0,
+});
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -24,9 +47,51 @@ const BlogPost = () => {
   const [readingProgress, setReadingProgress] = useState(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [post, setPost] = useState<BlogPostType | null>(null);
+  const [relatedPosts, setRelatedPosts] = useState<BlogPostType[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const post = useMemo(() => getPostBySlug(slug || ""), [slug]);
-  const relatedPosts = useMemo(() => post ? getRelatedPosts(post, 3) : [], [post]);
+  // Fetch post by slug
+  useEffect(() => {
+    const fetchPost = async () => {
+      if (!slug) return;
+      
+      setLoading(true);
+      try {
+        // Fetch the post
+        const { data, error } = await supabase
+          .from('blogs')
+          .select('*')
+          .eq('slug', slug)
+          .eq('is_published', true)
+          .single();
+
+        if (error) throw error;
+        
+        const fetchedPost = transformBlogPost(data);
+        setPost(fetchedPost);
+
+        // Fetch related posts (same category, exclude current)
+        const { data: relatedData } = await supabase
+          .from('blogs')
+          .select('*')
+          .eq('category', data.category)
+          .eq('is_published', true)
+          .neq('slug', slug)
+          .order('published_at', { ascending: false })
+          .limit(3);
+
+        setRelatedPosts((relatedData || []).map(transformBlogPost));
+      } catch (err) {
+        console.error('Error fetching post:', err);
+        setPost(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPost();
+  }, [slug]);
 
   // Generate TOC from content - moved before early return to satisfy hooks rules
   const tocItems = useMemo(() => {
@@ -83,6 +148,18 @@ const BlogPost = () => {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [slug]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <MiniNavbar />
+        <div className="flex justify-center items-center py-40">
+          <Loader2 className="w-10 h-10 animate-spin text-primary" />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!post) {
     return (

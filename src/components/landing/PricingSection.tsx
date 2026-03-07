@@ -1,11 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
 
-const plans = [
+interface PricingPlan {
+  id: string;
+  name: string;
+  monthlyPrice: number;
+  yearlyPrice: number;
+  credits: string;
+  features: string[];
+  cta: string;
+  highlighted: boolean;
+  isVisible?: boolean;
+}
+
+const defaultPlans: PricingPlan[] = [
   {
+    id: "free",
     name: "Free",
     monthlyPrice: 0,
     yearlyPrice: 0,
@@ -15,6 +29,7 @@ const plans = [
     highlighted: false,
   },
   {
+    id: "pro",
     name: "Pro",
     monthlyPrice: 19,
     yearlyPrice: 190,
@@ -24,6 +39,7 @@ const plans = [
     highlighted: true,
   },
   {
+    id: "enterprise",
     name: "Enterprise",
     monthlyPrice: 49,
     yearlyPrice: 490,
@@ -36,6 +52,45 @@ const plans = [
 
 const PricingSection = () => {
   const [annual, setAnnual] = useState(false);
+  const [plans, setPlans] = useState<PricingPlan[]>(defaultPlans);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPricing = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('cms_config')
+          .select('data')
+          .eq('section', 'pricing')
+          .single();
+
+        if (error) throw error;
+        if (data?.data?.plans) {
+          const transformedPlans: PricingPlan[] = data.data.plans
+            .filter((p: any) => p.isVisible !== false)
+            .map((p: any) => ({
+              id: p.id,
+              name: p.name,
+              monthlyPrice: parseFloat(p.monthlyPrice) || 0,
+              yearlyPrice: parseFloat(p.annualPrice) || 0,
+              credits: p.description || "",
+              features: p.features?.map((f: any) => f.text || f) || [],
+              cta: p.ctaText || "Get Started",
+              highlighted: p.isPopular || false,
+            }));
+          if (transformedPlans.length > 0) {
+            setPlans(transformedPlans);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching pricing:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPricing();
+  }, []);
 
   return (
     <section id="pricing" className="section-padding">
@@ -70,7 +125,7 @@ const PricingSection = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {plans.map((plan, i) => (
             <motion.div
-              key={plan.name}
+              key={plan.id || plan.name}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -95,8 +150,8 @@ const PricingSection = () => {
               </div>
 
               <ul className="space-y-3 mb-8 flex-1">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-sm">
+                {plan.features.map((f, idx) => (
+                  <li key={idx} className="flex items-center gap-2 text-sm">
                     <Check className="h-4 w-4 text-primary shrink-0" />
                     <span className="text-muted-foreground">{f}</span>
                   </li>

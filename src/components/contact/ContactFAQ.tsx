@@ -1,11 +1,49 @@
-import { useState } from "react";
-import { ChevronDown, HelpCircle } from "lucide-react";
-import { faqItems } from "@/data/faqData";
+import { useState, useEffect } from "react";
+import { ChevronDown, HelpCircle, Loader2 } from "lucide-react";
+import { faqItems as defaultFaqItems } from "@/data/faqData";
 import { useInView } from "@/hooks/useInView";
+import { supabase } from "@/lib/supabase";
+
+interface FAQItemData {
+  id: string | number;
+  question: string;
+  answer: string;
+  category: string;
+  isVisible?: boolean;
+}
 
 export const ContactFAQ = () => {
   const [headerRef, headerInView] = useInView<HTMLDivElement>({ threshold: 0.1, triggerOnce: true });
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [faqItems, setFaqItems] = useState<FAQItemData[]>(defaultFaqItems);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFAQs = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('cms_config')
+          .select('data')
+          .eq('section', 'faq')
+          .single();
+
+        if (error) throw error;
+        if (data?.data?.faqs) {
+          const visibleFaqs = data.data.faqs.filter((f: FAQItemData) => f.isVisible !== false);
+          if (visibleFaqs.length > 0) {
+            setFaqItems(visibleFaqs);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching FAQs:', err);
+        // Keep default FAQs on error
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFAQs();
+  }, []);
 
   const toggleAccordion = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -36,15 +74,21 @@ export const ContactFAQ = () => {
 
         {/* FAQ Accordion */}
         <div className="max-w-3xl mx-auto">
-          {faqItems.map((item, index) => (
-            <FAQItem
-              key={item.id}
-              item={item}
-              index={index}
-              isOpen={openIndex === index}
-              onToggle={() => toggleAccordion(index)}
-            />
-          ))}
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            faqItems.map((item, index) => (
+              <FAQItem
+                key={item.id}
+                item={item}
+                index={index}
+                isOpen={openIndex === index}
+                onToggle={() => toggleAccordion(index)}
+              />
+            ))
+          )}
         </div>
       </div>
     </section>
@@ -52,7 +96,7 @@ export const ContactFAQ = () => {
 };
 
 interface FAQItemProps {
-  item: typeof faqItems[0];
+  item: FAQItemData;
   index: number;
   isOpen: boolean;
   onToggle: () => void;

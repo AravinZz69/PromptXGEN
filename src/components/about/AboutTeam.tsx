@@ -1,9 +1,45 @@
+import { useState, useEffect } from "react";
 import { Twitter, Linkedin, Github } from "lucide-react";
-import { teamMembers } from "@/data/teamData";
 import { useInView } from "@/hooks/useInView";
+import { supabase } from "@/lib/supabase";
+
+interface TeamMember {
+  id: string;
+  name: string;
+  role: string | null;
+  bio: string | null;
+  avatar: string | null;
+  social_twitter: string | null;
+  social_linkedin: string | null;
+  social_github: string | null;
+  display_order: number;
+}
 
 export const AboutTeam = () => {
   const [headerRef, headerInView] = useInView<HTMLDivElement>({ threshold: 0.1, triggerOnce: true });
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('team_members')
+          .select('*')
+          .eq('is_active', true)
+          .order('display_order', { ascending: true });
+
+        if (error) throw error;
+        setTeamMembers(data || []);
+      } catch (err) {
+        console.error('Error fetching team members:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTeamMembers();
+  }, []);
 
   return (
     <section className="section-padding bg-card/20">
@@ -25,18 +61,24 @@ export const AboutTeam = () => {
         </div>
 
         {/* Team Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {teamMembers.map((member, index) => (
-            <TeamMemberCard key={member.id} member={member} index={index} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {teamMembers.map((member, index) => (
+              <TeamMemberCard key={member.id} member={member} index={index} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
 };
 
 interface TeamMemberCardProps {
-  member: typeof teamMembers[0];
+  member: TeamMember;
   index: number;
 }
 
@@ -54,7 +96,7 @@ const TeamMemberCard = ({ member, index }: TeamMemberCardProps) => {
       {/* Avatar */}
       <div className="relative w-24 h-24 mx-auto mb-4">
         <img
-          src={member.avatar}
+          src={member.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${member.name}&backgroundColor=6366f1`}
           alt={member.name}
           className="w-full h-full rounded-full object-cover ring-2 ring-border group-hover:ring-primary transition-all"
         />
@@ -72,9 +114,9 @@ const TeamMemberCard = ({ member, index }: TeamMemberCardProps) => {
 
       {/* Social Links */}
       <div className="flex justify-center gap-3">
-        {member.social.twitter && (
+        {member.social_twitter && (
           <a
-            href={member.social.twitter}
+            href={member.social_twitter}
             target="_blank"
             rel="noopener noreferrer"
             className="p-2 rounded-lg bg-card/50 hover:bg-card text-muted-foreground hover:text-[#1DA1F2] transition-colors"
@@ -82,9 +124,9 @@ const TeamMemberCard = ({ member, index }: TeamMemberCardProps) => {
             <Twitter className="w-4 h-4" />
           </a>
         )}
-        {member.social.linkedin && (
+        {member.social_linkedin && (
           <a
-            href={member.social.linkedin}
+            href={member.social_linkedin}
             target="_blank"
             rel="noopener noreferrer"
             className="p-2 rounded-lg bg-card/50 hover:bg-card text-muted-foreground hover:text-[#0A66C2] transition-colors"
@@ -92,9 +134,9 @@ const TeamMemberCard = ({ member, index }: TeamMemberCardProps) => {
             <Linkedin className="w-4 h-4" />
           </a>
         )}
-        {member.social.github && (
+        {member.social_github && (
           <a
-            href={member.social.github}
+            href={member.social_github}
             target="_blank"
             rel="noopener noreferrer"
             className="p-2 rounded-lg bg-card/50 hover:bg-card text-muted-foreground hover:text-foreground transition-colors"

@@ -13,6 +13,19 @@ import {
   Settings,
   LogOut,
   Sparkles,
+  Palette,
+  LayoutTemplate,
+  Zap,
+  CreditCard,
+  FileText,
+  HelpCircle,
+  Users as UsersIcon,
+  Image,
+  Settings2,
+  BookTemplate,
+  Clock,
+  Wallet,
+  Shield,
 } from 'lucide-react';
 import { adminLogout } from '../adminAuth';
 
@@ -34,14 +47,31 @@ const navGroups = [
     label: 'MONETIZATION',
     items: [
       { to: '/admin/revenue', icon: DollarSign, label: 'Revenue' },
+      { to: '/admin/payment-gateway', icon: Wallet, label: 'Payment Gateway' },
     ],
   },
   {
     label: 'PRODUCT',
     items: [
+      { to: '/admin/templates', icon: BookTemplate, label: 'Templates' },
       { to: '/admin/prompts', icon: History, label: 'Prompts Management' },
+      { to: '/admin/history', icon: Clock, label: 'History Viewer' },
       { to: '/admin/ai-models', icon: Cpu, label: 'AI Models' },
       { to: '/admin/feature-flags', icon: ToggleLeft, label: 'Feature Flags' },
+    ],
+  },
+  {
+    label: 'CONTENT',
+    items: [
+      { to: '/admin/theme', icon: Palette, label: 'Theme Manager' },
+      { to: '/admin/hero', icon: LayoutTemplate, label: 'Hero Editor' },
+      { to: '/admin/features-editor', icon: Zap, label: 'Features Editor' },
+      { to: '/admin/pricing-editor', icon: CreditCard, label: 'Pricing Editor' },
+      { to: '/admin/blog', icon: FileText, label: 'Blog Manager' },
+      { to: '/admin/faq', icon: HelpCircle, label: 'FAQ Editor' },
+      { to: '/admin/team', icon: UsersIcon, label: 'Team Editor' },
+      { to: '/admin/media', icon: Image, label: 'Media Manager' },
+      { to: '/admin/site-config', icon: Settings2, label: 'Site Config' },
     ],
   },
   {
@@ -53,6 +83,7 @@ const navGroups = [
   {
     label: 'SYSTEM',
     items: [
+      { to: '/admin/auth-config', icon: Shield, label: 'Auth Config' },
       { to: '/admin/audit-logs', icon: ScrollText, label: 'Audit Logs' },
       { to: '/admin/settings', icon: Settings, label: 'Settings' },
     ],

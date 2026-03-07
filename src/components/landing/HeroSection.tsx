@@ -1,9 +1,82 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Zap } from "lucide-react";
+import { ArrowRight, Zap, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
+
+interface HeroConfig {
+  badge: string;
+  headline: string;
+  subHeadline: string;
+  cta1Label: string;
+  cta1Url: string;
+  cta2Label: string;
+  cta2Url: string;
+}
+
+const defaultHeroConfig: HeroConfig = {
+  badge: "AI-Powered Prompt Engineering",
+  headline: "Craft Perfect Prompts in Seconds",
+  subHeadline: "Generate high-quality, structured prompts for ChatGPT, Claude, Gemini, and more. From basic to advanced chain-of-thought — unlock AI's full potential.",
+  cta1Label: "Start Generating Free",
+  cta1Url: "/auth?mode=signup",
+  cta2Label: "See How It Works",
+  cta2Url: "#features",
+};
 
 const HeroSection = () => {
+  const [config, setConfig] = useState<HeroConfig>(defaultHeroConfig);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchHeroConfig = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('cms_config')
+          .select('data')
+          .eq('section', 'hero')
+          .single();
+
+        if (error) throw error;
+        if (data?.data) {
+          setConfig({
+            badge: data.data.badge || defaultHeroConfig.badge,
+            headline: data.data.headline || defaultHeroConfig.headline,
+            subHeadline: data.data.subHeadline || defaultHeroConfig.subHeadline,
+            cta1Label: data.data.cta1Label || defaultHeroConfig.cta1Label,
+            cta1Url: data.data.cta1Url || defaultHeroConfig.cta1Url,
+            cta2Label: data.data.cta2Label || defaultHeroConfig.cta2Label,
+            cta2Url: data.data.cta2Url || defaultHeroConfig.cta2Url,
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching hero config:', err);
+        // Keep default config on error
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHeroConfig();
+  }, []);
+
+  // Parse headline to add gradient to text after first space-separated part
+  const renderHeadline = () => {
+    const parts = config.headline.split(' ');
+    if (parts.length <= 2) {
+      return config.headline;
+    }
+    const firstPart = parts.slice(0, -2).join(' ');
+    const gradientPart = parts.slice(-2).join(' ');
+    return (
+      <>
+        {firstPart}{" "}
+        <span className="gradient-text">{gradientPart}</span>
+      </>
+    );
+  };
+
   return (
     <section className="relative min-h-screen flex items-center justify-center section-padding pt-32 overflow-hidden">
       {/* Background effects */}
@@ -29,7 +102,7 @@ const HeroSection = () => {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm text-primary mb-8">
             <Zap className="h-3.5 w-3.5" />
-            <span>AI-Powered Prompt Engineering</span>
+            <span>{config.badge}</span>
           </div>
         </motion.div>
 
@@ -39,8 +112,7 @@ const HeroSection = () => {
           transition={{ duration: 0.7, delay: 0.1 }}
           className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight tracking-tight mb-6"
         >
-          Craft Perfect Prompts{" "}
-          <span className="gradient-text">in Seconds</span>
+          {renderHeadline()}
         </motion.h1>
 
         <motion.p
@@ -49,8 +121,7 @@ const HeroSection = () => {
           transition={{ duration: 0.7, delay: 0.2 }}
           className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
         >
-          Generate high-quality, structured prompts for ChatGPT, Claude, Gemini, and more.
-          From basic to advanced chain-of-thought — unlock AI's full potential.
+          {config.subHeadline}
         </motion.p>
 
         <motion.div
@@ -60,13 +131,17 @@ const HeroSection = () => {
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
           <Button variant="hero" size="lg" className="text-base px-8 py-6" asChild>
-            <Link to="/auth?mode=signup">
-              Start Generating Free
+            <Link to={config.cta1Url}>
+              {config.cta1Label}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
           <Button variant="hero-outline" size="lg" className="text-base px-8 py-6" asChild>
-            <a href="#features">See How It Works</a>
+            {config.cta2Url.startsWith('#') ? (
+              <a href={config.cta2Url}>{config.cta2Label}</a>
+            ) : (
+              <Link to={config.cta2Url}>{config.cta2Label}</Link>
+            )}
           </Button>
         </motion.div>
 

@@ -2,32 +2,93 @@ import { useState, useMemo, useEffect } from "react";
 import { MiniNavbar } from "@/components/ui/mini-navbar";
 import Footer from "@/components/landing/Footer";
 import { BlogHero, BlogFilters, BlogCard, BlogNewsletter } from "@/components/blog";
-import { blogPosts, getFeaturedPost, getPostsByCategory, searchPosts, getPopularPosts } from "@/data/blogData";
-import { TrendingUp, Clock, ArrowRight } from "lucide-react";
+import { BlogPost } from "@/data/blogData";
+import { supabase } from "@/lib/supabase";
+import { TrendingUp, Clock, ArrowRight, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useInView } from "@/hooks/useInView";
+
+// Transform DB row to BlogPost interface
+const transformBlogPost = (row: any): BlogPost => ({
+  id: row.id,
+  slug: row.slug,
+  title: row.title,
+  excerpt: row.excerpt,
+  content: row.content,
+  category: row.category,
+  tags: row.tags || [],
+  author: {
+    name: row.author_name,
+    role: row.author_role,
+    avatar: row.author_avatar,
+  },
+  coverImage: row.cover_image,
+  readTime: row.read_time,
+  publishedAt: row.published_at,
+  featured: row.is_featured,
+  views: row.views || 0,
+});
 
 const Blogs = () => {
   // Scroll to top on mount
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, []);
+
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const featuredPost = getFeaturedPost();
-  const popularPosts = getPopularPosts(4);
+  // Fetch blogs from Supabase
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('blogs')
+          .select('*')
+          .eq('is_published', true)
+          .order('published_at', { ascending: false });
+
+        if (error) throw error;
+        setBlogPosts((data || []).map(transformBlogPost));
+      } catch (err) {
+        console.error('Error fetching blogs:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlogs();
+  }, []);
+
+  const featuredPost = useMemo(() => 
+    blogPosts.find(p => p.featured), 
+    [blogPosts]
+  );
+
+  const popularPosts = useMemo(() => 
+    [...blogPosts].sort((a, b) => b.views - a.views).slice(0, 4),
+    [blogPosts]
+  );
 
   // Filter posts based on category and search
   const filteredPosts = useMemo(() => {
-    let posts = getPostsByCategory(selectedCategory);
+    let posts = [...blogPosts];
     
+    // Filter by category
+    if (selectedCategory !== "All") {
+      posts = posts.filter(p => p.category === selectedCategory);
+    }
+    
+    // Filter by search query
     if (searchQuery.trim()) {
-      posts = searchPosts(searchQuery);
-      // If we have a search query, filter by category too
-      if (selectedCategory !== "All") {
-        posts = posts.filter(p => p.category === selectedCategory);
-      }
+      const query = searchQuery.toLowerCase();
+      posts = posts.filter(p => 
+        p.title.toLowerCase().includes(query) ||
+        p.excerpt.toLowerCase().includes(query) ||
+        p.tags.some(tag => tag.toLowerCase().includes(query))
+      );
     }
     
     // Remove featured post from regular list
@@ -36,7 +97,7 @@ const Blogs = () => {
     }
     
     return posts;
-  }, [selectedCategory, searchQuery, featuredPost]);
+  }, [selectedCategory, searchQuery, featuredPost, blogPosts]);
 
   // Popular sidebar component
   const PopularSidebar = () => {
@@ -87,6 +148,18 @@ const Blogs = () => {
       </div>
     );
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <MiniNavbar />
+        <div className="flex justify-center items-center py-40">
+          <Loader2 className="w-10 h-10 animate-spin text-primary" />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

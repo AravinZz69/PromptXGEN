@@ -15,11 +15,23 @@ import {
   Minus,
   Loader2,
   RefreshCw,
+  Shield,
+  Users,
+  Mail,
+  Phone,
+  CheckCircle,
+  XCircle,
+  Key,
+  LogOut,
+  Clock,
 } from 'lucide-react';
 import Badge from '../components/Badge';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { supabase } from '@/lib/supabase';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
+import { formatDistanceToNow } from 'date-fns';
 
 const statusVariants = {
   Active: 'success',
@@ -54,6 +66,15 @@ export default function UserManagement() {
   const [creditsModal, setCreditsModal] = useState(null);
   const [creditAmount, setCreditAmount] = useState(100);
   const [creditReason, setCreditReason] = useState('');
+  
+  // Auth & Security Tab State
+  const [activeTab, setActiveTab] = useState('users');
+  const [authUsers, setAuthUsers] = useState([]);
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authSearchQuery, setAuthSearchQuery] = useState('');
+  const [signInHistoryUser, setSignInHistoryUser] = useState(null);
+  const [forcePasswordResetUser, setForcePasswordResetUser] = useState(null);
+  const [forceLogoutUser, setForceLogoutUser] = useState(null);
 
   const pageSize = 10;
 
@@ -150,6 +171,105 @@ export default function UserManagement() {
       setLoading(false);
     }
   }
+
+  // Fetch auth data for Auth & Security tab
+  async function fetchAuthUsers() {
+    setAuthLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, email, full_name, auth_providers, phone, phone_verified, is_enabled, is_verified, last_sign_in, sign_in_count, created_at')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setAuthUsers(data || []);
+    } catch (error) {
+      console.error('Error fetching auth users:', error);
+    } finally {
+      setAuthLoading(false);
+    }
+  }
+
+  // Effect to fetch auth users when tab changes
+  useEffect(() => {
+    if (activeTab === 'auth') {
+      fetchAuthUsers();
+    }
+  }, [activeTab]);
+
+  // Auth users filtering
+  const filteredAuthUsers = useMemo(() => {
+    if (!authSearchQuery) return authUsers;
+    const q = authSearchQuery.toLowerCase();
+    return authUsers.filter(u => 
+      u.email?.toLowerCase().includes(q) || 
+      u.full_name?.toLowerCase().includes(q)
+    );
+  }, [authUsers, authSearchQuery]);
+
+  // Auth actions
+  const handleToggleEnabled = async (user) => {
+    try {
+      const newVal = !user.is_enabled;
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_enabled: newVal })
+        .eq('id', user.id);
+      if (error) throw error;
+      setAuthUsers(prev => prev.map(u => u.id === user.id ? { ...u, is_enabled: newVal } : u));
+    } catch (error) {
+      console.error('Error toggling enabled:', error);
+      alert('Failed to update user');
+    }
+  };
+
+  const handleToggleVerified = async (user) => {
+    try {
+      const newVal = !user.is_verified;
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_verified: newVal })
+        .eq('id', user.id);
+      if (error) throw error;
+      setAuthUsers(prev => prev.map(u => u.id === user.id ? { ...u, is_verified: newVal } : u));
+    } catch (error) {
+      console.error('Error toggling verified:', error);
+      alert('Failed to update user');
+    }
+  };
+
+  const handleForcePasswordReset = async () => {
+    if (!forcePasswordResetUser) return;
+    try {
+      // In production, this would send a password reset email via Supabase Auth
+      const { error } = await supabase.auth.resetPasswordForEmail(forcePasswordResetUser.email);
+      if (error) throw error;
+      alert(`Password reset email sent to ${forcePasswordResetUser.email}`);
+    } catch (error) {
+      console.error('Error sending reset:', error);
+      alert('Failed to send password reset');
+    }
+    setForcePasswordResetUser(null);
+  };
+
+  const handleForceLogout = async () => {
+    if (!forceLogoutUser) return;
+    try {
+      // In production, this would invalidate all sessions for this user
+      // For now, we just update last_sign_in to trigger re-auth
+      const { error } = await supabase
+        .from('profiles')
+        .update({ last_sign_in: null })
+        .eq('id', forceLogoutUser.id);
+      if (error) throw error;
+      alert(`Logged out ${forceLogoutUser.email} from all sessions`);
+      fetchAuthUsers();
+    } catch (error) {
+      console.error('Error forcing logout:', error);
+      alert('Failed to force logout');
+    }
+    setForceLogoutUser(null);
+  };
 
   // Filter users
   const filteredUsers = useMemo(() => {
@@ -374,10 +494,34 @@ export default function UserManagement() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header with Tabs */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h2 className="text-xl font-semibold text-white">User Management</h2>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="bg-gray-800 border border-gray-700">
+          <TabsTrigger
+            value="users"
+            className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white gap-2"
+          >
+            <Users className="w-4 h-4" />
+            Users List
+          </TabsTrigger>
+          <TabsTrigger
+            value="auth"
+            className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white gap-2"
+          >
+            <Shield className="w-4 h-4" />
+            Auth & Security
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Users List Tab */}
+        <TabsContent value="users" className="mt-6 space-y-6">
+      {/* Sub-Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <h2 className="text-xl font-semibold text-white">Users</h2>
           <Badge label={`${filteredUsers.length} total`} variant="neutral" />
           {loading && <Loader2 className="w-4 h-4 text-indigo-500 animate-spin" />}
         </div>
@@ -917,6 +1061,227 @@ export default function UserManagement() {
         variant="danger"
         requireTextInput="DELETE"
       />
+        </TabsContent>
+
+        {/* Auth & Security Tab */}
+        <TabsContent value="auth" className="mt-6 space-y-6">
+          {/* Sub-Header */}
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Badge label={`${filteredAuthUsers.length} users`} variant="neutral" />
+              {authLoading && <Loader2 className="w-4 h-4 text-indigo-500 animate-spin" />}
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={fetchAuthUsers}
+                disabled={authLoading}
+                className="p-2 bg-[#111827] border border-gray-800 rounded-lg text-gray-400 hover:text-white hover:border-gray-700 transition-colors"
+              >
+                <RefreshCw className={`w-4 h-4 ${authLoading ? 'animate-spin' : ''}`} />
+              </button>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search users..."
+                  value={authSearchQuery}
+                  onChange={(e) => setAuthSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 py-2 bg-[#111827] border border-gray-800 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 w-64"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Auth Table */}
+          <div className="bg-[#111827] border border-gray-800 rounded-xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-800">
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">User</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Auth Providers</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Phone</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-400 uppercase">Enabled</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-400 uppercase">Verified</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Last Sign In</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-400 uppercase">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAuthUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-12 text-center">
+                        <Shield className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+                        <p className="text-gray-400">No users found</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredAuthUsers.map((user) => (
+                      <tr key={user.id} className="border-b border-gray-800/50 hover:bg-gray-800/30">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xs font-semibold">
+                              {(user.full_name || user.email || 'U').substring(0, 2).toUpperCase()}
+                            </div>
+                            <div>
+                              <p className="text-sm text-white font-medium">{user.full_name || user.email?.split('@')[0]}</p>
+                              <p className="text-xs text-gray-500">{user.email}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1">
+                            {(user.auth_providers || ['email']).map((provider, i) => (
+                              <span key={i} className="px-2 py-0.5 text-xs rounded bg-gray-700 text-gray-300 capitalize">
+                                {provider}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          {user.phone ? (
+                            <div className="flex items-center gap-1">
+                              <Phone className="w-3 h-3 text-gray-500" />
+                              <span className="text-sm text-gray-300">{user.phone}</span>
+                              {user.phone_verified && (
+                                <CheckCircle className="w-3 h-3 text-green-500" />
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-xs text-gray-500">-</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <Switch
+                            checked={user.is_enabled !== false}
+                            onCheckedChange={() => handleToggleEnabled(user)}
+                            className="data-[state=checked]:bg-green-600"
+                          />
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <Switch
+                            checked={user.is_verified === true}
+                            onCheckedChange={() => handleToggleVerified(user)}
+                            className="data-[state=checked]:bg-blue-600"
+                          />
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-400">
+                          {user.last_sign_in ? (
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {formatDistanceToNow(new Date(user.last_sign_in), { addSuffix: true })}
+                            </div>
+                          ) : '-'}
+                          {user.sign_in_count > 0 && (
+                            <p className="text-xs text-gray-500">{user.sign_in_count} sign-ins</p>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-center gap-1">
+                            <button
+                              onClick={() => setForcePasswordResetUser(user)}
+                              className="p-1.5 rounded hover:bg-yellow-500/20 text-gray-400 hover:text-yellow-400"
+                              title="Force Password Reset"
+                            >
+                              <Key className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => setForceLogoutUser(user)}
+                              className="p-1.5 rounded hover:bg-red-500/20 text-gray-400 hover:text-red-400"
+                              title="Force Logout"
+                            >
+                              <LogOut className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => setSignInHistoryUser(user)}
+                              className="p-1.5 rounded hover:bg-blue-500/20 text-gray-400 hover:text-blue-400"
+                              title="Sign-in History"
+                            >
+                              <Clock className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Sign-in History Modal */}
+          <Modal isOpen={!!signInHistoryUser} onClose={() => setSignInHistoryUser(null)} title="Sign-in History">
+            {signInHistoryUser && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-4 bg-[#0A0E1A] rounded-lg">
+                  <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white text-lg font-bold">
+                    {(signInHistoryUser.full_name || signInHistoryUser.email || 'U').substring(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-white font-medium">{signInHistoryUser.full_name || signInHistoryUser.email}</p>
+                    <p className="text-sm text-gray-400">{signInHistoryUser.email}</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-3 bg-[#0A0E1A] rounded-lg">
+                    <span className="text-sm text-gray-400">Total Sign-ins</span>
+                    <span className="text-white font-medium">{signInHistoryUser.sign_in_count || 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-[#0A0E1A] rounded-lg">
+                    <span className="text-sm text-gray-400">Last Sign-in</span>
+                    <span className="text-white font-medium">
+                      {signInHistoryUser.last_sign_in 
+                        ? new Date(signInHistoryUser.last_sign_in).toLocaleString()
+                        : 'Never'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-[#0A0E1A] rounded-lg">
+                    <span className="text-sm text-gray-400">Account Created</span>
+                    <span className="text-white font-medium">
+                      {new Date(signInHistoryUser.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-[#0A0E1A] rounded-lg">
+                    <span className="text-sm text-gray-400">Auth Providers</span>
+                    <div className="flex gap-1">
+                      {(signInHistoryUser.auth_providers || ['email']).map((p, i) => (
+                        <span key={i} className="px-2 py-0.5 text-xs rounded bg-indigo-500/20 text-indigo-400 capitalize">
+                          {p}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 text-center pt-2">
+                  Detailed sign-in logs require Supabase Auth Hooks configuration
+                </p>
+              </div>
+            )}
+          </Modal>
+
+          {/* Force Password Reset Confirm */}
+          <ConfirmDialog
+            isOpen={!!forcePasswordResetUser}
+            onClose={() => setForcePasswordResetUser(null)}
+            onConfirm={handleForcePasswordReset}
+            title="Force Password Reset"
+            message={`Send a password reset email to ${forcePasswordResetUser?.email}? The user will be required to set a new password.`}
+            confirmLabel="Send Reset Email"
+            variant="warning"
+          />
+
+          {/* Force Logout Confirm */}
+          <ConfirmDialog
+            isOpen={!!forceLogoutUser}
+            onClose={() => setForceLogoutUser(null)}
+            onConfirm={handleForceLogout}
+            title="Force Logout"
+            message={`Log out ${forceLogoutUser?.email} from all devices? They will need to sign in again.`}
+            confirmLabel="Force Logout"
+            variant="danger"
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

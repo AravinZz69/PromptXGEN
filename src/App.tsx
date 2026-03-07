@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import CustomCursor from "@/components/ui/CustomCursor";
 import Index from "./pages/Index";
@@ -42,6 +43,21 @@ import Notifications from "./admin/pages/Notifications";
 import FeatureFlags from "./admin/pages/FeatureFlags";
 import AuditLogs from "./admin/pages/AuditLogs";
 import AdminSettings from "./admin/pages/AdminSettings";
+// CMS Pages
+import ThemeManager from "./admin/pages/ThemeManager";
+import HeroEditor from "./admin/pages/HeroEditor";
+import FeaturesEditor from "./admin/pages/FeaturesEditor";
+import PricingEditor from "./admin/pages/PricingEditor";
+import BlogManager from "./admin/pages/BlogManager";
+import FAQEditor from "./admin/pages/FAQEditor";
+import TeamManager from "./admin/pages/TeamManager";
+import MediaManager from "./admin/pages/MediaManager";
+import SiteConfig from "./admin/pages/SiteConfig";
+// New Feature Pages
+import TemplateManager from "./admin/pages/TemplateManager";
+import HistoryViewer from "./admin/pages/HistoryViewer";
+import PaymentGateway from "./admin/pages/PaymentGateway";
+import AuthConfig from "./admin/pages/AuthConfig";
 
 const queryClient = new QueryClient();
 
@@ -161,6 +177,21 @@ function AnimatedRoutes() {
           <Route path="feature-flags" element={<FeatureFlags />} />
           <Route path="audit-logs" element={<AuditLogs />} />
           <Route path="settings" element={<AdminSettings />} />
+          {/* CMS Routes */}
+          <Route path="theme" element={<ThemeManager />} />
+          <Route path="hero" element={<HeroEditor />} />
+          <Route path="features-editor" element={<FeaturesEditor />} />
+          <Route path="pricing-editor" element={<PricingEditor />} />
+          <Route path="blog" element={<BlogManager />} />
+          <Route path="faq" element={<FAQEditor />} />
+          <Route path="team" element={<TeamManager />} />
+          <Route path="media" element={<MediaManager />} />
+          <Route path="site-config" element={<SiteConfig />} />
+          {/* New Feature Routes */}
+          <Route path="templates" element={<TemplateManager />} />
+          <Route path="history" element={<HistoryViewer />} />
+          <Route path="payment-gateway" element={<PaymentGateway />} />
+          <Route path="auth-config" element={<AuthConfig />} />
         </Route>
         
         <Route path="/blogs" element={<Blogs />} />
@@ -195,18 +226,20 @@ function CursorProvider({ children }: { children: React.ReactNode }) {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <CursorProvider>
-          <CustomCursor />
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AnimatedRoutes />
-          </BrowserRouter>
-        </CursorProvider>
-      </TooltipProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <CursorProvider>
+            <CustomCursor />
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AnimatedRoutes />
+            </BrowserRouter>
+          </CursorProvider>
+        </TooltipProvider>
+      </AuthProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

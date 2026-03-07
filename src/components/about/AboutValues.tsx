@@ -1,5 +1,6 @@
-import { Lightbulb, Heart, Eye, Trophy, Users, GraduationCap, LucideIcon } from "lucide-react";
-import { companyValues } from "@/data/teamData";
+import { useState, useEffect } from "react";
+import { Lightbulb, Heart, Eye, Trophy, Users, GraduationCap, LucideIcon, Loader2 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 import { useInView } from "@/hooks/useInView";
 
 // Icon mapping
@@ -12,8 +13,50 @@ const iconMap: Record<string, LucideIcon> = {
   GraduationCap,
 };
 
+interface CompanyValue {
+  id: string;
+  icon: string;
+  title: string;
+  description: string;
+  display_order: number;
+  is_active: boolean;
+}
+
 export const AboutValues = () => {
   const [headerRef, headerInView] = useInView<HTMLDivElement>({ threshold: 0.1, triggerOnce: true });
+  const [values, setValues] = useState<CompanyValue[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchValues = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('company_values')
+          .select('*')
+          .eq('is_active', true)
+          .order('display_order', { ascending: true });
+
+        if (error) throw error;
+        setValues(data || []);
+      } catch (err) {
+        console.error('Error fetching company values:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchValues();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="section-padding">
+        <div className="container mx-auto px-4 flex justify-center items-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="section-padding">
@@ -35,7 +78,7 @@ export const AboutValues = () => {
 
         {/* Values Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {companyValues.map((value, index) => (
+          {values.map((value, index) => (
             <ValueCard key={value.id} value={value} index={index} />
           ))}
         </div>
@@ -45,7 +88,7 @@ export const AboutValues = () => {
 };
 
 interface ValueCardProps {
-  value: typeof companyValues[0];
+  value: CompanyValue;
   index: number;
 }
 

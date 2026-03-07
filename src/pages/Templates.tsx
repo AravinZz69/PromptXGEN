@@ -6,6 +6,7 @@ import { MiniNavbar } from "@/components/ui/mini-navbar";
 import Sidebar from "@/components/ui/sidebar-menu";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/lib/supabase";
 import {
   Search,
   Grid3X3,
@@ -15,6 +16,7 @@ import {
   Users,
   Crown,
   Bookmark,
+  Loader2,
 } from "lucide-react";
 
 interface Template {
@@ -28,544 +30,17 @@ interface Template {
   isHighlighted?: boolean;
 }
 
-const templates: Template[] = [
-  {
-    id: "1",
-    title: "Lesson Plan Generator",
-    description: "Create detailed lesson plans with objectives, activities, and...",
-    category: "K12",
-    role: "teacher",
-    isFavorite: true,
-  },
-  {
-    id: "2",
-    title: "MCQ Generator",
-    description: "Generate multiple choice questions for any subject",
-    category: "K12",
-    role: "teacher",
-    isFavorite: true,
-  },
-  {
-    id: "3",
-    title: "Worksheet Creator",
-    description: "Design practice worksheets with varied question types",
-    category: "K12",
-    role: "teacher",
-  },
-  {
-    id: "4",
-    title: "Question Paper Builder",
-    description: "Create complete question papers with marking scheme",
-    category: "K12",
-    role: "teacher",
-  },
-  {
-    id: "5",
-    title: "Concept Explainer",
-    description: "Get clear explanations of complex topics",
-    category: "K12",
-    role: "student",
-    isFavorite: true,
-    isHighlighted: true,
-  },
-  {
-    id: "6",
-    title: "Doubt Clarifier",
-    description: "Ask specific questions and get detailed answers",
-    category: "K12",
-    role: "student",
-  },
-  {
-    id: "7",
-    title: "Technical Notes Generator",
-    description: "Create structured technical notes for engineering subjects",
-    category: "Engineering",
-    role: "student",
-  },
-  {
-    id: "8",
-    title: "Lab Manual Creator",
-    description: "Generate lab procedures and safety guidelines",
-    category: "Engineering",
-    role: "teacher",
-  },
-  {
-    id: "9",
-    title: "Engineering Problem Solver",
-    description: "Step-by-step solutions for engineering problems",
-    category: "Engineering",
-    role: "student",
-  },
-  {
-    id: "10",
-    title: "Code Explainer",
-    description: "Understand code with detailed explanations",
-    category: "Engineering",
-    role: "student",
-  },
-  {
-    id: "11",
-    title: "Clinical Case Study",
-    description: "Create medical case studies for learning",
-    category: "Medical",
-    role: "teacher",
-    isPro: true,
-  },
-  {
-    id: "12",
-    title: "Anatomy Study Guide",
-    description: "Comprehensive anatomy revision notes",
-    category: "Medical",
-    role: "student",
-  },
-  {
-    id: "13",
-    title: "UPSC Essay Writer",
-    description: "Generate well-structured essays for UPSC preparation",
-    category: "UPSC",
-    role: "student",
-  },
-  {
-    id: "14",
-    title: "Current Affairs Summarizer",
-    description: "Get concise summaries of current events",
-    category: "UPSC",
-    role: "student",
-  },
-  {
-    id: "15",
-    title: "Business Case Study",
-    description: "Create detailed business case studies",
-    category: "Commerce",
-    role: "teacher",
-  },
-  {
-    id: "16",
-    title: "Financial Analysis Helper",
-    description: "Analyze financial statements and ratios",
-    category: "Commerce",
-    role: "student",
-  },
-  {
-    id: "17",
-    title: "Art History Notes",
-    description: "Generate comprehensive art history study material",
-    category: "Arts",
-    role: "student",
-  },
-  {
-    id: "18",
-    title: "Creative Writing Prompts",
-    description: "Get inspiring prompts for creative writing",
-    category: "Arts",
-    role: "student",
-  },
-  {
-    id: "19",
-    title: "Research Paper Outline",
-    description: "Create structured outlines for research papers",
-    category: "Research",
-    role: "student",
-    isPro: true,
-  },
-  {
-    id: "20",
-    title: "Literature Review Helper",
-    description: "Organize and summarize research literature",
-    category: "Research",
-    role: "student",
-  },
-  {
-    id: "21",
-    title: "Intermediate Math Solver",
-    description: "Step-by-step solutions for intermediate math problems",
-    category: "Intermediate",
-    role: "student",
-  },
-  {
-    id: "22",
-    title: "Science Lab Report",
-    description: "Generate structured lab reports for science experiments",
-    category: "Intermediate",
-    role: "student",
-  },
-  // JEE Templates
-  {
-    id: "23",
-    title: "JEE Physics Problem Solver",
-    description: "Step-by-step solutions for JEE Main & Advanced physics problems",
-    category: "JEE",
-    role: "student",
-    isFavorite: true,
-    isHighlighted: true,
-  },
-  {
-    id: "24",
-    title: "JEE Chemistry Formula Sheet",
-    description: "Generate comprehensive formula sheets for organic, inorganic & physical chemistry",
-    category: "JEE",
-    role: "student",
-  },
-  {
-    id: "25",
-    title: "JEE Maths Concept Builder",
-    description: "Master calculus, algebra, and coordinate geometry concepts",
-    category: "JEE",
-    role: "student",
-  },
-  {
-    id: "26",
-    title: "JEE Previous Year Analysis",
-    description: "Analyze previous year questions with detailed solutions",
-    category: "JEE",
-    role: "student",
-    isPro: true,
-  },
-  {
-    id: "27",
-    title: "JEE Mock Test Generator",
-    description: "Create timed mock tests matching JEE pattern",
-    category: "JEE",
-    role: "teacher",
-  },
-  // NEET Templates
-  {
-    id: "28",
-    title: "NEET Biology Notes Generator",
-    description: "Create detailed notes for Botany and Zoology NCERT chapters",
-    category: "NEET",
-    role: "student",
-    isFavorite: true,
-  },
-  {
-    id: "29",
-    title: "NEET Chemistry Quick Revision",
-    description: "Generate quick revision notes for NEET chemistry",
-    category: "NEET",
-    role: "student",
-  },
-  {
-    id: "30",
-    title: "NEET Physics Numericals",
-    description: "Practice numerical problems with step-by-step solutions",
-    category: "NEET",
-    role: "student",
-  },
-  {
-    id: "31",
-    title: "NEET Diagram Explainer",
-    description: "Understand biological diagrams and their labeling",
-    category: "NEET",
-    role: "student",
-  },
-  // GATE Templates
-  {
-    id: "32",
-    title: "GATE CS Question Bank",
-    description: "Practice questions for algorithms, OS, DBMS, and networks",
-    category: "GATE",
-    role: "student",
-    isHighlighted: true,
-  },
-  {
-    id: "33",
-    title: "GATE ECE Concept Notes",
-    description: "Detailed notes for signals, circuits, and communication systems",
-    category: "GATE",
-    role: "student",
-  },
-  {
-    id: "34",
-    title: "GATE Mechanical Solver",
-    description: "Solutions for thermodynamics, fluid mechanics, and machine design",
-    category: "GATE",
-    role: "student",
-  },
-  {
-    id: "35",
-    title: "GATE Aptitude Booster",
-    description: "Practice general aptitude and engineering mathematics",
-    category: "GATE",
-    role: "student",
-  },
-  // Banking & SSC Templates
-  {
-    id: "36",
-    title: "Banking Awareness Notes",
-    description: "Current affairs and banking knowledge for IBPS, SBI, RBI exams",
-    category: "Banking",
-    role: "student",
-  },
-  {
-    id: "37",
-    title: "Quantitative Aptitude Solver",
-    description: "Quick methods for DI, arithmetic, and number series",
-    category: "Banking",
-    role: "student",
-    isFavorite: true,
-  },
-  {
-    id: "38",
-    title: "English Grammar & Vocabulary",
-    description: "Improve grammar, vocabulary, and comprehension skills",
-    category: "Banking",
-    role: "student",
-  },
-  {
-    id: "39",
-    title: "SSC CGL Preparation Guide",
-    description: "Complete preparation strategy and study material for SSC CGL",
-    category: "Banking",
-    role: "student",
-  },
-  {
-    id: "40",
-    title: "Reasoning Ability Trainer",
-    description: "Master puzzles, syllogisms, and logical reasoning",
-    category: "Banking",
-    role: "student",
-  },
-  // More UPSC Templates
-  {
-    id: "41",
-    title: "UPSC Prelims MCQ Generator",
-    description: "Practice MCQs for history, polity, geography, and economy",
-    category: "UPSC",
-    role: "student",
-  },
-  {
-    id: "42",
-    title: "UPSC Mains Answer Writing",
-    description: "Learn structured answer writing with model answers",
-    category: "UPSC",
-    role: "student",
-    isPro: true,
-  },
-  {
-    id: "43",
-    title: "Indian Polity Explainer",
-    description: "Understand constitution, governance, and political system",
-    category: "UPSC",
-    role: "student",
-    isFavorite: true,
-  },
-  {
-    id: "44",
-    title: "Geography Map Revision",
-    description: "Learn Indian and world geography with map-based questions",
-    category: "UPSC",
-    role: "student",
-  },
-  // Engineering Specific Templates
-  {
-    id: "45",
-    title: "DSA Problem Solver",
-    description: "Solutions for arrays, trees, graphs, DP with code explanations",
-    category: "Engineering",
-    role: "student",
-    isFavorite: true,
-    isHighlighted: true,
-  },
-  {
-    id: "46",
-    title: "Circuit Analysis Helper",
-    description: "Solve KVL, KCL, Thevenin, Norton circuit problems",
-    category: "Engineering",
-    role: "student",
-  },
-  {
-    id: "47",
-    title: "Thermodynamics Calculator",
-    description: "Solve heat transfer, entropy, and energy balance problems",
-    category: "Engineering",
-    role: "student",
-  },
-  {
-    id: "48",
-    title: "Machine Learning Concepts",
-    description: "Understand ML algorithms, neural networks, and deep learning",
-    category: "Engineering",
-    role: "student",
-    isPro: true,
-  },
-  {
-    id: "49",
-    title: "DBMS Query Generator",
-    description: "Write SQL queries, normalization, and ER diagrams",
-    category: "Engineering",
-    role: "student",
-  },
-  {
-    id: "50",
-    title: "Computer Networks Notes",
-    description: "OSI model, TCP/IP, routing protocols explained",
-    category: "Engineering",
-    role: "student",
-  },
-  {
-    id: "51",
-    title: "Operating Systems Concepts",
-    description: "Process scheduling, memory management, deadlocks explained",
-    category: "Engineering",
-    role: "student",
-  },
-  {
-    id: "52",
-    title: "Digital Electronics Solver",
-    description: "Boolean algebra, K-maps, flip-flops, and counters",
-    category: "Engineering",
-    role: "student",
-  },
-  {
-    id: "53",
-    title: "Signals & Systems Helper",
-    description: "Fourier, Laplace, Z-transforms with solved examples",
-    category: "Engineering",
-    role: "student",
-  },
-  {
-    id: "54",
-    title: "Control Systems Designer",
-    description: "Transfer functions, Bode plots, stability analysis",
-    category: "Engineering",
-    role: "student",
-  },
-  {
-    id: "55",
-    title: "Compiler Design Notes",
-    description: "Lexical analysis, parsing, code generation explained",
-    category: "Engineering",
-    role: "student",
-  },
-  {
-    id: "56",
-    title: "Software Engineering Guide",
-    description: "SDLC, design patterns, testing methodologies",
-    category: "Engineering",
-    role: "student",
-  },
-  // CAT/MBA Templates
-  {
-    id: "57",
-    title: "CAT VARC Preparation",
-    description: "Reading comprehension, para jumbles, and verbal ability",
-    category: "CAT",
-    role: "student",
-  },
-  {
-    id: "58",
-    title: "CAT Quant Shortcuts",
-    description: "Quick calculation methods for CAT quantitative section",
-    category: "CAT",
-    role: "student",
-    isFavorite: true,
-  },
-  {
-    id: "59",
-    title: "CAT DILR Strategies",
-    description: "Data interpretation and logical reasoning techniques",
-    category: "CAT",
-    role: "student",
-  },
-  {
-    id: "60",
-    title: "GD/PI Preparation",
-    description: "Group discussion topics and personal interview tips",
-    category: "CAT",
-    role: "student",
-    isPro: true,
-  },
-  // State PSC Templates
-  {
-    id: "61",
-    title: "State History & Culture",
-    description: "State-wise history, culture, and heritage notes",
-    category: "UPSC",
-    role: "student",
-  },
-  {
-    id: "62",
-    title: "Indian Economy Notes",
-    description: "Budget, policies, and economic surveys explained",
-    category: "UPSC",
-    role: "student",
-  },
-  // Law Entrance
-  {
-    id: "63",
-    title: "CLAT Legal Reasoning",
-    description: "Practice legal reasoning and legal knowledge questions",
-    category: "Law",
-    role: "student",
-  },
-  {
-    id: "64",
-    title: "CLAT GK Capsule",
-    description: "Current affairs and static GK for law entrance",
-    category: "Law",
-    role: "student",
-  },
-  // Defense Exams
-  {
-    id: "65",
-    title: "NDA Math Solver",
-    description: "Mathematics preparation for NDA written exam",
-    category: "Defense",
-    role: "student",
-  },
-  {
-    id: "66",
-    title: "CDS GK & English",
-    description: "General knowledge and English for CDS examination",
-    category: "Defense",
-    role: "student",
-  },
-  // Teaching Exams
-  {
-    id: "67",
-    title: "UGC NET Paper 1",
-    description: "Teaching aptitude, research methodology, and reasoning",
-    category: "Research",
-    role: "student",
-  },
-  {
-    id: "68",
-    title: "CTET Pedagogy Notes",
-    description: "Child development and pedagogy for teaching exams",
-    category: "K12",
-    role: "teacher",
-  },
-  // More Medical Templates
-  {
-    id: "69",
-    title: "Pharmacology Quick Notes",
-    description: "Drug classifications, mechanisms, and side effects",
-    category: "Medical",
-    role: "student",
-  },
-  {
-    id: "70",
-    title: "Pathology Case Studies",
-    description: "Disease mechanisms and diagnostic approaches",
-    category: "Medical",
-    role: "student",
-    isPro: true,
-  },
-  {
-    id: "71",
-    title: "Biochemistry Pathways",
-    description: "Metabolic pathways and enzyme mechanisms explained",
-    category: "Medical",
-    role: "student",
-  },
-  {
-    id: "72",
-    title: "Microbiology Flashcards",
-    description: "Bacteria, viruses, and fungi identification guide",
-    category: "Medical",
-    role: "student",
-  },
-];
+// Transform DB row to Template interface
+const transformTemplate = (row: any): Template => ({
+  id: row.id?.toString() || row.name?.replace(/\s+/g, '-').toLowerCase(),
+  title: row.name || row.title,
+  description: row.description,
+  category: row.category,
+  role: row.target_audience === 'Teacher' ? 'teacher' : 'student',
+  isPro: row.is_pro,
+  isHighlighted: row.is_highlighted || false,
+  isFavorite: false,
+});
 
 const categories = [
   "All Categories",
@@ -590,6 +65,30 @@ const Templates = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch templates from Supabase
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('templates')
+          .select('*')
+          .eq('is_active', true)
+          .order('usage_count', { ascending: false });
+
+        if (error) throw error;
+        setTemplates((data || []).map(transformTemplate));
+      } catch (err) {
+        console.error('Error fetching templates:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTemplates();
+  }, []);
 
   // Scroll to top on mount
   useEffect(() => {
@@ -677,12 +176,20 @@ const Templates = () => {
 
       return matchesSearch && matchesCategory && matchesRole;
     });
-  }, [searchQuery, selectedCategory, selectedRole, showBookmarksOnly, bookmarkedIds]);
+  }, [templates, searchQuery, selectedCategory, selectedRole, showBookmarksOnly, bookmarkedIds]);
 
   const handleTemplateClick = (template: Template) => {
     // Navigate to template generator page
     navigate(`/template/${template.id}`);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex">

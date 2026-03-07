@@ -66,6 +66,7 @@ interface PromptHistoryItem {
   id: string;
   user_id: string;
   user_email: string;
+  user_name: string | null;
   type: 'basic' | 'advanced' | 'cot' | 'template';
   input_text: string;
   output_text: string;
@@ -81,6 +82,7 @@ interface ChatHistoryItem {
   id: string;
   user_id: string;
   user_email: string;
+  user_name: string | null;
   session_id: string;
   messages: ChatMessage[];
   model: string;
@@ -186,11 +188,21 @@ function PromptHistoryTab() {
       setLoading(true);
       const { data, error } = await supabase
         .from('prompt_history')
-        .select('*')
+        .select(`
+          *,
+          profiles:user_id (full_name)
+        `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setItems(data || []);
+      
+      // Map the joined data to include user_name
+      const mappedData = (data || []).map((item: any) => ({
+        ...item,
+        user_name: item.profiles?.full_name || null,
+        profiles: undefined, // Remove the nested profiles object
+      }));
+      setItems(mappedData);
     } catch (error: any) {
       toast({
         title: '❌ Error loading history',
@@ -212,6 +224,7 @@ function PromptHistoryTab() {
       result = result.filter(
         (item) =>
           item.user_email?.toLowerCase().includes(q) ||
+          item.user_name?.toLowerCase().includes(q) ||
           item.input_text?.toLowerCase().includes(q)
       );
     }
@@ -323,8 +336,9 @@ function PromptHistoryTab() {
   };
 
   const handleExportCSV = () => {
-    const headers = ['User Email', 'Type', 'Input', 'Output', 'Model', 'Credits', 'Flagged', 'Date'];
+    const headers = ['User Name', 'User Email', 'Type', 'Input', 'Output', 'Model', 'Credits', 'Flagged', 'Date'];
     const rows = filteredItems.map((i) => [
+      i.user_name || 'Unknown',
       i.user_email,
       i.type,
       `"${(i.input_text || '').replace(/"/g, '""')}"`,
@@ -721,11 +735,21 @@ function ChatHistoryTab() {
       setLoading(true);
       const { data, error } = await supabase
         .from('chat_history')
-        .select('*')
+        .select(`
+          *,
+          profiles:user_id (full_name)
+        `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setItems(data || []);
+      
+      // Map the joined data to include user_name
+      const mappedData = (data || []).map((item: any) => ({
+        ...item,
+        user_name: item.profiles?.full_name || null,
+        profiles: undefined,
+      }));
+      setItems(mappedData);
     } catch (error: any) {
       toast({
         title: '❌ Error loading chats',
@@ -743,7 +767,10 @@ function ChatHistoryTab() {
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      result = result.filter((item) => item.user_email?.toLowerCase().includes(q));
+      result = result.filter((item) => 
+        item.user_email?.toLowerCase().includes(q) ||
+        item.user_name?.toLowerCase().includes(q)
+      );
     }
 
     if (dateRange !== 'all') {
@@ -835,8 +862,9 @@ function ChatHistoryTab() {
   };
 
   const handleExportCSV = () => {
-    const headers = ['User Email', 'Messages', 'Credits', 'Model', 'Flagged', 'Date'];
+    const headers = ['User Name', 'User Email', 'Messages', 'Credits', 'Model', 'Flagged', 'Date'];
     const rows = filteredItems.map((i) => [
+      i.user_name || 'Unknown',
       i.user_email,
       i.total_messages || i.messages?.length || 0,
       i.credits_used,
@@ -959,8 +987,15 @@ function ChatHistoryTab() {
               ) : (
                 paginatedItems.map((item) => (
                   <tr key={item.id} className="hover:bg-muted/50">
-                    <td className="px-4 py-3 text-sm text-muted-foreground">
-                      {item.user_email || 'Unknown'}
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col">
+                        <span className="text-sm text-white font-medium">
+                          {item.user_name || 'Unknown User'}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {item.user_email || 'No email'}
+                        </span>
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-center text-sm text-muted-foreground">
                       {item.total_messages || item.messages?.length || 0}

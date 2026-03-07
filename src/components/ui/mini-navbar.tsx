@@ -19,6 +19,7 @@ interface NavLink {
 interface NavbarConfig {
   logoUrl: string;
   siteName: string;
+  tagline: string;
   navLinks: NavLink[];
   ctaText: string;
   ctaUrl: string;
@@ -29,6 +30,7 @@ interface NavbarConfig {
 const DEFAULT_NAVBAR: NavbarConfig = {
   logoUrl: '',
   siteName: 'AskJai',
+  tagline: 'AI Prompt Generator',
   navLinks: [
     { id: '1', label: 'Features', url: '#features', isVisible: true },
     { id: '2', label: 'Pricing', url: '#pricing', isVisible: true },
@@ -123,7 +125,14 @@ export function MiniNavbar() {
         .maybeSingle();
 
       if (!error && data?.data) {
-        setNavConfig({ ...DEFAULT_NAVBAR, ...data.data });
+        const config = { ...DEFAULT_NAVBAR, ...data.data };
+        setNavConfig(config);
+        // Update browser tab title
+        if (config.siteName) {
+          document.title = config.tagline 
+            ? `${config.siteName} — ${config.tagline}`
+            : config.siteName;
+        }
       }
     };
     fetchNavbar();

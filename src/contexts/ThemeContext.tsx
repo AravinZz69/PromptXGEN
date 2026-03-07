@@ -180,7 +180,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         .from('cms_config')
         .select('data')
         .eq('section', 'theme')
-        .single();
+        .maybeSingle();
 
       if (!error && data?.data) {
         const fetchedTheme = { ...DEFAULT_THEME, ...data.data };

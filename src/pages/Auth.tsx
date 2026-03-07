@@ -84,7 +84,7 @@ const Auth = () => {
         .from('cms_config')
         .select('data')
         .eq('section', 'auth_pages')
-        .single();
+        .maybeSingle();
 
       if (!error && data?.data) {
         setAuthConfig(data.data);

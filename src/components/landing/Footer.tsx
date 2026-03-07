@@ -101,7 +101,7 @@ const Footer = () => {
         .from('cms_config')
         .select('data')
         .eq('section', 'footer')
-        .single();
+        .maybeSingle();
 
       if (!error && data?.data) {
         setConfig({ ...DEFAULT_FOOTER, ...data.data });

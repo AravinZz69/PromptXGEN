@@ -36,7 +36,7 @@ const HeroSection = () => {
           .from('cms_config')
           .select('data')
           .eq('section', 'hero')
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
         if (data?.data) {

@@ -57,7 +57,7 @@ const Navbar = () => {
         .from('cms_config')
         .select('data')
         .eq('section', 'navbar')
-        .single();
+        .maybeSingle();
 
       console.log('[Navbar] Response:', { data, error });
       

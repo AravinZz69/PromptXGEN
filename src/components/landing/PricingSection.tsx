@@ -62,9 +62,10 @@ const PricingSection = () => {
           .from('cms_config')
           .select('data')
           .eq('section', 'pricing')
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
+        if (!data) return; // No pricing config yet, use defaults
         if (data?.data?.plans) {
           const transformedPlans: PricingPlan[] = data.data.plans
             .filter((p: any) => p.isVisible !== false)

@@ -25,7 +25,7 @@ export const ContactFAQ = () => {
           .from('cms_config')
           .select('data')
           .eq('section', 'faq')
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
         if (data?.data?.faqs) {

@@ -93,7 +93,7 @@ const FeaturesSection = () => {
           .from('cms_config')
           .select('data')
           .eq('section', 'features')
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
         if (data?.data?.features) {

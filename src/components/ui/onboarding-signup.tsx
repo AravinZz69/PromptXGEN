@@ -31,6 +31,19 @@ interface OnboardingSignupProps {
   onGitHubSignIn: () => Promise<void>;
   isLoading?: boolean;
   error?: string;
+  config?: {
+    heading?: string;
+    subheading?: string;
+    roles?: Array<{ id: string; title: string; description: string; icon: string }>;
+    useCases?: Array<{ id: string; title: string; description: string }>;
+    showGoogleLogin?: boolean;
+    showGitHubLogin?: boolean;
+    step1Title?: string;
+    step2Title?: string;
+    step3Title?: string;
+    step4Title?: string;
+    step5Title?: string;
+  };
 }
 
 // ── STEP INDICATOR ───────────────────────────────────────────────────────────
@@ -109,6 +122,7 @@ export function OnboardingSignupPage({
   onGitHubSignIn,
   isLoading = false,
   error = "",
+  config: propsConfig,
 }: OnboardingSignupProps) {
   const [step, setStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
@@ -125,6 +139,13 @@ export function OnboardingSignupPage({
     experienceLevel: "",
   });
   const [validationError, setValidationError] = useState("");
+
+  // Merge with defaults
+  const config = {
+    showGoogleLogin: true,
+    showGitHubLogin: true,
+    ...propsConfig,
+  };
 
   const updateField = (field: keyof SignupData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));

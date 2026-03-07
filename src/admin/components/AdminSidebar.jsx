@@ -26,6 +26,7 @@ import {
   Clock,
   Wallet,
   Shield,
+  KeyRound,
 } from 'lucide-react';
 import { adminLogout } from '../adminAuth';
 
@@ -72,6 +73,7 @@ const navGroups = [
       { to: '/admin/team', icon: UsersIcon, label: 'Team Editor' },
       { to: '/admin/media', icon: Image, label: 'Media Manager' },
       { to: '/admin/site-config', icon: Settings2, label: 'Site Config' },
+      { to: '/admin/auth-pages', icon: KeyRound, label: 'Auth Pages' },
     ],
   },
   {

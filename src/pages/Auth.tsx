@@ -10,6 +10,7 @@ import { Zap, Mail, ArrowLeft, Loader2 } from 'lucide-react';
 import { AnimatedLoginPage } from '@/components/ui/animated-characters-login';
 import { OnboardingSignupPage } from '@/components/ui/onboarding-signup';
 import { isAdminCredentials, adminLogin, getSession } from '@/admin/adminAuth';
+import { supabase } from '@/lib/supabase';
 
 type AuthMode = 'signin' | 'signup' | 'forgot-password';
 
@@ -25,6 +26,39 @@ interface SignupData {
   experienceLevel: string;
 }
 
+interface AuthPagesConfig {
+  login?: {
+    logoUrl?: string;
+    siteName?: string;
+    heading?: string;
+    subheading?: string;
+    submitButtonText?: string;
+    forgotPasswordText?: string;
+    showGoogleLogin?: boolean;
+    showGitHubLogin?: boolean;
+    googleButtonText?: string;
+    githubButtonText?: string;
+    orDividerText?: string;
+    signupPrompt?: string;
+    signupLinkText?: string;
+  };
+  signup?: {
+    heading?: string;
+    subheading?: string;
+    roles?: Array<{ id: string; title: string; description: string; icon: string }>;
+    useCases?: Array<{ id: string; title: string; description: string }>;
+    showGoogleLogin?: boolean;
+    showGitHubLogin?: boolean;
+  };
+  forgotPassword?: {
+    heading?: string;
+    subheading?: string;
+    submitButtonText?: string;
+    backToLoginText?: string;
+    successMessage?: string;
+  };
+}
+
 const Auth = () => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
@@ -34,6 +68,7 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [authConfig, setAuthConfig] = useState<AuthPagesConfig>({});
   
   const { signIn, signUp, signInWithGoogle, signInWithGitHub, resetPassword, user } = useAuth();
   const navigate = useNavigate();
@@ -41,6 +76,22 @@ const Auth = () => {
 
   // Get where user was trying to go (for redirect after login)
   const from = (location.state as { from?: string })?.from || '/dashboard';
+
+  // Fetch auth pages config from CMS
+  useEffect(() => {
+    const fetchAuthConfig = async () => {
+      const { data, error } = await supabase
+        .from('cms_config')
+        .select('data')
+        .eq('section', 'auth_pages')
+        .single();
+
+      if (!error && data?.data) {
+        setAuthConfig(data.data);
+      }
+    };
+    fetchAuthConfig();
+  }, []);
 
   // Redirect if already logged in (user or admin)
   useEffect(() => {
@@ -287,6 +338,7 @@ const Auth = () => {
         onGitHubSignIn={handleGitHubSignIn}
         isLoading={isLoading}
         error={error}
+        config={authConfig.signup}
       />
     );
   }
@@ -301,6 +353,7 @@ const Auth = () => {
       onGitHubSignIn={handleGitHubSignIn}
       isLoading={isLoading}
       error={error}
+      config={authConfig.login}
     />
   );
 };

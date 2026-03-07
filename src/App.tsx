@@ -58,6 +58,7 @@ import TemplateManager from "./admin/pages/TemplateManager";
 import HistoryViewer from "./admin/pages/HistoryViewer";
 import PaymentGateway from "./admin/pages/PaymentGateway";
 import AuthConfig from "./admin/pages/AuthConfig";
+import AuthPageEditor from "./admin/pages/AuthPageEditor";
 
 const queryClient = new QueryClient();
 
@@ -192,6 +193,7 @@ function AnimatedRoutes() {
           <Route path="history" element={<HistoryViewer />} />
           <Route path="payment-gateway" element={<PaymentGateway />} />
           <Route path="auth-config" element={<AuthConfig />} />
+          <Route path="auth-pages" element={<AuthPageEditor />} />
         </Route>
         
         <Route path="/blogs" element={<Blogs />} />

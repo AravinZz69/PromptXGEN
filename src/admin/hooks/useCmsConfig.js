@@ -48,19 +48,18 @@ export function useCmsConfig(section) {
         .from('cms_config')
         .select('*')
         .eq('section', section)
-        .single();
+        .maybeSingle();
 
       console.log(`[CMS] Fetch response for '${section}':`, { configData, fetchError });
 
       if (fetchError) {
-        // If no record exists yet, return empty object (not an error)
-        if (fetchError.code === 'PGRST116') {
-          console.log(`[CMS] No record found for '${section}', using defaults`);
-          setData({});
-          setError(null);
-        } else {
-          throw fetchError;
-        }
+        throw fetchError;
+      }
+      
+      if (!configData) {
+        // No record exists yet, return empty object
+        console.log(`[CMS] No record found for '${section}', using defaults`);
+        setData({});
       } else {
         console.log(`[CMS] Setting data for '${section}':`, configData?.data);
         setData(configData?.data || {});

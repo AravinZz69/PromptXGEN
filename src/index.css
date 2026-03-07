@@ -51,6 +51,11 @@
     --surface-glass: 240 12% 8%;
     --gradient-start: 217 91% 60%;
     --gradient-end: 260 80% 60%;
+    
+    /* Font variables (can be overridden by ThemeContext) */
+    --font-display: "Space Grotesk";
+    --font-body: "Inter";
+    --font-heading: "Space Grotesk";
   }
 }
 

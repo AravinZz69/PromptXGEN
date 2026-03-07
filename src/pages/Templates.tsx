@@ -32,13 +32,13 @@ interface Template {
 
 // Transform DB row to Template interface
 const transformTemplate = (row: any): Template => ({
-  id: row.id?.toString() || row.name?.replace(/\s+/g, '-').toLowerCase(),
-  title: row.name || row.title,
+  id: row.id?.toString() || row.title?.replace(/\s+/g, '-').toLowerCase(),
+  title: row.title || row.name,
   description: row.description,
   category: row.category,
-  role: row.target_audience === 'Teacher' ? 'teacher' : 'student',
+  role: (row.role === 'teacher' || row.target_audience === 'Teacher') ? 'teacher' : 'student',
   isPro: row.is_pro,
-  isHighlighted: row.is_highlighted || false,
+  isHighlighted: row.is_featured || row.is_highlighted || false,
   isFavorite: false,
 });
 
@@ -75,7 +75,7 @@ const Templates = () => {
         const { data, error } = await supabase
           .from('templates')
           .select('*')
-          .eq('is_active', true)
+          .eq('is_visible', true)
           .order('usage_count', { ascending: false });
 
         if (error) throw error;

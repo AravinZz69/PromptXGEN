@@ -98,10 +98,20 @@ export default function UserManagement() {
           avatar: (user.full_name || user.email || 'U').substring(0, 2).toUpperCase(),
           plan: (user.plan || 'free').charAt(0).toUpperCase() + (user.plan || 'free').slice(1),
           promptsUsed: user.used_credits || 0,
+          tokensUsed: (user.used_credits || 0) * 500, // Estimate tokens
           joinedDate: user.created_at,
           lastActive: user.last_login || user.updated_at,
           status: user.is_active === false ? 'Suspended' : 'Active',
           credits: user.credits_balance || 0,
+          // Extended profile fields
+          mobile: user.mobile || '',
+          city: user.city || '',
+          role: user.role || '',
+          useCase: user.use_case || '',
+          experienceLevel: user.experience_level || '',
+          emailVerified: user.email_verified || false,
+          phoneVerified: user.phone_verified || false,
+          avatarUrl: user.avatar_url || '',
         })));
         setLoading(false);
         return;
@@ -138,10 +148,10 @@ export default function UserManagement() {
 
       if (creditsError) console.error('Error fetching credits:', creditsError);
 
-      // Fetch user_profiles for status
+      // Fetch user_profiles for status and extended fields
       const { data: userProfiles, error: upError } = await supabase
         .from('user_profiles')
-        .select('user_id, is_active, last_login');
+        .select('user_id, is_active, last_login, mobile, city, role, use_case, experience_level');
 
       if (upError) console.error('Error fetching user_profiles:', upError);
 
@@ -157,10 +167,20 @@ export default function UserManagement() {
           avatar: (profile.full_name || profile.email || 'U').substring(0, 2).toUpperCase(),
           plan: (profile.plan || 'free').charAt(0).toUpperCase() + (profile.plan || 'free').slice(1),
           promptsUsed: userCredit?.used_credits || 0,
+          tokensUsed: (userCredit?.used_credits || 0) * 500,
           joinedDate: profile.created_at,
           lastActive: userProfile?.last_login || profile.updated_at,
           status: userProfile?.is_active === false ? 'Suspended' : 'Active',
           credits: userCredit?.credits_balance || 0,
+          // Extended profile fields
+          mobile: userProfile?.mobile || '',
+          city: userProfile?.city || '',
+          role: userProfile?.role || '',
+          useCase: userProfile?.use_case || '',
+          experienceLevel: userProfile?.experience_level || '',
+          emailVerified: false, // Not available in fallback
+          phoneVerified: false,
+          avatarUrl: profile.avatar_url || '',
         };
       });
 
@@ -797,15 +817,69 @@ export default function UserManagement() {
           <div className="p-6 space-y-6">
             {/* Profile */}
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white text-xl font-bold">
-                {viewUser.avatar}
-              </div>
+              {viewUser.avatarUrl ? (
+                <img src={viewUser.avatarUrl} alt={viewUser.name} className="w-16 h-16 rounded-full object-cover" />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white text-xl font-bold">
+                  {viewUser.avatar}
+                </div>
+              )}
               <div>
                 <h4 className="text-xl text-white font-semibold">{viewUser.name}</h4>
                 <p className="text-muted-foreground">{viewUser.email}</p>
                 <div className="flex items-center gap-2 mt-1">
                   <Badge label={viewUser.plan} variant={planVariants[viewUser.plan]} />
                   <Badge label={viewUser.status} variant={statusVariants[viewUser.status]} />
+                </div>
+              </div>
+            </div>
+
+            {/* Contact Information */}
+            <div className="bg-background rounded-xl p-4 space-y-3">
+              <h5 className="text-sm font-semibold text-muted-foreground uppercase">Contact Information</h5>
+              <div className="grid grid-cols-1 gap-3">
+                <div className="flex items-center gap-3">
+                  <Mail className="w-4 h-4 text-muted-foreground" />
+                  <div className="flex-1">
+                    <p className="text-xs text-muted-foreground">Email</p>
+                    <p className="text-sm text-white">{viewUser.email || 'Not provided'}</p>
+                  </div>
+                  {viewUser.emailVerified && (
+                    <CheckCircle className="w-4 h-4 text-green-400" title="Verified" />
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <Phone className="w-4 h-4 text-muted-foreground" />
+                  <div className="flex-1">
+                    <p className="text-xs text-muted-foreground">Mobile Number</p>
+                    <p className="text-sm text-white">{viewUser.mobile || 'Not provided'}</p>
+                  </div>
+                  {viewUser.phoneVerified && (
+                    <CheckCircle className="w-4 h-4 text-green-400" title="Verified" />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Profile Details */}
+            <div className="bg-background rounded-xl p-4 space-y-3">
+              <h5 className="text-sm font-semibold text-muted-foreground uppercase">Profile Details</h5>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs text-muted-foreground">City/Location</p>
+                  <p className="text-sm text-white">{viewUser.city || 'Not provided'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Role/Profession</p>
+                  <p className="text-sm text-white">{viewUser.role || 'Not provided'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Use Case</p>
+                  <p className="text-sm text-white">{viewUser.useCase || 'Not provided'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Experience Level</p>
+                  <p className="text-sm text-white capitalize">{viewUser.experienceLevel || 'Not provided'}</p>
                 </div>
               </div>
             </div>
@@ -826,7 +900,30 @@ export default function UserManagement() {
               </div>
               <div className="bg-background rounded-lg p-4">
                 <p className="text-xs text-muted-foreground uppercase">Last Login</p>
-                <p className="text-lg text-white font-bold">{new Date(viewUser.lastActive).toLocaleDateString()}</p>
+                <p className="text-lg text-white font-bold">{viewUser.lastActive ? new Date(viewUser.lastActive).toLocaleDateString() : 'Never'}</p>
+              </div>
+            </div>
+
+            {/* Account Details */}
+            <div className="bg-background rounded-xl p-4 space-y-3">
+              <h5 className="text-sm font-semibold text-muted-foreground uppercase">Account Details</h5>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs text-muted-foreground">User ID</p>
+                  <p className="text-xs text-white font-mono truncate" title={viewUser.id}>{viewUser.id?.substring(0, 8)}...</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Joined Date</p>
+                  <p className="text-sm text-white">{new Date(viewUser.joinedDate).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Current Plan</p>
+                  <p className="text-sm text-white">{viewUser.plan} Plan</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Account Status</p>
+                  <p className="text-sm text-white">{viewUser.status}</p>
+                </div>
               </div>
             </div>
 
@@ -834,7 +931,6 @@ export default function UserManagement() {
             <div>
               <h5 className="text-sm font-semibold text-muted-foreground uppercase mb-3">Subscription History</h5>
               <div className="space-y-2">
-                {/* MOCK DATA */}
                 <div className="flex items-center justify-between p-3 bg-background rounded-lg">
                   <span className="text-sm text-white">{viewUser.plan} Plan</span>
                   <span className="text-xs text-muted-foreground">Current</span>
@@ -843,20 +939,6 @@ export default function UserManagement() {
                   <span className="text-sm text-muted-foreground">Free Plan</span>
                   <span className="text-xs text-muted-foreground">{new Date(viewUser.joinedDate).toLocaleDateString()}</span>
                 </div>
-              </div>
-            </div>
-
-            {/* Recent Prompts */}
-            <div>
-              <h5 className="text-sm font-semibold text-muted-foreground uppercase mb-3">Recent Prompts</h5>
-              <div className="space-y-2">
-                {/* MOCK DATA */}
-                {['Code review for React component', 'Marketing copy for SaaS', 'Blog post outline', 'API documentation', 'Email template'].map((prompt, i) => (
-                  <div key={i} className="p-3 bg-background rounded-lg">
-                    <p className="text-sm text-white truncate">{prompt}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{i + 1} day{i > 0 ? 's' : ''} ago</p>
-                  </div>
-                ))}
               </div>
             </div>
 

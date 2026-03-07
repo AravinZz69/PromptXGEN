@@ -5,6 +5,42 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProfileDropdown } from '@/components/ui/profile-dropdown';
 import { Zap } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+
+// Types for CMS navbar config
+interface NavLink {
+  id: string;
+  label: string;
+  url: string;
+  isExternal?: boolean;
+  isVisible?: boolean;
+}
+
+interface NavbarConfig {
+  logoUrl: string;
+  siteName: string;
+  navLinks: NavLink[];
+  ctaText: string;
+  ctaUrl: string;
+  ctaVisible: boolean;
+}
+
+// Default values (fallback)
+const DEFAULT_NAVBAR: NavbarConfig = {
+  logoUrl: '',
+  siteName: 'AskJai',
+  navLinks: [
+    { id: '1', label: 'Features', url: '#features', isVisible: true },
+    { id: '2', label: 'Pricing', url: '#pricing', isVisible: true },
+    { id: '3', label: 'Templates', url: '/templates', isVisible: true },
+    { id: '4', label: 'Blogs', url: '/blogs', isVisible: true },
+    { id: '5', label: 'About', url: '/about', isVisible: true },
+    { id: '6', label: 'Contact', url: '/contact', isVisible: true },
+  ],
+  ctaText: 'Dashboard',
+  ctaUrl: '/dashboard',
+  ctaVisible: true,
+};
 
 interface NavLinkProps {
   to: string;
@@ -71,10 +107,27 @@ const AnimatedNavLink = ({ to, children, onClick }: NavLinkProps) => {
 export function MiniNavbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [headerShapeClass, setHeaderShapeClass] = useState('rounded-full');
+  const [navConfig, setNavConfig] = useState<NavbarConfig>(DEFAULT_NAVBAR);
   const shapeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Fetch navbar config from CMS
+  useEffect(() => {
+    const fetchNavbar = async () => {
+      const { data, error } = await supabase
+        .from('cms_config')
+        .select('data')
+        .eq('section', 'navbar')
+        .maybeSingle();
+
+      if (!error && data?.data) {
+        setNavConfig({ ...DEFAULT_NAVBAR, ...data.data });
+      }
+    };
+    fetchNavbar();
+  }, []);
 
   // Check if we're on a dashboard/app page (logged in user pages)
   const isDashboardPage = location.pathname.startsWith('/dashboard') || 
@@ -114,20 +167,19 @@ export function MiniNavbar() {
 
   const logoElement = (
     <Link to="/" className="flex items-center gap-2">
-      <img src="/askjai-logo.png" alt="AskJai" className="h-7 w-7" />
-      <span className="font-display text-sm font-bold text-white hidden sm:block">AskJai</span>
+      {navConfig.logoUrl ? (
+        <img src={navConfig.logoUrl} alt={navConfig.siteName} className="h-7 w-7" />
+      ) : (
+        <img src="/askjai-logo.png" alt="AskJai" className="h-7 w-7" />
+      )}
+      <span className="font-display text-sm font-bold text-white hidden sm:block">{navConfig.siteName}</span>
     </Link>
   );
 
-  // Different nav links for landing vs dashboard
-  const landingNavLinks = [
-    { label: 'Features', to: '#features' },
-    { label: 'Pricing', to: '#pricing' },
-    { label: 'Templates', to: '#templates' },
-    { label: 'Blogs', to: '/blogs' },
-    { label: 'About', to: '/about' },
-    { label: 'Contact', to: '/contact' },
-  ];
+  // Use CMS nav links for landing, filter visible ones
+  const landingNavLinks = navConfig.navLinks
+    .filter(link => link.isVisible !== false)
+    .map(link => ({ label: link.label, to: link.url }));
 
   const dashboardNavLinks = [
     { label: 'Dashboard', to: '/dashboard' },
@@ -167,14 +219,14 @@ export function MiniNavbar() {
     </div>
   );
 
-  const dashboardButtonElement = (
+  const dashboardButtonElement = navConfig.ctaVisible ? (
     <Link 
-      to="/dashboard"
+      to={navConfig.ctaUrl}
       className="relative z-10 px-4 py-2 sm:px-3 text-xs sm:text-sm font-semibold text-black bg-gradient-to-br from-primary to-purple-400 rounded-full hover:from-primary/90 hover:to-purple-500 transition-all duration-200 w-full sm:w-auto text-center"
     >
-      Dashboard
+      {navConfig.ctaText}
     </Link>
-  );
+  ) : null;
 
   // Render right side content based on page type
   const renderRightContent = () => {

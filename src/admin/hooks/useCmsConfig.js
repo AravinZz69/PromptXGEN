@@ -42,21 +42,27 @@ export function useCmsConfig(section) {
       setLoading(true);
       setError(null);
 
+      console.log(`[CMS] Fetching section '${section}'...`);
+
       const { data: configData, error: fetchError } = await supabase
         .from('cms_config')
         .select('*')
         .eq('section', section)
         .single();
 
+      console.log(`[CMS] Fetch response for '${section}':`, { configData, fetchError });
+
       if (fetchError) {
         // If no record exists yet, return empty object (not an error)
         if (fetchError.code === 'PGRST116') {
+          console.log(`[CMS] No record found for '${section}', using defaults`);
           setData({});
           setError(null);
         } else {
           throw fetchError;
         }
       } else {
+        console.log(`[CMS] Setting data for '${section}':`, configData?.data);
         setData(configData?.data || {});
       }
     } catch (err) {
@@ -80,10 +86,12 @@ export function useCmsConfig(section) {
       setSaving(true);
       setError(null);
 
+      console.log(`[CMS] Saving section '${section}':`, newData);
+
       // Optimistic update
       setData(newData);
 
-      const { error: saveError } = await supabase
+      const { data: savedData, error: saveError } = await supabase
         .from('cms_config')
         .upsert(
           {
@@ -94,7 +102,10 @@ export function useCmsConfig(section) {
           {
             onConflict: 'section',
           }
-        );
+        )
+        .select();
+
+      console.log(`[CMS] Save response:`, { savedData, saveError });
 
       if (saveError) throw saveError;
 

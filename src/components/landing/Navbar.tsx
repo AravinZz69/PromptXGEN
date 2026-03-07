@@ -68,7 +68,32 @@ const Navbar = () => {
         console.log('[Navbar] Using defaults, error:', error?.message);
       }
     };
+    
     fetchNavbar();
+
+    // Subscribe to realtime updates
+    const channel = supabase
+      .channel('navbar-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'cms_config',
+          filter: 'section=eq.navbar',
+        },
+        (payload) => {
+          console.log('[Navbar] Realtime update received:', payload);
+          if (payload.new && (payload.new as any).data) {
+            setConfig({ ...DEFAULT_NAVBAR, ...(payload.new as any).data });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   // Filter visible nav links

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProfileDropdown } from '@/components/ui/profile-dropdown';
+import { NotificationBell } from '@/components/ui/notification-bell';
 import { Zap } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -244,7 +245,12 @@ export function MiniNavbar() {
       return null;
     }
     if (user) {
-      return dashboardButtonElement;
+      return (
+        <div className="flex items-center gap-2">
+          <NotificationBell />
+          {dashboardButtonElement}
+        </div>
+      );
     }
     return (
       <>
@@ -261,7 +267,12 @@ export function MiniNavbar() {
       return null;
     }
     if (user) {
-      return dashboardButtonElement;
+      return (
+        <div className="flex items-center gap-2">
+          <NotificationBell />
+          {dashboardButtonElement}
+        </div>
+      );
     }
     return (
       <>
@@ -275,7 +286,8 @@ export function MiniNavbar() {
     <>
       {/* Fixed Profile Dropdown at top-right for dashboard pages */}
       {isDashboardPage && user && (
-        <div className="fixed top-6 right-6 z-50">
+        <div className="fixed top-6 right-6 z-50 flex items-center gap-2">
+          <NotificationBell />
           <ProfileDropdown compact />
         </div>
       )}

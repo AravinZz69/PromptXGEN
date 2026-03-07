@@ -105,6 +105,7 @@ export default function Notifications() {
 
   const handleSendNotification = async (schedule = false) => {
     try {
+      // Insert admin notification record
       const { data, error } = await supabase
         .from('admin_notifications')
         .insert({
@@ -116,23 +117,39 @@ export default function Notifications() {
           sent_at: schedule ? null : new Date().toISOString(),
           scheduled_for: schedule ? newNotification.scheduledFor : null,
           priority: newNotification.priority,
-          recipients: newNotification.audience === 'all' ? 3241 : 
-            newNotification.audience === 'pro' ? 890 : 
-            newNotification.audience === 'free' ? 2351 : 0,
+          recipients: 0, // Will be updated by the function
         })
         .select()
         .single();
 
       if (error) throw error;
 
+      let actualRecipients = 0;
+
+      // If in-app channel is selected and not scheduled, send to users immediately
+      if (!schedule && newNotification.channels.includes('in-app')) {
+        const { data: result, error: sendError } = await supabase
+          .rpc('send_notification_to_users', {
+            p_admin_notification_id: data.id,
+            p_title: newNotification.title,
+            p_message: newNotification.message,
+            p_audience: newNotification.audience,
+            p_priority: newNotification.priority,
+          });
+
+        if (sendError) {
+          console.error('Error sending in-app notifications:', sendError);
+        } else {
+          actualRecipients = result || 0;
+        }
+      }
+
       const notification = {
         id: data.id,
         ...newNotification,
         status: schedule ? 'Scheduled' : 'Sent',
         sentAt: schedule ? null : new Date().toISOString(),
-        recipients: newNotification.audience === 'all' ? 3241 : 
-          newNotification.audience === 'pro' ? 890 : 
-          newNotification.audience === 'free' ? 2351 : 0,
+        recipients: actualRecipients,
         openRate: 0,
       };
 

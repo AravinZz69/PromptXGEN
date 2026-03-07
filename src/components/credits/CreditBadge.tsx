@@ -42,7 +42,7 @@ export function CreditBadge({ className, showLabel = true, size = 'md' }: Credit
 
   // Get color based on percentage
   const getStatusColor = () => {
-    if (credits?.planType === 'enterprise') return 'text-purple-400 bg-purple-500/10 border-purple-500/30';
+    if (credits?.planType === 'enterprise') return 'text-accent-foreground bg-accent/10 border-accent/30';
     if (creditPercentage > 50) return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30';
     if (creditPercentage > 20) return 'text-amber-400 bg-amber-500/10 border-amber-500/30';
     return 'text-red-400 bg-red-500/10 border-red-500/30';
@@ -85,7 +85,7 @@ export function CreditBadge({ className, showLabel = true, size = 'md' }: Credit
         )}
       >
         <div className={cn('rounded-full bg-gray-500/30', sizeClasses.icon)} />
-        <span className="text-gray-400">...</span>
+        <span className="text-muted-foreground">...</span>
       </div>
     );
   }
@@ -119,7 +119,7 @@ export function CreditBadge({ className, showLabel = true, size = 'md' }: Credit
           </motion.span>
         </AnimatePresence>
         {showLabel && (
-          <span className="text-gray-400 font-normal">
+          <span className="text-muted-foreground font-normal">
             {isUnlimited ? '' : 'credits'}
           </span>
         )}

@@ -16,6 +16,8 @@ export default {
       fontFamily: {
         display: ['var(--font-display, "Space Grotesk")', 'system-ui', 'sans-serif'],
         body: ['var(--font-body, Inter)', 'system-ui', 'sans-serif'],
+        heading: ['var(--font-heading)', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-mono)', 'monospace'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -63,11 +65,39 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Theme system colors (CSS variable based)
+        theme: {
+          bg: "var(--bg-primary)",
+          surface: "var(--bg-secondary)",
+          card: "var(--bg-card)",
+          "card-hover": "var(--bg-card-hover)",
+          border: "var(--border-color)",
+          "border-hover": "var(--border-hover)",
+          text: "var(--text-primary)",
+          muted: "var(--text-secondary)",
+          faint: "var(--text-muted)",
+          accent: "var(--accent-primary)",
+          "accent-2": "var(--accent-secondary)",
+          "btn-bg": "var(--btn-primary-bg)",
+          "btn-hover": "var(--btn-primary-hover)",
+          "btn-text": "var(--btn-primary-text)",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        card: "var(--radius-card)",
+        btn: "var(--radius-btn)",
+      },
+      boxShadow: {
+        "theme-card": "var(--shadow-card)",
+        "theme-glow": "var(--shadow-glow)",
+      },
+      backgroundImage: {
+        "gradient-hero": "var(--gradient-hero)",
+        "gradient-accent": "var(--gradient-accent)",
+        "gradient-card": "var(--gradient-card)",
       },
       keyframes: {
         "accordion-down": {

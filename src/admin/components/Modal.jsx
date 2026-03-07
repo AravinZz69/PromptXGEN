@@ -68,14 +68,14 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' })
       <div
         ref={modalRef}
         tabIndex={-1}
-        className={`relative ${sizes[size]} w-full mx-4 bg-[#111827] border border-gray-800 rounded-xl shadow-2xl`}
+        className={`relative ${sizes[size]} w-full mx-4 bg-card border border-border rounded-xl shadow-2xl`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <h3 className="text-lg font-semibold text-white">{title}</h3>
           <button
             onClick={onClose}
-            className="p-1 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+            className="p-1 text-muted-foreground hover:text-white hover:bg-muted rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>

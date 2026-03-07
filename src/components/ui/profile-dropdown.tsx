@@ -200,10 +200,10 @@ export function ProfileDropdown({
                             <DropdownMenuItem asChild>
                                 <Link
                                     to="/admin/dashboard"
-                                    className="flex items-center gap-3 p-3 mb-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 cursor-pointer border border-indigo-500/20 hover:border-indigo-500/30 transition-all group"
+                                    className="flex items-center gap-3 p-3 mb-2 rounded-xl bg-primary/10 hover:bg-primary/20 cursor-pointer border border-primary/20 hover:border-primary/30 transition-all group"
                                 >
-                                    <Shield className="w-4 h-4 text-indigo-400" />
-                                    <span className="text-sm font-medium text-indigo-400">
+                                    <Shield className="w-4 h-4 text-primary" />
+                                    <span className="text-sm font-medium text-primary">
                                         Admin Panel
                                     </span>
                                 </Link>

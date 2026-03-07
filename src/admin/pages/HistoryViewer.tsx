@@ -114,24 +114,24 @@ export default function HistoryViewer() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white">History Viewer</h1>
-        <p className="text-gray-400 text-sm">
+        <p className="text-muted-foreground text-sm">
           View all prompt generations and chat sessions
         </p>
       </div>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)}>
-        <TabsList className="bg-gray-800 border border-gray-700">
+        <TabsList className="bg-muted border border-border">
           <TabsTrigger
             value="prompts"
-            className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white gap-2"
+            className="data-[state=active]:bg-primary data-[state=active]:text-white gap-2"
           >
             <FileText className="w-4 h-4" />
             Prompt History
           </TabsTrigger>
           <TabsTrigger
             value="chats"
-            className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white gap-2"
+            className="data-[state=active]:bg-primary data-[state=active]:text-white gap-2"
           >
             <MessageSquare className="w-4 h-4" />
             Chat History
@@ -348,7 +348,7 @@ function PromptHistoryTab() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -366,21 +366,21 @@ function PromptHistoryTab() {
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by email or input..."
-            className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg"
+            className="w-full pl-10 pr-4 py-2 bg-muted border border-border text-white placeholder-muted-foreground rounded-lg"
           />
         </div>
 
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-[130px] bg-gray-800 border-gray-700 text-white">
+          <SelectTrigger className="w-[130px] bg-muted border-border text-white">
             <SelectValue placeholder="Type" />
           </SelectTrigger>
-          <SelectContent className="bg-gray-800 border-gray-700">
+          <SelectContent className="bg-muted border-border">
             <SelectItem value="all">All Types</SelectItem>
             <SelectItem value="basic">Basic</SelectItem>
             <SelectItem value="advanced">Advanced</SelectItem>
@@ -390,10 +390,10 @@ function PromptHistoryTab() {
         </Select>
 
         <Select value={dateRange} onValueChange={(v: any) => setDateRange(v)}>
-          <SelectTrigger className="w-[140px] bg-gray-800 border-gray-700 text-white">
+          <SelectTrigger className="w-[140px] bg-muted border-border text-white">
             <SelectValue placeholder="Date Range" />
           </SelectTrigger>
-          <SelectContent className="bg-gray-800 border-gray-700">
+          <SelectContent className="bg-muted border-border">
             <SelectItem value="all">All Time</SelectItem>
             <SelectItem value="today">Today</SelectItem>
             <SelectItem value="7days">Last 7 Days</SelectItem>
@@ -402,10 +402,10 @@ function PromptHistoryTab() {
         </Select>
 
         <Select value={flagFilter} onValueChange={setFlagFilter}>
-          <SelectTrigger className="w-[120px] bg-gray-800 border-gray-700 text-white">
+          <SelectTrigger className="w-[120px] bg-muted border-border text-white">
             <SelectValue placeholder="Flag" />
           </SelectTrigger>
-          <SelectContent className="bg-gray-800 border-gray-700">
+          <SelectContent className="bg-muted border-border">
             <SelectItem value="all">All</SelectItem>
             <SelectItem value="flagged">Flagged</SelectItem>
             <SelectItem value="clean">Clean</SelectItem>
@@ -415,7 +415,7 @@ function PromptHistoryTab() {
         <Button
           variant="outline"
           onClick={handleExportCSV}
-          className="border-gray-700 text-gray-300 hover:bg-gray-800 gap-2"
+          className="border-border text-muted-foreground hover:bg-muted gap-2"
         >
           <Download className="w-4 h-4" />
           Export CSV
@@ -423,33 +423,33 @@ function PromptHistoryTab() {
       </div>
 
       {/* Table */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+      <div className="bg-muted border border-border rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-800/50">
+            <thead className="bg-muted/50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                   User
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                   Type
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                   Input
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                   Model
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
                   Credits
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
                   Flagged
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                   Date
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
                   Actions
                 </th>
               </tr>
@@ -459,13 +459,13 @@ function PromptHistoryTab() {
                 <tr>
                   <td colSpan={8} className="px-4 py-12 text-center">
                     <FileText className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                    <p className="text-gray-400">No prompts found</p>
+                    <p className="text-muted-foreground">No prompts found</p>
                   </td>
                 </tr>
               ) : (
                 paginatedItems.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-800/50">
-                    <td className="px-4 py-3 text-sm text-gray-300">
+                  <tr key={item.id} className="hover:bg-muted/50">
+                    <td className="px-4 py-3 text-sm text-muted-foreground">
                       {item.user_email || 'Unknown'}
                     </td>
                     <td className="px-4 py-3">
@@ -473,18 +473,18 @@ function PromptHistoryTab() {
                         item.type === 'basic' ? 'bg-blue-500/20 text-blue-400' :
                         item.type === 'advanced' ? 'bg-purple-500/20 text-purple-400' :
                         item.type === 'cot' ? 'bg-green-500/20 text-green-400' :
-                        'bg-indigo-500/20 text-indigo-400'
+                        'bg-primary/20 text-primary'
                       }`}>
                         {item.type || 'basic'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-400 max-w-[300px] truncate">
+                    <td className="px-4 py-3 text-sm text-muted-foreground max-w-[300px] truncate">
                       {item.input_text?.substring(0, 60)}...
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-500">
+                    <td className="px-4 py-3 text-xs text-muted-foreground">
                       {item.model}
                     </td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-400">
+                    <td className="px-4 py-3 text-center text-sm text-muted-foreground">
                       {item.credits_used}
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -494,14 +494,14 @@ function PromptHistoryTab() {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-500">
+                    <td className="px-4 py-3 text-xs text-muted-foreground">
                       {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center gap-1">
                         <button
                           onClick={() => setViewItem(item)}
-                          className="p-1.5 rounded hover:bg-gray-700 text-gray-400 hover:text-white"
+                          className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-white"
                           title="View"
                         >
                           <Eye className="w-4 h-4" />
@@ -511,8 +511,8 @@ function PromptHistoryTab() {
                             setFlagItem(item);
                             setFlagReason(item.flag_reason || '');
                           }}
-                          className={`p-1.5 rounded hover:bg-gray-700 ${
-                            item.is_flagged ? 'text-red-400' : 'text-gray-400 hover:text-white'
+                          className={`p-1.5 rounded hover:bg-muted ${
+                            item.is_flagged ? 'text-red-400' : 'text-muted-foreground hover:text-white'
                           }`}
                           title="Flag"
                         >
@@ -520,7 +520,7 @@ function PromptHistoryTab() {
                         </button>
                         <button
                           onClick={() => setDeleteItem(item)}
-                          className="p-1.5 rounded hover:bg-red-500/20 text-gray-400 hover:text-red-400"
+                          className="p-1.5 rounded hover:bg-red-500/20 text-muted-foreground hover:text-red-400"
                           title="Delete"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -536,8 +536,8 @@ function PromptHistoryTab() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-gray-800">
-            <span className="text-sm text-gray-400">
+          <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+            <span className="text-sm text-muted-foreground">
               Page {currentPage} of {totalPages}
             </span>
             <div className="flex items-center gap-2">
@@ -546,7 +546,7 @@ function PromptHistoryTab() {
                 variant="outline"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((p) => p - 1)}
-                className="border-gray-700 text-gray-300"
+                className="border-border text-muted-foreground"
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
@@ -555,7 +555,7 @@ function PromptHistoryTab() {
                 variant="outline"
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((p) => p + 1)}
-                className="border-gray-700 text-gray-300"
+                className="border-border text-muted-foreground"
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
@@ -566,20 +566,20 @@ function PromptHistoryTab() {
 
       {/* View Detail Modal */}
       <Dialog open={!!viewItem} onOpenChange={() => setViewItem(null)}>
-        <DialogContent className="bg-gray-900 border-gray-800 max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="bg-muted border-border max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white">Prompt Details</DialogTitle>
           </DialogHeader>
           {viewItem && (
             <div className="space-y-4">
               {/* User Info */}
-              <div className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg">
-                <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold">
+              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold">
                   {viewItem.user_email?.charAt(0).toUpperCase() || 'U'}
                 </div>
                 <div>
                   <p className="text-white font-medium">{viewItem.user_email}</p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-muted-foreground">
                     {new Date(viewItem.created_at).toLocaleString()}
                   </p>
                 </div>
@@ -587,7 +587,7 @@ function PromptHistoryTab() {
                   viewItem.type === 'basic' ? 'bg-blue-500/20 text-blue-400' :
                   viewItem.type === 'advanced' ? 'bg-purple-500/20 text-purple-400' :
                   viewItem.type === 'cot' ? 'bg-green-500/20 text-green-400' :
-                  'bg-indigo-500/20 text-indigo-400'
+                  'bg-primary/20 text-primary'
                 }`}>
                   {viewItem.type}
                 </span>
@@ -595,22 +595,22 @@ function PromptHistoryTab() {
 
               {/* Input */}
               <div>
-                <label className="text-xs text-gray-500 uppercase">Input</label>
-                <div className="mt-1 p-3 bg-gray-800 rounded-lg text-sm text-gray-300 whitespace-pre-wrap">
+                <label className="text-xs text-muted-foreground uppercase">Input</label>
+                <div className="mt-1 p-3 bg-muted rounded-lg text-sm text-muted-foreground whitespace-pre-wrap">
                   {viewItem.input_text}
                 </div>
               </div>
 
               {/* Output */}
               <div>
-                <label className="text-xs text-gray-500 uppercase">Output</label>
-                <div className="mt-1 p-3 bg-gray-800/50 border border-gray-700 rounded-lg text-sm text-gray-300 whitespace-pre-wrap max-h-[300px] overflow-y-auto">
+                <label className="text-xs text-muted-foreground uppercase">Output</label>
+                <div className="mt-1 p-3 bg-muted/50 border border-border rounded-lg text-sm text-muted-foreground whitespace-pre-wrap max-h-[300px] overflow-y-auto">
                   {viewItem.output_text}
                 </div>
               </div>
 
               {/* Metadata */}
-              <div className="flex items-center gap-4 text-xs text-gray-500">
+              <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 <span>Model: {viewItem.model}</span>
                 <span>Credits: {viewItem.credits_used}</span>
                 {viewItem.is_flagged && (
@@ -626,7 +626,7 @@ function PromptHistoryTab() {
 
       {/* Flag Dialog */}
       <Dialog open={!!flagItem} onOpenChange={() => setFlagItem(null)}>
-        <DialogContent className="bg-gray-900 border-gray-800">
+        <DialogContent className="bg-muted border-border">
           <DialogHeader>
             <DialogTitle className="text-white">
               {flagItem?.is_flagged ? 'Unflag Prompt' : 'Flag Prompt'}
@@ -635,7 +635,7 @@ function PromptHistoryTab() {
           <div className="space-y-4">
             {!flagItem?.is_flagged && (
               <div>
-                <label className="block text-sm text-gray-300 mb-2">
+                <label className="block text-sm text-muted-foreground mb-2">
                   Reason for flagging
                 </label>
                 <textarea
@@ -643,7 +643,7 @@ function PromptHistoryTab() {
                   onChange={(e) => setFlagReason(e.target.value)}
                   placeholder="Enter reason..."
                   rows={3}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 text-white rounded-lg"
+                  className="w-full px-3 py-2 bg-muted border border-border text-white rounded-lg"
                 />
               </div>
             )}
@@ -651,7 +651,7 @@ function PromptHistoryTab() {
               <Button
                 variant="outline"
                 onClick={() => setFlagItem(null)}
-                className="border-gray-700 text-gray-300"
+                className="border-border text-muted-foreground"
               >
                 Cancel
               </Button>
@@ -668,15 +668,15 @@ function PromptHistoryTab() {
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteItem} onOpenChange={() => setDeleteItem(null)}>
-        <AlertDialogContent className="bg-gray-900 border-gray-800">
+        <AlertDialogContent className="bg-muted border-border">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Delete Prompt?</AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-400">
+            <AlertDialogDescription className="text-muted-foreground">
               This will permanently delete this prompt history entry.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-gray-800 text-gray-300 border-gray-700">
+            <AlertDialogCancel className="bg-muted text-muted-foreground border-border">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
@@ -858,7 +858,7 @@ function ChatHistoryTab() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -876,21 +876,21 @@ function ChatHistoryTab() {
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by email..."
-            className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg"
+            className="w-full pl-10 pr-4 py-2 bg-muted border border-border text-white placeholder-muted-foreground rounded-lg"
           />
         </div>
 
         <Select value={dateRange} onValueChange={(v: any) => setDateRange(v)}>
-          <SelectTrigger className="w-[140px] bg-gray-800 border-gray-700 text-white">
+          <SelectTrigger className="w-[140px] bg-muted border-border text-white">
             <SelectValue placeholder="Date Range" />
           </SelectTrigger>
-          <SelectContent className="bg-gray-800 border-gray-700">
+          <SelectContent className="bg-muted border-border">
             <SelectItem value="all">All Time</SelectItem>
             <SelectItem value="today">Today</SelectItem>
             <SelectItem value="7days">Last 7 Days</SelectItem>
@@ -899,10 +899,10 @@ function ChatHistoryTab() {
         </Select>
 
         <Select value={flagFilter} onValueChange={setFlagFilter}>
-          <SelectTrigger className="w-[120px] bg-gray-800 border-gray-700 text-white">
+          <SelectTrigger className="w-[120px] bg-muted border-border text-white">
             <SelectValue placeholder="Flag" />
           </SelectTrigger>
-          <SelectContent className="bg-gray-800 border-gray-700">
+          <SelectContent className="bg-muted border-border">
             <SelectItem value="all">All</SelectItem>
             <SelectItem value="flagged">Flagged</SelectItem>
             <SelectItem value="clean">Clean</SelectItem>
@@ -912,7 +912,7 @@ function ChatHistoryTab() {
         <Button
           variant="outline"
           onClick={handleExportCSV}
-          className="border-gray-700 text-gray-300 hover:bg-gray-800 gap-2"
+          className="border-border text-muted-foreground hover:bg-muted gap-2"
         >
           <Download className="w-4 h-4" />
           Export CSV
@@ -920,30 +920,30 @@ function ChatHistoryTab() {
       </div>
 
       {/* Table */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+      <div className="bg-muted border border-border rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-800/50">
+            <thead className="bg-muted/50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                   User
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
                   Messages
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
                   Credits
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                   Model
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
                   Flagged
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                   Date
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
                   Actions
                 </th>
               </tr>
@@ -953,22 +953,22 @@ function ChatHistoryTab() {
                 <tr>
                   <td colSpan={7} className="px-4 py-12 text-center">
                     <MessageSquare className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                    <p className="text-gray-400">No chat sessions found</p>
+                    <p className="text-muted-foreground">No chat sessions found</p>
                   </td>
                 </tr>
               ) : (
                 paginatedItems.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-800/50">
-                    <td className="px-4 py-3 text-sm text-gray-300">
+                  <tr key={item.id} className="hover:bg-muted/50">
+                    <td className="px-4 py-3 text-sm text-muted-foreground">
                       {item.user_email || 'Unknown'}
                     </td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-400">
+                    <td className="px-4 py-3 text-center text-sm text-muted-foreground">
                       {item.total_messages || item.messages?.length || 0}
                     </td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-400">
+                    <td className="px-4 py-3 text-center text-sm text-muted-foreground">
                       {item.credits_used}
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-500">
+                    <td className="px-4 py-3 text-xs text-muted-foreground">
                       {item.model}
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -978,14 +978,14 @@ function ChatHistoryTab() {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-500">
+                    <td className="px-4 py-3 text-xs text-muted-foreground">
                       {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center gap-1">
                         <button
                           onClick={() => setViewItem(item)}
-                          className="p-1.5 rounded hover:bg-gray-700 text-gray-400 hover:text-white"
+                          className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-white"
                           title="View Conversation"
                         >
                           <Eye className="w-4 h-4" />
@@ -995,8 +995,8 @@ function ChatHistoryTab() {
                             setFlagItem(item);
                             setFlagReason(item.flag_reason || '');
                           }}
-                          className={`p-1.5 rounded hover:bg-gray-700 ${
-                            item.is_flagged ? 'text-red-400' : 'text-gray-400 hover:text-white'
+                          className={`p-1.5 rounded hover:bg-muted ${
+                            item.is_flagged ? 'text-red-400' : 'text-muted-foreground hover:text-white'
                           }`}
                           title="Flag"
                         >
@@ -1004,7 +1004,7 @@ function ChatHistoryTab() {
                         </button>
                         <button
                           onClick={() => setDeleteItem(item)}
-                          className="p-1.5 rounded hover:bg-red-500/20 text-gray-400 hover:text-red-400"
+                          className="p-1.5 rounded hover:bg-red-500/20 text-muted-foreground hover:text-red-400"
                           title="Delete"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -1020,8 +1020,8 @@ function ChatHistoryTab() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-gray-800">
-            <span className="text-sm text-gray-400">
+          <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+            <span className="text-sm text-muted-foreground">
               Page {currentPage} of {totalPages}
             </span>
             <div className="flex items-center gap-2">
@@ -1030,7 +1030,7 @@ function ChatHistoryTab() {
                 variant="outline"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((p) => p - 1)}
-                className="border-gray-700 text-gray-300"
+                className="border-border text-muted-foreground"
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
@@ -1039,7 +1039,7 @@ function ChatHistoryTab() {
                 variant="outline"
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((p) => p + 1)}
-                className="border-gray-700 text-gray-300"
+                className="border-border text-muted-foreground"
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
@@ -1050,20 +1050,20 @@ function ChatHistoryTab() {
 
       {/* Conversation Modal */}
       <Dialog open={!!viewItem} onOpenChange={() => setViewItem(null)}>
-        <DialogContent className="bg-gray-900 border-gray-800 max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+        <DialogContent className="bg-muted border-border max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle className="text-white">Chat Conversation</DialogTitle>
           </DialogHeader>
           {viewItem && (
             <div className="flex-1 overflow-y-auto space-y-4">
               {/* Header */}
-              <div className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg sticky top-0">
-                <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold">
+              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg sticky top-0">
+                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold">
                   {viewItem.user_email?.charAt(0).toUpperCase() || 'U'}
                 </div>
                 <div>
                   <p className="text-white font-medium">{viewItem.user_email}</p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-muted-foreground">
                     {viewItem.total_messages || viewItem.messages?.length || 0} messages • {viewItem.credits_used} credits
                   </p>
                 </div>
@@ -1079,14 +1079,14 @@ function ChatHistoryTab() {
                     <div
                       className={`max-w-[80%] px-4 py-2 rounded-2xl ${
                         msg.role === 'user'
-                          ? 'bg-indigo-600 text-white rounded-br-md'
-                          : 'bg-gray-800 text-gray-300 rounded-bl-md'
+                          ? 'bg-primary text-white rounded-br-md'
+                          : 'bg-muted text-muted-foreground rounded-bl-md'
                       }`}
                     >
                       <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                       {msg.timestamp && (
                         <p className={`text-xs mt-1 ${
-                          msg.role === 'user' ? 'text-indigo-200' : 'text-gray-500'
+                          msg.role === 'user' ? 'text-indigo-200' : 'text-muted-foreground'
                         }`}>
                           {new Date(msg.timestamp).toLocaleTimeString()}
                         </p>
@@ -1112,7 +1112,7 @@ function ChatHistoryTab() {
 
       {/* Flag Dialog */}
       <Dialog open={!!flagItem} onOpenChange={() => setFlagItem(null)}>
-        <DialogContent className="bg-gray-900 border-gray-800">
+        <DialogContent className="bg-muted border-border">
           <DialogHeader>
             <DialogTitle className="text-white">
               {flagItem?.is_flagged ? 'Unflag Chat' : 'Flag Chat'}
@@ -1121,7 +1121,7 @@ function ChatHistoryTab() {
           <div className="space-y-4">
             {!flagItem?.is_flagged && (
               <div>
-                <label className="block text-sm text-gray-300 mb-2">
+                <label className="block text-sm text-muted-foreground mb-2">
                   Reason for flagging
                 </label>
                 <textarea
@@ -1129,7 +1129,7 @@ function ChatHistoryTab() {
                   onChange={(e) => setFlagReason(e.target.value)}
                   placeholder="Enter reason..."
                   rows={3}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 text-white rounded-lg"
+                  className="w-full px-3 py-2 bg-muted border border-border text-white rounded-lg"
                 />
               </div>
             )}
@@ -1137,7 +1137,7 @@ function ChatHistoryTab() {
               <Button
                 variant="outline"
                 onClick={() => setFlagItem(null)}
-                className="border-gray-700 text-gray-300"
+                className="border-border text-muted-foreground"
               >
                 Cancel
               </Button>
@@ -1154,15 +1154,15 @@ function ChatHistoryTab() {
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteItem} onOpenChange={() => setDeleteItem(null)}>
-        <AlertDialogContent className="bg-gray-900 border-gray-800">
+        <AlertDialogContent className="bg-muted border-border">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Delete Chat Session?</AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-400">
+            <AlertDialogDescription className="text-muted-foreground">
               This will permanently delete this chat session and all messages.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-gray-800 text-gray-300 border-gray-700">
+            <AlertDialogCancel className="bg-muted text-muted-foreground border-border">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
@@ -1189,8 +1189,8 @@ function StatCard({
   color?: 'white' | 'red';
 }) {
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-      <p className="text-gray-400 text-xs uppercase tracking-wider">{label}</p>
+    <div className="bg-muted border border-border rounded-xl p-4">
+      <p className="text-muted-foreground text-xs uppercase tracking-wider">{label}</p>
       <p className={`text-2xl font-bold mt-1 ${color === 'red' ? 'text-red-400' : 'text-white'}`}>
         {value.toLocaleString()}
       </p>

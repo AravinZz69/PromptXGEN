@@ -210,7 +210,7 @@ export function AuthPageEditor() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -221,14 +221,14 @@ export function AuthPageEditor() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Auth Page Editor</h1>
-          <p className="text-gray-400 text-sm">
+          <p className="text-muted-foreground text-sm">
             Customize login, signup, and password reset pages
           </p>
         </div>
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="bg-indigo-600 hover:bg-indigo-700"
+          className="bg-primary hover:bg-primary/90"
         >
           {saving ? (
             <>
@@ -243,89 +243,89 @@ export function AuthPageEditor() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-gray-800 border-gray-700">
-          <TabsTrigger value="login" className="data-[state=active]:bg-indigo-600">
+        <TabsList className="bg-muted border-border">
+          <TabsTrigger value="login" className="data-[state=active]:bg-primary">
             Login Page
           </TabsTrigger>
-          <TabsTrigger value="signup" className="data-[state=active]:bg-indigo-600">
+          <TabsTrigger value="signup" className="data-[state=active]:bg-primary">
             Signup Page
           </TabsTrigger>
-          <TabsTrigger value="forgot" className="data-[state=active]:bg-indigo-600">
+          <TabsTrigger value="forgot" className="data-[state=active]:bg-primary">
             Forgot Password
           </TabsTrigger>
         </TabsList>
 
         {/* LOGIN TAB */}
         <TabsContent value="login" className="space-y-6">
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-6">
+          <div className="bg-muted border border-border rounded-xl p-6 space-y-6">
             <h2 className="text-lg font-semibold text-white">Branding & Content</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Logo URL
                 </label>
                 <input
                   type="text"
                   value={config.login.logoUrl}
                   onChange={(e) => updateLogin('logoUrl', e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
                   placeholder="/askjai-logo.png"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Site Name
                 </label>
                 <input
                   type="text"
                   value={config.login.siteName}
                   onChange={(e) => updateLogin('siteName', e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Heading
                 </label>
                 <input
                   type="text"
                   value={config.login.heading}
                   onChange={(e) => updateLogin('heading', e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Subheading
                 </label>
                 <input
                   type="text"
                   value={config.login.subheading}
                   onChange={(e) => updateLogin('subheading', e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Submit Button Text
                 </label>
                 <input
                   type="text"
                   value={config.login.submitButtonText}
                   onChange={(e) => updateLogin('submitButtonText', e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Forgot Password Text
                 </label>
                 <input
                   type="text"
                   value={config.login.forgotPasswordText}
                   onChange={(e) => updateLogin('forgotPasswordText', e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
                 />
               </div>
             </div>
@@ -337,41 +337,41 @@ export function AuthPageEditor() {
                   checked={config.login.showGoogleLogin}
                   onCheckedChange={(val) => updateLogin('showGoogleLogin', val)}
                 />
-                <span className="text-gray-300">Show Google Login</span>
+                <span className="text-muted-foreground">Show Google Login</span>
               </div>
               <div className="flex items-center gap-3">
                 <Switch
                   checked={config.login.showGitHubLogin}
                   onCheckedChange={(val) => updateLogin('showGitHubLogin', val)}
                 />
-                <span className="text-gray-300">Show GitHub Login</span>
+                <span className="text-muted-foreground">Show GitHub Login</span>
               </div>
             </div>
 
             {config.login.showGoogleLogin && (
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Google Button Text
                 </label>
                 <input
                   type="text"
                   value={config.login.googleButtonText}
                   onChange={(e) => updateLogin('googleButtonText', e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
                 />
               </div>
             )}
 
             {config.login.showGitHubLogin && (
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   GitHub Button Text
                 </label>
                 <input
                   type="text"
                   value={config.login.githubButtonText}
                   onChange={(e) => updateLogin('githubButtonText', e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
                 />
               </div>
             )}
@@ -381,43 +381,43 @@ export function AuthPageEditor() {
         {/* SIGNUP TAB */}
         <TabsContent value="signup" className="space-y-6">
           {/* Basic Info */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+          <div className="bg-muted border border-border rounded-xl p-6 space-y-4">
             <h2 className="text-lg font-semibold text-white">Basic Info</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Heading
                 </label>
                 <input
                   type="text"
                   value={config.signup.heading}
                   onChange={(e) => updateSignup('heading', e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Subheading
                 </label>
                 <input
                   type="text"
                   value={config.signup.subheading}
                   onChange={(e) => updateSignup('subheading', e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
                 />
               </div>
             </div>
           </div>
 
           {/* Roles */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+          <div className="bg-muted border border-border rounded-xl p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-white">User Roles (Step 2)</h2>
               <Button
                 onClick={addRole}
                 variant="outline"
                 size="sm"
-                className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                className="border-border text-muted-foreground hover:bg-muted"
               >
                 <Plus className="w-4 h-4 mr-1" />
                 Add Role
@@ -427,28 +427,28 @@ export function AuthPageEditor() {
               {config.signup.roles.map((role) => (
                 <div
                   key={role.id}
-                  className="flex items-center gap-3 bg-gray-800 border border-gray-700 rounded-lg p-3"
+                  className="flex items-center gap-3 bg-muted border border-border rounded-lg p-3"
                 >
-                  <GripVertical className="w-5 h-5 text-gray-500" />
+                  <GripVertical className="w-5 h-5 text-muted-foreground" />
                   <input
                     type="text"
                     value={role.title}
                     onChange={(e) => updateRole(role.id, 'title', e.target.value)}
-                    className="flex-1 bg-gray-900 border border-gray-700 text-white rounded px-2 py-1 text-sm"
+                    className="flex-1 bg-muted border border-border text-white rounded px-2 py-1 text-sm"
                     placeholder="Role Title"
                   />
                   <input
                     type="text"
                     value={role.description}
                     onChange={(e) => updateRole(role.id, 'description', e.target.value)}
-                    className="flex-1 bg-gray-900 border border-gray-700 text-white rounded px-2 py-1 text-sm"
+                    className="flex-1 bg-muted border border-border text-white rounded px-2 py-1 text-sm"
                     placeholder="Description"
                   />
                   <input
                     type="text"
                     value={role.icon}
                     onChange={(e) => updateRole(role.id, 'icon', e.target.value)}
-                    className="w-24 bg-gray-900 border border-gray-700 text-white rounded px-2 py-1 text-sm"
+                    className="w-24 bg-muted border border-border text-white rounded px-2 py-1 text-sm"
                     placeholder="Icon"
                   />
                   <Button
@@ -465,14 +465,14 @@ export function AuthPageEditor() {
           </div>
 
           {/* Use Cases */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+          <div className="bg-muted border border-border rounded-xl p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-white">Use Cases (Step 3)</h2>
               <Button
                 onClick={addUseCase}
                 variant="outline"
                 size="sm"
-                className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                className="border-border text-muted-foreground hover:bg-muted"
               >
                 <Plus className="w-4 h-4 mr-1" />
                 Add Use Case
@@ -482,21 +482,21 @@ export function AuthPageEditor() {
               {config.signup.useCases.map((useCase) => (
                 <div
                   key={useCase.id}
-                  className="flex items-center gap-3 bg-gray-800 border border-gray-700 rounded-lg p-3"
+                  className="flex items-center gap-3 bg-muted border border-border rounded-lg p-3"
                 >
-                  <GripVertical className="w-5 h-5 text-gray-500" />
+                  <GripVertical className="w-5 h-5 text-muted-foreground" />
                   <input
                     type="text"
                     value={useCase.title}
                     onChange={(e) => updateUseCase(useCase.id, 'title', e.target.value)}
-                    className="flex-1 bg-gray-900 border border-gray-700 text-white rounded px-2 py-1 text-sm"
+                    className="flex-1 bg-muted border border-border text-white rounded px-2 py-1 text-sm"
                     placeholder="Title"
                   />
                   <input
                     type="text"
                     value={useCase.description}
                     onChange={(e) => updateUseCase(useCase.id, 'description', e.target.value)}
-                    className="flex-1 bg-gray-900 border border-gray-700 text-white rounded px-2 py-1 text-sm"
+                    className="flex-1 bg-muted border border-border text-white rounded px-2 py-1 text-sm"
                     placeholder="Description"
                   />
                   <Button
@@ -513,62 +513,62 @@ export function AuthPageEditor() {
           </div>
 
           {/* Step Titles */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+          <div className="bg-muted border border-border rounded-xl p-6 space-y-4">
             <h2 className="text-lg font-semibold text-white">Step Titles</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Step 1 Title
                 </label>
                 <input
                   type="text"
                   value={config.signup.step1Title}
                   onChange={(e) => updateSignup('step1Title', e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Step 2 Title
                 </label>
                 <input
                   type="text"
                   value={config.signup.step2Title}
                   onChange={(e) => updateSignup('step2Title', e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Step 3 Title
                 </label>
                 <input
                   type="text"
                   value={config.signup.step3Title}
                   onChange={(e) => updateSignup('step3Title', e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Step 4 Title
                 </label>
                 <input
                   type="text"
                   value={config.signup.step4Title}
                   onChange={(e) => updateSignup('step4Title', e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Step 5 Title
                 </label>
                 <input
                   type="text"
                   value={config.signup.step5Title}
                   onChange={(e) => updateSignup('step5Title', e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
                 />
               </div>
             </div>
@@ -577,62 +577,62 @@ export function AuthPageEditor() {
 
         {/* FORGOT PASSWORD TAB */}
         <TabsContent value="forgot" className="space-y-6">
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+          <div className="bg-muted border border-border rounded-xl p-6 space-y-4">
             <h2 className="text-lg font-semibold text-white">Forgot Password Page</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Heading
                 </label>
                 <input
                   type="text"
                   value={config.forgotPassword.heading}
                   onChange={(e) => updateForgotPassword('heading', e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Subheading
                 </label>
                 <input
                   type="text"
                   value={config.forgotPassword.subheading}
                   onChange={(e) => updateForgotPassword('subheading', e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Submit Button Text
                 </label>
                 <input
                   type="text"
                   value={config.forgotPassword.submitButtonText}
                   onChange={(e) => updateForgotPassword('submitButtonText', e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Back to Login Text
                 </label>
                 <input
                   type="text"
                   value={config.forgotPassword.backToLoginText}
                   onChange={(e) => updateForgotPassword('backToLoginText', e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Success Message
                 </label>
                 <input
                   type="text"
                   value={config.forgotPassword.successMessage}
                   onChange={(e) => updateForgotPassword('successMessage', e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
                 />
               </div>
             </div>

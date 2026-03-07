@@ -22,7 +22,9 @@ import {
   Shield,
   Camera,
   Loader2,
+  Palette,
 } from 'lucide-react';
+import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
 
 interface UserProfile {
   firstName: string;
@@ -614,6 +616,21 @@ const Settings = () => {
                   )}
                 </div>
               </div>
+            </motion.div>
+
+            {/* Appearance Section */}
+            <motion.div
+              className="mt-6 bg-card border border-border rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow"
+              whileHover={{ y: -2 }}
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <Palette className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-semibold text-foreground">Appearance</h3>
+              </div>
+              <p className="text-muted-foreground text-sm mb-4">
+                Choose your preferred visual theme
+              </p>
+              <ThemeSwitcher variant="expanded" />
             </motion.div>
 
             {/* Account Actions */}

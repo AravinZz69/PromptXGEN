@@ -174,8 +174,8 @@ const ChatWelcome = ({ onSend }) => {
       </div>
 
       {/* Ambient Blobs */}
-      <div className="absolute top-[-10%] left-[20%] w-96 h-96 bg-indigo-500/[0.08] rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-[10%] w-80 h-80 bg-purple-500/[0.06] rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-[-10%] left-[20%] w-96 h-96 bg-primary/[0.08] rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 right-[10%] w-80 h-80 bg-accent/[0.06] rounded-full blur-3xl pointer-events-none" />
 
       {/* Heading Block */}
       <div className="text-center" style={getVisibleStyle(0)}>
@@ -279,7 +279,7 @@ const ChatWelcome = ({ onSend }) => {
           <button
             key={i}
             onClick={() => fillInput(chip)}
-            className="flex-shrink-0 px-4 py-2 rounded-full text-[13px] border border-white/10 bg-white/5 text-white/50 whitespace-nowrap hover:bg-white/10 hover:text-white/90 hover:border-white/[0.22] transition-all duration-200 cursor-pointer"
+            className="flex-shrink-0 px-4 py-2 rounded-full text-[13px] border border-border bg-muted/50 text-foreground/50 whitespace-nowrap hover:bg-muted hover:text-foreground/90 hover:border-border transition-all duration-200 cursor-pointer"
           >
             {chip}
           </button>

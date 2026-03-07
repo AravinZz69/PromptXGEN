@@ -69,11 +69,11 @@ export default function ConfirmDialog({
       />
       
       {/* Dialog */}
-      <div className="relative max-w-md w-full mx-4 bg-[#111827] border border-gray-800 rounded-xl shadow-2xl">
+      <div className="relative max-w-md w-full mx-4 bg-card border border-border rounded-xl shadow-2xl">
         {/* Close button */}
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 p-1 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+          className="absolute top-4 right-4 p-1 text-muted-foreground hover:text-white hover:bg-muted rounded-lg transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
@@ -89,19 +89,19 @@ export default function ConfirmDialog({
           <h3 className="text-lg font-semibold text-white text-center mb-2">{title}</h3>
           
           {/* Message */}
-          <p className="text-gray-400 text-center mb-6">{message}</p>
+          <p className="text-muted-foreground text-center mb-6">{message}</p>
           
           {/* Text input for double confirmation */}
           {requireTextInput && (
             <div className="mb-6">
-              <label className="block text-sm text-gray-400 mb-2">
+              <label className="block text-sm text-muted-foreground mb-2">
                 Type <span className="text-white font-mono">{requireTextInput}</span> to confirm:
               </label>
               <input
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:border-primary"
                 placeholder={requireTextInput}
               />
             </div>
@@ -111,7 +111,7 @@ export default function ConfirmDialog({
           <div className="flex gap-3">
             <button
               onClick={handleClose}
-              className="flex-1 px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+              className="flex-1 px-4 py-2.5 bg-muted hover:bg-muted text-white rounded-lg font-medium transition-colors"
             >
               Cancel
             </button>

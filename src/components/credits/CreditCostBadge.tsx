@@ -56,7 +56,7 @@ export function CreditCostBadge({
   // Inline variant - just shows the cost text
   if (variant === 'inline') {
     return (
-      <span className={cn('text-gray-400', className)}>
+      <span className={cn('text-muted-foreground', className)}>
         ~{estimatedCost} credits
       </span>
     );
@@ -82,14 +82,14 @@ export function CreditCostBadge({
         {/* Tooltip */}
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 rounded-lg shadow-xl border border-gray-700 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
           <div className="text-xs space-y-1">
-            <p className="text-gray-300">
-              <span className="text-gray-500">Model:</span> {model}
+            <p className="text-muted-foreground">
+              <span className="text-muted-foreground">Model:</span> {model}
             </p>
-            <p className="text-gray-300">
-              <span className="text-gray-500">Base cost:</span> {baseCost} credits
+            <p className="text-muted-foreground">
+              <span className="text-muted-foreground">Base cost:</span> {baseCost} credits
             </p>
-            <p className="text-gray-300">
-              <span className="text-gray-500">Token cost:</span> ~{estimatedCost - baseCost} credits
+            <p className="text-muted-foreground">
+              <span className="text-muted-foreground">Token cost:</span> ~{estimatedCost - baseCost} credits
             </p>
             <hr className="border-gray-700 my-1" />
             <p className="font-medium text-primary">
@@ -134,7 +134,7 @@ export function CreditCostLabel({
   const cost = calculateEstimatedCost(model);
   
   return (
-    <span className={cn('inline-flex items-center gap-0.5 text-xs text-gray-400', className)}>
+    <span className={cn('inline-flex items-center gap-0.5 text-xs text-muted-foreground', className)}>
       <Sparkles className="h-3 w-3" />
       ~{cost} credits
     </span>

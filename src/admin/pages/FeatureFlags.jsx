@@ -233,12 +233,12 @@ export default function FeatureFlags() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-white">Feature Flags</h2>
-          <p className="text-sm text-gray-400">Control feature rollouts and experiments</p>
+          <p className="text-sm text-muted-foreground">Control feature rollouts and experiments</p>
         </div>
         <div className="flex gap-3">
           <button
             onClick={() => setAddFlagOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700"
+            className="flex items-center gap-2 px-4 py-2 bg-muted text-muted-foreground rounded-lg hover:bg-muted"
           >
             <Plus className="w-4 h-4" />
             Add Flag
@@ -248,8 +248,8 @@ export default function FeatureFlags() {
             disabled={!hasChanges}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
               hasChanges
-                ? 'bg-indigo-500 text-white hover:bg-indigo-600'
-                : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                ? 'bg-primary text-white hover:bg-primary'
+                : 'bg-muted text-muted-foreground cursor-not-allowed'
             }`}
           >
             <Save className="w-4 h-4" />
@@ -270,32 +270,32 @@ export default function FeatureFlags() {
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search feature flags..."
-          className="w-full pl-12 pr-4 py-3 bg-[#111827] border border-gray-800 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+          className="w-full pl-12 pr-4 py-3 bg-card border border-border rounded-xl text-white placeholder-muted-foreground focus:outline-none focus:border-primary"
         />
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-[#111827] border border-gray-800 rounded-xl p-4">
-          <p className="text-xs text-gray-400 mb-1">Total Flags</p>
+        <div className="bg-card border border-border rounded-xl p-4">
+          <p className="text-xs text-muted-foreground mb-1">Total Flags</p>
           <p className="text-2xl font-bold text-white">{flags.length}</p>
         </div>
-        <div className="bg-[#111827] border border-gray-800 rounded-xl p-4">
-          <p className="text-xs text-gray-400 mb-1">Enabled</p>
+        <div className="bg-card border border-border rounded-xl p-4">
+          <p className="text-xs text-muted-foreground mb-1">Enabled</p>
           <p className="text-2xl font-bold text-emerald-400">{flags.filter(f => f.enabled).length}</p>
         </div>
-        <div className="bg-[#111827] border border-gray-800 rounded-xl p-4">
-          <p className="text-xs text-gray-400 mb-1">Experimental</p>
+        <div className="bg-card border border-border rounded-xl p-4">
+          <p className="text-xs text-muted-foreground mb-1">Experimental</p>
           <p className="text-2xl font-bold text-amber-400">{flags.filter(f => f.section === 'Experimental').length}</p>
         </div>
-        <div className="bg-[#111827] border border-gray-800 rounded-xl p-4">
-          <p className="text-xs text-gray-400 mb-1">A/B Tests</p>
+        <div className="bg-card border border-border rounded-xl p-4">
+          <p className="text-xs text-muted-foreground mb-1">A/B Tests</p>
           <p className="text-2xl font-bold text-blue-400">{flags.filter(f => f.section === 'A/B Tests').length}</p>
         </div>
       </div>
@@ -303,38 +303,38 @@ export default function FeatureFlags() {
       {/* Flags by Section */}
       <div className="space-y-4">
         {sections.map(section => (
-          <div key={section} className="bg-[#111827] border border-gray-800 rounded-xl overflow-hidden">
+          <div key={section} className="bg-card border border-border rounded-xl overflow-hidden">
             {/* Section Header */}
             <button
               onClick={() => toggleSection(section)}
-              className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-800/50 transition-colors"
+              className="w-full px-6 py-4 flex items-center justify-between hover:bg-muted/50 transition-colors"
             >
               <div className="flex items-center gap-3">
                 {expandedSections.includes(section) ? (
-                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                  <ChevronDown className="w-5 h-5 text-muted-foreground" />
                 ) : (
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
+                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
                 )}
                 <h3 className="text-lg font-semibold text-white">{section}</h3>
                 <Badge label={`${groupedFlags[section]?.length || 0} flags`} variant="neutral" />
               </div>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-muted-foreground">
                 {groupedFlags[section]?.filter(f => f.enabled).length || 0} enabled
               </span>
             </button>
 
             {/* Flags List */}
             {expandedSections.includes(section) && (
-              <div className="border-t border-gray-800">
+              <div className="border-t border-border">
                 {groupedFlags[section]?.length === 0 ? (
-                  <div className="p-6 text-center text-gray-500">
+                  <div className="p-6 text-center text-muted-foreground">
                     No flags in this section
                   </div>
                 ) : (
                   groupedFlags[section]?.map(flag => (
                     <div
                       key={flag.id}
-                      className="px-6 py-4 border-b border-gray-800/50 last:border-b-0 hover:bg-gray-800/20"
+                      className="px-6 py-4 border-b border-border/50 last:border-b-0 hover:bg-muted/20"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-4">
@@ -342,7 +342,7 @@ export default function FeatureFlags() {
                           <button
                             onClick={() => toggleFlag(flag.id)}
                             className={`mt-1 relative w-12 h-6 rounded-full transition-colors ${
-                              flag.enabled ? 'bg-emerald-500' : 'bg-gray-700'
+                              flag.enabled ? 'bg-emerald-500' : 'bg-muted'
                             }`}
                           >
                             <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
@@ -354,14 +354,14 @@ export default function FeatureFlags() {
                           <div>
                             <div className="flex items-center gap-2 mb-1">
                               <h4 className="text-white font-medium">{flag.name}</h4>
-                              <code className="px-2 py-0.5 bg-gray-800 rounded text-xs text-gray-400 font-mono">
+                              <code className="px-2 py-0.5 bg-muted rounded text-xs text-muted-foreground font-mono">
                                 {flag.key}
                               </code>
                             </div>
-                            <p className="text-sm text-gray-400 mb-2">{flag.description}</p>
+                            <p className="text-sm text-muted-foreground mb-2">{flag.description}</p>
                             
                             {/* Meta */}
-                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
                               {flag.rolloutPercentage < 100 && (
                                 <span className="flex items-center gap-1">
                                   <Percent className="w-3 h-3" />
@@ -389,7 +389,7 @@ export default function FeatureFlags() {
                           {/* Rollout Slider */}
                           {flag.enabled && (
                             <div className="flex items-center gap-2 mr-4">
-                              <span className="text-xs text-gray-500">Rollout:</span>
+                              <span className="text-xs text-muted-foreground">Rollout:</span>
                               <input
                                 type="range"
                                 min="0"
@@ -403,14 +403,14 @@ export default function FeatureFlags() {
                           )}
                           <button
                             onClick={() => setEditFlag({ ...flag })}
-                            className="p-2 text-gray-400 hover:text-white"
+                            className="p-2 text-muted-foreground hover:text-white"
                             title="Edit"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => setDeleteConfirm(flag)}
-                            className="p-2 text-gray-400 hover:text-red-400"
+                            className="p-2 text-muted-foreground hover:text-red-400"
                             title="Delete"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -444,41 +444,41 @@ export default function FeatureFlags() {
       <Modal isOpen={addFlagOpen} onClose={() => setAddFlagOpen(false)} title="Add Feature Flag">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Flag Name</label>
+            <label className="block text-sm text-muted-foreground mb-2">Flag Name</label>
             <input
               type="text"
               value={newFlag.name}
               onChange={(e) => setNewFlag({ ...newFlag, name: e.target.value })}
               placeholder="e.g., New Dashboard UI"
-              className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+              className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:border-primary"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Flag Key</label>
+            <label className="block text-sm text-muted-foreground mb-2">Flag Key</label>
             <input
               type="text"
               value={newFlag.key}
               onChange={(e) => setNewFlag({ ...newFlag, key: e.target.value.toLowerCase().replace(/\s+/g, '_') })}
               placeholder="e.g., new_dashboard_ui"
-              className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white placeholder-gray-500 font-mono focus:outline-none focus:border-indigo-500"
+              className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground font-mono focus:outline-none focus:border-primary"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Description</label>
+            <label className="block text-sm text-muted-foreground mb-2">Description</label>
             <textarea
               value={newFlag.description}
               onChange={(e) => setNewFlag({ ...newFlag, description: e.target.value })}
               placeholder="What does this feature flag control?"
               rows={3}
-              className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 resize-none"
+              className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:border-primary resize-none"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Section</label>
+            <label className="block text-sm text-muted-foreground mb-2">Section</label>
             <select
               value={newFlag.section}
               onChange={(e) => setNewFlag({ ...newFlag, section: e.target.value })}
-              className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+              className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
             >
               <option value="Core Features">Core Features</option>
               <option value="Experimental">Experimental</option>
@@ -487,39 +487,39 @@ export default function FeatureFlags() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Initial State</label>
+              <label className="block text-sm text-muted-foreground mb-2">Initial State</label>
               <select
                 value={newFlag.enabled ? 'enabled' : 'disabled'}
                 onChange={(e) => setNewFlag({ ...newFlag, enabled: e.target.value === 'enabled' })}
-                className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
               >
                 <option value="disabled">Disabled</option>
                 <option value="enabled">Enabled</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Rollout %</label>
+              <label className="block text-sm text-muted-foreground mb-2">Rollout %</label>
               <input
                 type="number"
                 min="0"
                 max="100"
                 value={newFlag.rolloutPercentage}
                 onChange={(e) => setNewFlag({ ...newFlag, rolloutPercentage: parseInt(e.target.value) || 0 })}
-                className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
               />
             </div>
           </div>
           <div className="flex gap-3 pt-4">
             <button
               onClick={() => setAddFlagOpen(false)}
-              className="flex-1 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700"
+              className="flex-1 py-2 bg-muted text-white rounded-lg hover:bg-muted"
             >
               Cancel
             </button>
             <button
               onClick={handleAddFlag}
               disabled={!newFlag.name || !newFlag.key}
-              className="flex-1 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 disabled:opacity-50"
+              className="flex-1 py-2 bg-primary text-white rounded-lg hover:bg-primary disabled:opacity-50"
             >
               Add Flag
             </button>
@@ -532,38 +532,38 @@ export default function FeatureFlags() {
         {editFlag && (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Flag Name</label>
+              <label className="block text-sm text-muted-foreground mb-2">Flag Name</label>
               <input
                 type="text"
                 value={editFlag.name}
                 onChange={(e) => setEditFlag({ ...editFlag, name: e.target.value })}
-                className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Flag Key</label>
+              <label className="block text-sm text-muted-foreground mb-2">Flag Key</label>
               <input
                 type="text"
                 value={editFlag.key}
                 onChange={(e) => setEditFlag({ ...editFlag, key: e.target.value })}
-                className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white font-mono focus:outline-none focus:border-indigo-500"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white font-mono focus:outline-none focus:border-primary"
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Description</label>
+              <label className="block text-sm text-muted-foreground mb-2">Description</label>
               <textarea
                 value={editFlag.description}
                 onChange={(e) => setEditFlag({ ...editFlag, description: e.target.value })}
                 rows={3}
-                className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500 resize-none"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary resize-none"
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Section</label>
+              <label className="block text-sm text-muted-foreground mb-2">Section</label>
               <select
                 value={editFlag.section}
                 onChange={(e) => setEditFlag({ ...editFlag, section: e.target.value })}
-                className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
               >
                 <option value="Core Features">Core Features</option>
                 <option value="Experimental">Experimental</option>
@@ -573,13 +573,13 @@ export default function FeatureFlags() {
             <div className="flex gap-3 pt-4">
               <button
                 onClick={() => setEditFlag(null)}
-                className="flex-1 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700"
+                className="flex-1 py-2 bg-muted text-white rounded-lg hover:bg-muted"
               >
                 Cancel
               </button>
               <button
                 onClick={handleEditSave}
-                className="flex-1 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
+                className="flex-1 py-2 bg-primary text-white rounded-lg hover:bg-primary"
               >
                 Save Changes
               </button>

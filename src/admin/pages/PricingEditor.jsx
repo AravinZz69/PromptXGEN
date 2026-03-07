@@ -105,7 +105,7 @@ export function PricingEditor() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -116,14 +116,14 @@ export function PricingEditor() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Pricing Editor</h1>
-          <p className="text-gray-400 text-sm">
+          <p className="text-muted-foreground text-sm">
             Manage your pricing plans and features
           </p>
         </div>
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="bg-indigo-600 hover:bg-indigo-700"
+          className="bg-primary hover:bg-primary/90"
         >
           {saving ? (
             <>
@@ -137,20 +137,20 @@ export function PricingEditor() {
       </div>
 
       {/* Billing toggle setting */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+      <div className="bg-muted border border-border rounded-xl p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-gray-300">
+            <h3 className="text-sm font-semibold text-muted-foreground">
               Enable Billing Toggle
             </h3>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Allow users to switch between monthly and annual pricing
             </p>
           </div>
           <Button
             variant={config.billingToggle ? 'default' : 'outline'}
             onClick={() => setConfig({ ...config, billingToggle: !config.billingToggle })}
-            className={config.billingToggle ? 'bg-indigo-600' : 'border-gray-700 text-gray-400'}
+            className={config.billingToggle ? 'bg-primary' : 'border-border text-muted-foreground'}
           >
             {config.billingToggle ? 'Enabled' : 'Disabled'}
           </Button>
@@ -160,14 +160,14 @@ export function PricingEditor() {
       {/* Preview mode toggle */}
       {config.billingToggle && (
         <div className="flex items-center justify-center gap-3">
-          <span className="text-sm text-gray-400">Preview Mode:</span>
-          <div className="inline-flex bg-gray-900 border border-gray-800 rounded-lg p-1">
+          <span className="text-sm text-muted-foreground">Preview Mode:</span>
+          <div className="inline-flex bg-muted border border-border rounded-lg p-1">
             <button
               onClick={() => setPreviewMode('monthly')}
               className={`px-4 py-2 rounded text-sm transition-colors ${
                 previewMode === 'monthly'
-                  ? 'bg-indigo-600 text-white'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-primary text-white'
+                  : 'text-muted-foreground hover:text-white'
               }`}
             >
               Monthly
@@ -176,8 +176,8 @@ export function PricingEditor() {
               onClick={() => setPreviewMode('annual')}
               className={`px-4 py-2 rounded text-sm transition-colors ${
                 previewMode === 'annual'
-                  ? 'bg-indigo-600 text-white'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-primary text-white'
+                  : 'text-muted-foreground hover:text-white'
               }`}
             >
               Annual
@@ -199,29 +199,29 @@ export function PricingEditor() {
       </div>
 
       {/* Live Preview */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-        <div className="p-4 border-b border-gray-800 flex items-center gap-2">
+      <div className="bg-muted border border-border rounded-xl overflow-hidden">
+        <div className="p-4 border-b border-border flex items-center gap-2">
           <div className="flex gap-1.5">
             <div className="w-3 h-3 rounded-full bg-red-500"></div>
             <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
             <div className="w-3 h-3 rounded-full bg-green-500"></div>
           </div>
-          <span className="text-xs text-gray-400 ml-2">Pricing Section Preview</span>
+          <span className="text-xs text-muted-foreground ml-2">Pricing Section Preview</span>
         </div>
 
         <div className="p-8 bg-gradient-to-br from-gray-950 to-gray-900">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-white mb-2">Choose Your Plan</h2>
-            <p className="text-gray-400">Select the perfect plan for your needs</p>
+            <p className="text-muted-foreground">Select the perfect plan for your needs</p>
           </div>
 
           {config.billingToggle && (
             <div className="flex items-center justify-center gap-3 mb-8">
-              <span className="text-sm text-gray-400">Monthly</span>
-              <div className="inline-flex bg-gray-800 border border-gray-700 rounded-lg p-1">
-                <div className="w-12 h-6 bg-indigo-600 rounded transition-transform" />
+              <span className="text-sm text-muted-foreground">Monthly</span>
+              <div className="inline-flex bg-muted border border-border rounded-lg p-1">
+                <div className="w-12 h-6 bg-primary rounded transition-transform" />
               </div>
-              <span className="text-sm text-gray-400">
+              <span className="text-sm text-muted-foreground">
                 Annual <span className="text-green-400 text-xs ml-1">(Save 17%)</span>
               </span>
             </div>
@@ -231,26 +231,26 @@ export function PricingEditor() {
             {config.plans.filter(p => p.isVisible).map((plan) => (
               <div
                 key={plan.id}
-                className={`relative bg-gray-800/50 backdrop-blur border rounded-xl p-6 ${
-                  plan.isPopular ? 'border-indigo-500 shadow-lg shadow-indigo-500/20' : 'border-gray-700'
+                className={`relative bg-muted/50 backdrop-blur border rounded-xl p-6 ${
+                  plan.isPopular ? 'border-indigo-500 shadow-lg shadow-indigo-500/20' : 'border-border'
                 }`}
               >
                 {plan.isPopular && (
                   <div className="absolute top-0 right-6 -translate-y-1/2">
-                    <span className="inline-block px-3 py-1 bg-indigo-600 text-white text-xs font-semibold rounded-full">
+                    <span className="inline-block px-3 py-1 bg-primary text-white text-xs font-semibold rounded-full">
                       {plan.badgeText}
                     </span>
                   </div>
                 )}
 
                 <h3 className="text-xl font-bold text-white mb-2">{plan.name}</h3>
-                <p className="text-gray-400 text-sm mb-4">{plan.description}</p>
+                <p className="text-muted-foreground text-sm mb-4">{plan.description}</p>
 
                 <div className="mb-6">
                   <span className="text-4xl font-bold text-white">
                     ${previewMode === 'annual' ? plan.annualPrice : plan.monthlyPrice}
                   </span>
-                  <span className="text-gray-400 text-sm ml-2">
+                  <span className="text-muted-foreground text-sm ml-2">
                     / {previewMode === 'annual' ? 'year' : 'month'}
                   </span>
                 </div>
@@ -258,8 +258,8 @@ export function PricingEditor() {
                 <button
                   className={`w-full py-3 rounded-lg font-medium mb-6 transition-colors ${
                     plan.isPopular
-                      ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                      : 'bg-gray-700 text-white hover:bg-gray-600'
+                      ? 'bg-primary text-white hover:bg-primary/90'
+                      : 'bg-muted text-white hover:bg-muted'
                   }`}
                 >
                   {plan.ctaText}
@@ -269,7 +269,7 @@ export function PricingEditor() {
                   {plan.features.map((feature) => (
                     <li key={feature.id} className="flex items-start gap-2 text-sm">
                       <span className="text-green-400 mt-0.5">✓</span>
-                      <span className="text-gray-300">{feature.text}</span>
+                      <span className="text-muted-foreground">{feature.text}</span>
                     </li>
                   ))}
                 </ul>

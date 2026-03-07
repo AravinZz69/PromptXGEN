@@ -252,7 +252,7 @@ export default function AuthConfig() {
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -262,7 +262,7 @@ export default function AuthConfig() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white">Authentication Config</h1>
-        <p className="text-gray-400 text-sm">
+        <p className="text-muted-foreground text-sm">
           Configure authentication providers and security settings
         </p>
       </div>
@@ -280,14 +280,14 @@ export default function AuthConfig() {
       </div>
 
       {/* Global Security Settings */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-        <div className="p-4 border-b border-gray-800 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-indigo-600/20 flex items-center justify-center text-indigo-400">
+      <div className="bg-muted border border-border rounded-xl overflow-hidden">
+        <div className="p-4 border-b border-border flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
             <Shield className="w-5 h-5" />
           </div>
           <div>
             <h3 className="text-lg font-semibold text-white">Global Security Settings</h3>
-            <p className="text-xs text-gray-500">Configure security policies across all providers</p>
+            <p className="text-xs text-muted-foreground">Configure security policies across all providers</p>
           </div>
         </div>
 
@@ -295,7 +295,7 @@ export default function AuthConfig() {
           <div className="grid md:grid-cols-2 gap-6">
             {/* Session Timeout */}
             <div>
-              <label className="block text-sm text-gray-400 mb-2">
+              <label className="block text-sm text-muted-foreground mb-2">
                 Session Timeout (hours)
               </label>
               <Select
@@ -307,10 +307,10 @@ export default function AuthConfig() {
                   }))
                 }
               >
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                <SelectTrigger className="bg-muted border-border text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectContent className="bg-muted border-border">
                   <SelectItem value="1">1 hour</SelectItem>
                   <SelectItem value="4">4 hours</SelectItem>
                   <SelectItem value="8">8 hours</SelectItem>
@@ -323,7 +323,7 @@ export default function AuthConfig() {
 
             {/* Max Login Attempts */}
             <div>
-              <label className="block text-sm text-gray-400 mb-2">
+              <label className="block text-sm text-muted-foreground mb-2">
                 Max Login Attempts
               </label>
               <Select
@@ -335,10 +335,10 @@ export default function AuthConfig() {
                   }))
                 }
               >
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                <SelectTrigger className="bg-muted border-border text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectContent className="bg-muted border-border">
                   <SelectItem value="3">3 attempts</SelectItem>
                   <SelectItem value="5">5 attempts</SelectItem>
                   <SelectItem value="10">10 attempts</SelectItem>
@@ -348,7 +348,7 @@ export default function AuthConfig() {
 
             {/* Lockout Duration */}
             <div>
-              <label className="block text-sm text-gray-400 mb-2">
+              <label className="block text-sm text-muted-foreground mb-2">
                 Lockout Duration (minutes)
               </label>
               <Select
@@ -360,10 +360,10 @@ export default function AuthConfig() {
                   }))
                 }
               >
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                <SelectTrigger className="bg-muted border-border text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectContent className="bg-muted border-border">
                   <SelectItem value="15">15 minutes</SelectItem>
                   <SelectItem value="30">30 minutes</SelectItem>
                   <SelectItem value="60">1 hour</SelectItem>
@@ -374,7 +374,7 @@ export default function AuthConfig() {
 
             {/* Password Policy */}
             <div>
-              <label className="block text-sm text-gray-400 mb-2">
+              <label className="block text-sm text-muted-foreground mb-2">
                 Password Policy
               </label>
               <Select
@@ -386,10 +386,10 @@ export default function AuthConfig() {
                   }))
                 }
               >
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                <SelectTrigger className="bg-muted border-border text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectContent className="bg-muted border-border">
                   <SelectItem value="basic">Basic (6+ chars)</SelectItem>
                   <SelectItem value="moderate">Moderate (8+ chars, mixed case)</SelectItem>
                   <SelectItem value="strict">Strict (12+ chars, symbols, numbers)</SelectItem>
@@ -399,12 +399,12 @@ export default function AuthConfig() {
           </div>
 
           {/* 2FA for Admin */}
-          <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
+          <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
             <div className="flex items-center gap-3">
               <Key className="w-5 h-5 text-yellow-500" />
               <div>
                 <p className="text-white font-medium">Require 2FA for Admin Users</p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   Admin users must enable two-factor authentication
                 </p>
               </div>
@@ -423,7 +423,7 @@ export default function AuthConfig() {
             <Button
               onClick={saveSecuritySettings}
               disabled={savingSecurity}
-              className="bg-indigo-600 hover:bg-indigo-700 gap-2"
+              className="bg-primary hover:bg-primary/90 gap-2"
             >
               {savingSecurity ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -477,14 +477,14 @@ function ProviderCard({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-white">Require Email Verification</p>
-                <p className="text-xs text-gray-500">Users must verify email before login</p>
+                <p className="text-xs text-muted-foreground">Users must verify email before login</p>
               </div>
               <Switch
                 checked={config.require_email_verification ?? true}
                 onCheckedChange={(checked) =>
                   handleConfigChange('require_email_verification', checked)
                 }
-                className="data-[state=checked]:bg-indigo-600"
+                className="data-[state=checked]:bg-primary"
               />
             </div>
 
@@ -492,20 +492,20 @@ function ProviderCard({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-white">Allow Password Reset</p>
-                <p className="text-xs text-gray-500">Enable forgot password flow</p>
+                <p className="text-xs text-muted-foreground">Enable forgot password flow</p>
               </div>
               <Switch
                 checked={config.allow_password_reset ?? true}
                 onCheckedChange={(checked) =>
                   handleConfigChange('allow_password_reset', checked)
                 }
-                className="data-[state=checked]:bg-indigo-600"
+                className="data-[state=checked]:bg-primary"
               />
             </div>
 
             {/* Min Password Length */}
             <div>
-              <label className="block text-sm text-gray-400 mb-1">
+              <label className="block text-sm text-muted-foreground mb-1">
                 Minimum Password Length
               </label>
               <Select
@@ -514,10 +514,10 @@ function ProviderCard({
                   handleConfigChange('min_password_length', parseInt(v))
                 }
               >
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                <SelectTrigger className="bg-muted border-border text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectContent className="bg-muted border-border">
                   <SelectItem value="6">6 characters</SelectItem>
                   <SelectItem value="8">8 characters</SelectItem>
                   <SelectItem value="10">10 characters</SelectItem>
@@ -533,7 +533,7 @@ function ProviderCard({
           <div className="space-y-4">
             {/* OTP Expiry */}
             <div>
-              <label className="block text-sm text-gray-400 mb-1">
+              <label className="block text-sm text-muted-foreground mb-1">
                 OTP Expiry (minutes)
               </label>
               <Select
@@ -542,10 +542,10 @@ function ProviderCard({
                   handleConfigChange('otp_expiry_minutes', parseInt(v))
                 }
               >
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                <SelectTrigger className="bg-muted border-border text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectContent className="bg-muted border-border">
                   <SelectItem value="2">2 minutes</SelectItem>
                   <SelectItem value="5">5 minutes</SelectItem>
                   <SelectItem value="10">10 minutes</SelectItem>
@@ -556,17 +556,17 @@ function ProviderCard({
 
             {/* Max Attempts */}
             <div>
-              <label className="block text-sm text-gray-400 mb-1">
+              <label className="block text-sm text-muted-foreground mb-1">
                 Max OTP Attempts
               </label>
               <Select
                 value={(config.max_attempts || 3).toString()}
                 onValueChange={(v) => handleConfigChange('max_attempts', parseInt(v))}
               >
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                <SelectTrigger className="bg-muted border-border text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectContent className="bg-muted border-border">
                   <SelectItem value="3">3 attempts</SelectItem>
                   <SelectItem value="5">5 attempts</SelectItem>
                   <SelectItem value="10">10 attempts</SelectItem>
@@ -590,31 +590,31 @@ function ProviderCard({
           <div className="space-y-4">
             {/* Client ID */}
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Client ID</label>
+              <label className="block text-sm text-muted-foreground mb-1">Client ID</label>
               <input
                 type="text"
                 value={config.client_id || ''}
                 onChange={(e) => handleConfigChange('client_id', e.target.value)}
                 placeholder="Enter client ID..."
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg"
+                className="w-full px-3 py-2 bg-muted border border-border text-white placeholder-muted-foreground rounded-lg"
               />
             </div>
 
             {/* Client Secret */}
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Client Secret</label>
+              <label className="block text-sm text-muted-foreground mb-1">Client Secret</label>
               <div className="relative">
                 <input
                   type={showSecrets['client_secret'] ? 'text' : 'password'}
                   value={config.client_secret || ''}
                   onChange={(e) => handleConfigChange('client_secret', e.target.value)}
                   placeholder="Enter client secret..."
-                  className="w-full px-3 py-2 pr-10 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg"
+                  className="w-full px-3 py-2 pr-10 bg-muted border border-border text-white placeholder-muted-foreground rounded-lg"
                 />
                 <button
                   type="button"
                   onClick={() => toggleSecret('client_secret')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white"
                 >
                   {showSecrets['client_secret'] ? (
                     <EyeOff className="w-4 h-4" />
@@ -627,32 +627,32 @@ function ProviderCard({
 
             {/* Redirect URI */}
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Redirect URI</label>
+              <label className="block text-sm text-muted-foreground mb-1">Redirect URI</label>
               <input
                 type="text"
                 value={config.redirect_uri || ''}
                 onChange={(e) => handleConfigChange('redirect_uri', e.target.value)}
                 placeholder="https://your-app.com/auth/callback"
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg"
+                className="w-full px-3 py-2 bg-muted border border-border text-white placeholder-muted-foreground rounded-lg"
               />
             </div>
 
             {/* Scopes */}
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Scopes</label>
+              <label className="block text-sm text-muted-foreground mb-1">Scopes</label>
               <input
                 type="text"
                 value={config.scopes || ''}
                 onChange={(e) => handleConfigChange('scopes', e.target.value)}
                 placeholder={provider.provider === 'google' ? 'email profile' : 'user:email'}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg"
+                className="w-full px-3 py-2 bg-muted border border-border text-white placeholder-muted-foreground rounded-lg"
               />
             </div>
 
             {/* Setup Info */}
-            <div className="flex items-start gap-2 p-3 bg-gray-800/50 border border-gray-700 rounded-lg">
-              <Info className="w-4 h-4 text-gray-400 mt-0.5" />
-              <div className="text-xs text-gray-400">
+            <div className="flex items-start gap-2 p-3 bg-muted/50 border border-border rounded-lg">
+              <Info className="w-4 h-4 text-muted-foreground mt-0.5" />
+              <div className="text-xs text-muted-foreground">
                 <p className="font-medium mb-1">Setup Instructions:</p>
                 {provider.provider === 'google' ? (
                   <ol className="list-decimal list-inside space-y-1">
@@ -680,28 +680,28 @@ function ProviderCard({
   };
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+    <div className="bg-muted border border-border rounded-xl overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-gray-800 flex items-center justify-between">
+      <div className="p-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div
             className={`w-10 h-10 rounded-lg flex items-center justify-center ${
               provider.is_enabled
                 ? 'bg-green-600/20 text-green-400'
-                : 'bg-gray-700 text-gray-400'
+                : 'bg-muted text-muted-foreground'
             }`}
           >
             {PROVIDER_ICONS[provider.provider]}
           </div>
           <div>
             <h3 className="text-lg font-semibold text-white">{provider.display_name}</h3>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               {provider.is_enabled ? (
                 <span className="flex items-center gap-1 text-green-400">
                   <CheckCircle className="w-3 h-3" /> Enabled
                 </span>
               ) : (
-                <span className="text-gray-500">Disabled</span>
+                <span className="text-muted-foreground">Disabled</span>
               )}
             </p>
           </div>
@@ -732,7 +732,7 @@ function ProviderCard({
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="bg-indigo-600 hover:bg-indigo-700 gap-2"
+            className="bg-primary hover:bg-primary/90 gap-2"
           >
             {saving ? (
               <Loader2 className="w-4 h-4 animate-spin" />

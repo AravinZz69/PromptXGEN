@@ -12,8 +12,8 @@ export default function Badge({ label, variant = 'neutral' }) {
     warning: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
     danger: 'bg-red-500/20 text-red-400 border-red-500/30',
     info: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    neutral: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-    purple: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30',
+    neutral: 'bg-gray-500/20 text-muted-foreground border-gray-500/30',
+    purple: 'bg-primary/20 text-primary border-indigo-500/30',
   };
 
   return (

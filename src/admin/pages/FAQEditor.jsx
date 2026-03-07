@@ -146,7 +146,7 @@ export function FAQEditor() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -157,7 +157,7 @@ export function FAQEditor() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">FAQ Editor</h1>
-          <p className="text-gray-400 text-sm">
+          <p className="text-muted-foreground text-sm">
             Manage your frequently asked questions
           </p>
         </div>
@@ -165,7 +165,7 @@ export function FAQEditor() {
           <Button
             onClick={addFAQ}
             variant="outline"
-            className="border-gray-700 text-gray-300 hover:bg-gray-800 gap-2"
+            className="border-border text-muted-foreground hover:bg-muted gap-2"
           >
             <Plus className="w-4 h-4" />
             Add FAQ
@@ -173,7 +173,7 @@ export function FAQEditor() {
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="bg-indigo-600 hover:bg-indigo-700"
+            className="bg-primary hover:bg-primary/90"
           >
             {saving ? (
               <>
@@ -196,8 +196,8 @@ export function FAQEditor() {
             className={`
               px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors
               ${activeCategory === category
-                ? 'bg-indigo-600 text-white'
-                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                ? 'bg-primary text-white'
+                : 'bg-muted text-muted-foreground hover:bg-muted'
               }
             `}
           >
@@ -210,18 +210,18 @@ export function FAQEditor() {
       </div>
 
       {/* FAQ list */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+      <div className="bg-muted border border-border rounded-xl p-6">
         <DraggableList
           items={filteredFaqs}
           onReorder={reorderFAQs}
           emptyMessage="No FAQs in this category yet. Click 'Add FAQ' to create one."
           renderItem={(faq, index, dragHandleProps) => (
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-5 space-y-4">
+            <div className="bg-muted border border-border rounded-lg p-5 space-y-4">
               {/* Header row */}
               <div className="flex items-start gap-3">
                 {/* Drag handle */}
                 <div {...dragHandleProps} className="pt-3">
-                  <GripVertical className="w-5 h-5 text-gray-500" />
+                  <GripVertical className="w-5 h-5 text-muted-foreground" />
                 </div>
 
                 {/* Content */}
@@ -232,7 +232,7 @@ export function FAQEditor() {
                     value={faq.question}
                     onChange={(e) => updateFAQ(faq.id, 'question', e.target.value)}
                     placeholder="Question?"
-                    className="w-full bg-gray-900 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 font-semibold"
+                    className="w-full bg-muted border border-border text-white placeholder-muted-foreground rounded-lg px-3 py-2 font-semibold"
                   />
 
                   {/* Answer */}
@@ -241,16 +241,16 @@ export function FAQEditor() {
                     onChange={(e) => updateFAQ(faq.id, 'answer', e.target.value)}
                     placeholder="Answer..."
                     rows={3}
-                    className="w-full bg-gray-900 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm resize-none"
+                    className="w-full bg-muted border border-border text-white placeholder-muted-foreground rounded-lg px-3 py-2 text-sm resize-none"
                   />
 
                   {/* Category */}
                   <div className="flex items-center gap-3">
-                    <label className="text-xs font-medium text-gray-400">Category:</label>
+                    <label className="text-xs font-medium text-muted-foreground">Category:</label>
                     <select
                       value={faq.category}
                       onChange={(e) => updateFAQ(faq.id, 'category', e.target.value)}
-                      className="bg-gray-900 border border-gray-700 text-white rounded px-3 py-1.5 text-sm"
+                      className="bg-muted border border-border text-white rounded px-3 py-1.5 text-sm"
                     >
                       <option value="General">General</option>
                       <option value="Pricing">Pricing</option>
@@ -263,7 +263,7 @@ export function FAQEditor() {
                 {/* Actions */}
                 <div className="flex flex-col items-end gap-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-400">Visible</span>
+                    <span className="text-xs text-muted-foreground">Visible</span>
                     <Switch
                       checked={faq.isVisible}
                       onCheckedChange={(val) => updateFAQ(faq.id, 'isVisible', val)}
@@ -286,15 +286,15 @@ export function FAQEditor() {
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent className="bg-gray-900 border-gray-800">
+        <AlertDialogContent className="bg-muted border-border">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Delete FAQ?</AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-400">
+            <AlertDialogDescription className="text-muted-foreground">
               This will permanently remove this FAQ item. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700">
+            <AlertDialogCancel className="bg-muted text-muted-foreground border-border hover:bg-muted">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction

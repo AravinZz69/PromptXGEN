@@ -184,7 +184,7 @@ export default function Notifications() {
         <button
           onClick={fetchNotifications}
           disabled={loading}
-          className="flex items-center gap-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-3 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm transition-colors disabled:opacity-50"
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
           Refresh
@@ -194,13 +194,13 @@ export default function Notifications() {
       {/* Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {stats.map((stat, i) => (
-          <div key={i} className="bg-[#111827] border border-gray-800 rounded-xl p-4">
+          <div key={i} className="bg-card border border-border rounded-xl p-4">
             <div className="flex items-center gap-3">
               <div className={`w-10 h-10 bg-${stat.color}-500/20 rounded-lg flex items-center justify-center`}>
                 <stat.icon className={`w-5 h-5 text-${stat.color}-400`} />
               </div>
               <div>
-                <p className="text-xs text-gray-400">{stat.label}</p>
+                <p className="text-xs text-muted-foreground">{stat.label}</p>
                 <p className="text-xl font-bold text-white">{stat.value}</p>
               </div>
             </div>
@@ -211,12 +211,12 @@ export default function Notifications() {
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Compose Section */}
-        <div className="lg:col-span-1 bg-[#111827] border border-gray-800 rounded-xl p-6">
+        <div className="lg:col-span-1 bg-card border border-border rounded-xl p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-white">Quick Compose</h3>
             <button
               onClick={() => setComposeOpen(true)}
-              className="flex items-center gap-1 text-sm text-indigo-400 hover:text-indigo-300"
+              className="flex items-center gap-1 text-sm text-primary hover:text-indigo-300"
             >
               <Plus className="w-4 h-4" />
               Full Editor
@@ -225,33 +225,33 @@ export default function Notifications() {
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Title</label>
+              <label className="block text-sm text-muted-foreground mb-2">Title</label>
               <input
                 type="text"
                 value={newNotification.title}
                 onChange={(e) => setNewNotification({ ...newNotification, title: e.target.value })}
                 placeholder="Notification title..."
-                className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white placeholder-gray-500 text-sm focus:outline-none focus:border-indigo-500"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground text-sm focus:outline-none focus:border-primary"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Message</label>
+              <label className="block text-sm text-muted-foreground mb-2">Message</label>
               <textarea
                 value={newNotification.message}
                 onChange={(e) => setNewNotification({ ...newNotification, message: e.target.value })}
                 placeholder="Write your message..."
                 rows={4}
-                className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white placeholder-gray-500 text-sm focus:outline-none focus:border-indigo-500 resize-none"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground text-sm focus:outline-none focus:border-primary resize-none"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Audience</label>
+              <label className="block text-sm text-muted-foreground mb-2">Audience</label>
               <select
                 value={newNotification.audience}
                 onChange={(e) => setNewNotification({ ...newNotification, audience: e.target.value })}
-                className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white text-sm focus:outline-none focus:border-primary"
               >
                 <option value="all">All Users (3,241)</option>
                 <option value="pro">Pro Users (890)</option>
@@ -261,7 +261,7 @@ export default function Notifications() {
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Channels</label>
+              <label className="block text-sm text-muted-foreground mb-2">Channels</label>
               <div className="flex gap-2">
                 {['email', 'in-app', 'push'].map(channel => {
                   const Icon = channelIcons[channel];
@@ -272,8 +272,8 @@ export default function Notifications() {
                       onClick={() => toggleChannel(channel)}
                       className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-colors ${
                         isSelected
-                          ? 'bg-indigo-500/20 border-indigo-500 text-indigo-400'
-                          : 'bg-[#0A0E1A] border-gray-700 text-gray-400 hover:border-gray-600'
+                          ? 'bg-primary/20 border-indigo-500 text-primary'
+                          : 'bg-background border-border text-muted-foreground hover:border-border'
                       }`}
                     >
                       <Icon className="w-4 h-4" />
@@ -288,14 +288,14 @@ export default function Notifications() {
               <button
                 onClick={() => handleSendNotification(false)}
                 disabled={!newNotification.title || !newNotification.message}
-                className="flex-1 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 py-2 bg-primary text-white rounded-lg hover:bg-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 <Send className="w-4 h-4" />
                 Send Now
               </button>
               <button
                 onClick={() => setComposeOpen(true)}
-                className="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700"
+                className="px-4 py-2 bg-muted text-muted-foreground rounded-lg hover:bg-muted"
               >
                 <Calendar className="w-4 h-4" />
               </button>
@@ -304,13 +304,13 @@ export default function Notifications() {
         </div>
 
         {/* Sent Notifications Table */}
-        <div className="lg:col-span-2 bg-[#111827] border border-gray-800 rounded-xl overflow-hidden">
-          <div className="p-4 border-b border-gray-800 flex items-center justify-between">
+        <div className="lg:col-span-2 bg-card border border-border rounded-xl overflow-hidden">
+          <div className="p-4 border-b border-border flex items-center justify-between">
             <h3 className="text-lg font-semibold text-white">Notification History</h3>
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-3 py-1 bg-[#0A0E1A] border border-gray-700 rounded text-sm text-gray-300 focus:outline-none"
+              className="px-3 py-1 bg-background border border-border rounded text-sm text-muted-foreground focus:outline-none"
             >
               <option value="all">All Status</option>
               <option value="Sent">Sent</option>
@@ -321,24 +321,24 @@ export default function Notifications() {
 
           <div className="overflow-x-auto max-h-[500px]">
             <table className="w-full">
-              <thead className="sticky top-0 bg-[#111827]">
-                <tr className="border-b border-gray-800">
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Notification</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Channels</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Recipients</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Open Rate</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Actions</th>
+              <thead className="sticky top-0 bg-card">
+                <tr className="border-b border-border">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Notification</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Channels</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Recipients</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Open Rate</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredNotifications.map(notification => (
-                  <tr key={notification.id} className="border-b border-gray-800/50 hover:bg-gray-800/30">
+                  <tr key={notification.id} className="border-b border-border/50 hover:bg-muted/30">
                     <td className="px-4 py-3">
                       <div>
                         <p className="text-sm text-white font-medium">{notification.title}</p>
-                        <p className="text-xs text-gray-500 truncate max-w-xs">{notification.message}</p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-muted-foreground truncate max-w-xs">{notification.message}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
                           {notification.sentAt 
                             ? new Date(notification.sentAt).toLocaleDateString() 
                             : notification.scheduledFor 
@@ -355,29 +355,29 @@ export default function Notifications() {
                           return (
                             <div
                               key={channel}
-                              className="w-6 h-6 bg-gray-800 rounded flex items-center justify-center"
+                              className="w-6 h-6 bg-muted rounded flex items-center justify-center"
                               title={channel}
                             >
-                              <Icon className="w-3 h-3 text-gray-400" />
+                              <Icon className="w-3 h-3 text-muted-foreground" />
                             </div>
                           );
                         })}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-300">
+                    <td className="px-4 py-3 text-sm text-muted-foreground">
                       {notification.recipients?.toLocaleString() || '-'}
                     </td>
                     <td className="px-4 py-3">
                       <Badge label={notification.status} variant={statusVariants[notification.status]} />
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-300">
+                    <td className="px-4 py-3 text-sm text-muted-foreground">
                       {notification.openRate ? `${notification.openRate}%` : '-'}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => setViewNotification(notification)}
-                          className="text-gray-400 hover:text-white"
+                          className="text-muted-foreground hover:text-white"
                           title="View"
                         >
                           <Eye className="w-4 h-4" />
@@ -388,7 +388,7 @@ export default function Notifications() {
                               setNewNotification(notification);
                               setComposeOpen(true);
                             }}
-                            className="text-gray-400 hover:text-indigo-400"
+                            className="text-muted-foreground hover:text-primary"
                             title="Edit"
                           >
                             <Edit className="w-4 h-4" />
@@ -396,7 +396,7 @@ export default function Notifications() {
                         )}
                         <button
                           onClick={() => setDeleteConfirm(notification)}
-                          className="text-gray-400 hover:text-red-400"
+                          className="text-muted-foreground hover:text-red-400"
                           title="Delete"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -412,10 +412,10 @@ export default function Notifications() {
       </div>
 
       {/* Templates Section */}
-      <div className="bg-[#111827] border border-gray-800 rounded-xl p-6">
+      <div className="bg-card border border-border rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-white">Notification Templates</h3>
-          <button className="px-3 py-2 bg-indigo-500 text-white rounded-lg text-sm hover:bg-indigo-600">
+          <button className="px-3 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary">
             Create Template
           </button>
         </div>
@@ -430,12 +430,12 @@ export default function Notifications() {
             { name: 'Plan Upgrade', description: 'Confirmation for plan upgrades', uses: 234 },
             { name: 'Account Security', description: 'Security alerts and notices', uses: 167 },
           ].map((template, i) => (
-            <div key={i} className="bg-[#0A0E1A] border border-gray-800 rounded-lg p-4">
+            <div key={i} className="bg-background border border-border rounded-lg p-4">
               <h4 className="text-white font-medium mb-1">{template.name}</h4>
-              <p className="text-xs text-gray-500 mb-3">{template.description}</p>
+              <p className="text-xs text-muted-foreground mb-3">{template.description}</p>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">{template.uses} uses</span>
-                <button className="text-xs text-indigo-400 hover:text-indigo-300">Use Template</button>
+                <span className="text-xs text-muted-foreground">{template.uses} uses</span>
+                <button className="text-xs text-primary hover:text-indigo-300">Use Template</button>
               </div>
             </div>
           ))}
@@ -446,34 +446,34 @@ export default function Notifications() {
       <Modal isOpen={composeOpen} onClose={() => setComposeOpen(false)} title="Compose Notification" size="lg">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Title</label>
+            <label className="block text-sm text-muted-foreground mb-2">Title</label>
             <input
               type="text"
               value={newNotification.title}
               onChange={(e) => setNewNotification({ ...newNotification, title: e.target.value })}
               placeholder="Notification title..."
-              className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+              className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:border-primary"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Message</label>
+            <label className="block text-sm text-muted-foreground mb-2">Message</label>
             <textarea
               value={newNotification.message}
               onChange={(e) => setNewNotification({ ...newNotification, message: e.target.value })}
               placeholder="Write your message..."
               rows={6}
-              className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 resize-none"
+              className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:border-primary resize-none"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Audience</label>
+              <label className="block text-sm text-muted-foreground mb-2">Audience</label>
               <select
                 value={newNotification.audience}
                 onChange={(e) => setNewNotification({ ...newNotification, audience: e.target.value })}
-                className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
               >
                 <option value="all">All Users (3,241)</option>
                 <option value="pro">Pro Users (890)</option>
@@ -482,11 +482,11 @@ export default function Notifications() {
               </select>
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Priority</label>
+              <label className="block text-sm text-muted-foreground mb-2">Priority</label>
               <select
                 value={newNotification.priority}
                 onChange={(e) => setNewNotification({ ...newNotification, priority: e.target.value })}
-                className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
               >
                 <option value="normal">Normal</option>
                 <option value="high">High</option>
@@ -496,7 +496,7 @@ export default function Notifications() {
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Channels</label>
+            <label className="block text-sm text-muted-foreground mb-2">Channels</label>
             <div className="flex gap-2">
               {['email', 'in-app', 'push'].map(channel => {
                 const Icon = channelIcons[channel];
@@ -507,8 +507,8 @@ export default function Notifications() {
                     onClick={() => toggleChannel(channel)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
                       isSelected
-                        ? 'bg-indigo-500/20 border-indigo-500 text-indigo-400'
-                        : 'bg-[#0A0E1A] border-gray-700 text-gray-400 hover:border-gray-600'
+                        ? 'bg-primary/20 border-indigo-500 text-primary'
+                        : 'bg-background border-border text-muted-foreground hover:border-border'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -520,19 +520,19 @@ export default function Notifications() {
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Schedule (optional)</label>
+            <label className="block text-sm text-muted-foreground mb-2">Schedule (optional)</label>
             <input
               type="datetime-local"
               value={newNotification.scheduledFor}
               onChange={(e) => setNewNotification({ ...newNotification, scheduledFor: e.target.value })}
-              className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+              className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
             />
           </div>
 
           <div className="flex gap-3 pt-4">
             <button
               onClick={() => setComposeOpen(false)}
-              className="flex-1 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700"
+              className="flex-1 py-2 bg-muted text-white rounded-lg hover:bg-muted"
             >
               Cancel
             </button>
@@ -541,7 +541,7 @@ export default function Notifications() {
                 setNotifications([{ ...newNotification, id: notifications.length + 1, status: 'Draft' }, ...notifications]);
                 setComposeOpen(false);
               }}
-              className="py-2 px-4 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
+              className="py-2 px-4 bg-muted text-white rounded-lg hover:bg-muted"
             >
               Save Draft
             </button>
@@ -558,7 +558,7 @@ export default function Notifications() {
               <button
                 onClick={() => handleSendNotification(false)}
                 disabled={!newNotification.title || !newNotification.message}
-                className="flex-1 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 py-2 bg-primary text-white rounded-lg hover:bg-primary disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <Send className="w-4 h-4" />
                 Send Now
@@ -573,20 +573,20 @@ export default function Notifications() {
         {viewNotification && (
           <div className="space-y-4">
             <div>
-              <p className="text-xs text-gray-500 uppercase mb-1">Title</p>
+              <p className="text-xs text-muted-foreground uppercase mb-1">Title</p>
               <p className="text-white">{viewNotification.title}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-500 uppercase mb-1">Message</p>
-              <p className="text-gray-300">{viewNotification.message}</p>
+              <p className="text-xs text-muted-foreground uppercase mb-1">Message</p>
+              <p className="text-muted-foreground">{viewNotification.message}</p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-gray-500 uppercase mb-1">Status</p>
+                <p className="text-xs text-muted-foreground uppercase mb-1">Status</p>
                 <Badge label={viewNotification.status} variant={statusVariants[viewNotification.status]} />
               </div>
               <div>
-                <p className="text-xs text-gray-500 uppercase mb-1">Channels</p>
+                <p className="text-xs text-muted-foreground uppercase mb-1">Channels</p>
                 <div className="flex gap-1">
                   {viewNotification.channels.map(c => (
                     <Badge key={c} label={c} variant="neutral" />
@@ -594,11 +594,11 @@ export default function Notifications() {
                 </div>
               </div>
               <div>
-                <p className="text-xs text-gray-500 uppercase mb-1">Recipients</p>
+                <p className="text-xs text-muted-foreground uppercase mb-1">Recipients</p>
                 <p className="text-white">{viewNotification.recipients?.toLocaleString() || '-'}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 uppercase mb-1">Open Rate</p>
+                <p className="text-xs text-muted-foreground uppercase mb-1">Open Rate</p>
                 <p className="text-white">{viewNotification.openRate ? `${viewNotification.openRate}%` : '-'}</p>
               </div>
             </div>

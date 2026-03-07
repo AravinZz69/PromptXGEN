@@ -500,17 +500,17 @@ export default function UserManagement() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-gray-800 border border-gray-700">
+        <TabsList className="bg-muted border border-border">
           <TabsTrigger
             value="users"
-            className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white gap-2"
+            className="data-[state=active]:bg-primary data-[state=active]:text-white gap-2"
           >
             <Users className="w-4 h-4" />
             Users List
           </TabsTrigger>
           <TabsTrigger
             value="auth"
-            className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white gap-2"
+            className="data-[state=active]:bg-primary data-[state=active]:text-white gap-2"
           >
             <Shield className="w-4 h-4" />
             Auth & Security
@@ -523,7 +523,7 @@ export default function UserManagement() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Badge label={`${filteredUsers.length} total`} variant="neutral" />
-          {loading && <Loader2 className="w-4 h-4 text-indigo-500 animate-spin" />}
+          {loading && <Loader2 className="w-4 h-4 text-primary animate-spin" />}
         </div>
         
         <div className="flex flex-wrap items-center gap-3">
@@ -531,14 +531,14 @@ export default function UserManagement() {
           <button
             onClick={fetchUsers}
             disabled={loading}
-            className="p-2 bg-[#111827] border border-gray-800 rounded-lg text-gray-400 hover:text-white hover:border-gray-700 transition-colors"
+            className="p-2 bg-card border border-border rounded-lg text-muted-foreground hover:text-white hover:border-border transition-colors"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
           
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search users..."
@@ -547,7 +547,7 @@ export default function UserManagement() {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              className="pl-10 pr-4 py-2 bg-[#111827] border border-gray-800 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 w-64"
+              className="pl-10 pr-4 py-2 bg-card border border-border rounded-lg text-sm text-white placeholder-muted-foreground focus:outline-none focus:border-primary w-64"
             />
           </div>
 
@@ -558,7 +558,7 @@ export default function UserManagement() {
               setPlanFilter(e.target.value);
               setCurrentPage(1);
             }}
-            className="px-3 py-2 bg-[#111827] border border-gray-800 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500"
+            className="px-3 py-2 bg-card border border-border rounded-lg text-sm text-white focus:outline-none focus:border-primary"
           >
             <option value="All">All Plans</option>
             <option value="Free">Free</option>
@@ -573,7 +573,7 @@ export default function UserManagement() {
               setStatusFilter(e.target.value);
               setCurrentPage(1);
             }}
-            className="px-3 py-2 bg-[#111827] border border-gray-800 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500"
+            className="px-3 py-2 bg-card border border-border rounded-lg text-sm text-white focus:outline-none focus:border-primary"
           >
             <option value="All">All Status</option>
             <option value="Active">Active</option>
@@ -583,7 +583,7 @@ export default function UserManagement() {
 
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 px-4 py-2 bg-[#111827] border border-gray-800 rounded-lg text-sm text-gray-300 hover:text-white hover:border-gray-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-lg text-sm text-muted-foreground hover:text-white hover:border-border transition-colors"
           >
             <Download className="w-4 h-4" />
             Export CSV
@@ -591,7 +591,7 @@ export default function UserManagement() {
 
           <button
             onClick={() => setInviteModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg text-sm text-white transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary rounded-lg text-sm text-white transition-colors"
           >
             <UserPlus className="w-4 h-4" />
             Invite Admin
@@ -601,8 +601,8 @@ export default function UserManagement() {
 
       {/* Bulk Actions */}
       {selectedUsers.size > 0 && (
-        <div className="flex items-center gap-3 p-3 bg-indigo-500/10 border border-indigo-500/30 rounded-lg">
-          <span className="text-sm text-indigo-400">{selectedUsers.size} selected</span>
+        <div className="flex items-center gap-3 p-3 bg-primary/10 border border-indigo-500/30 rounded-lg">
+          <span className="text-sm text-primary">{selectedUsers.size} selected</span>
           <button className="px-3 py-1 text-sm bg-yellow-500/20 text-yellow-400 rounded hover:bg-yellow-500/30">
             Suspend All
           </button>
@@ -616,52 +616,52 @@ export default function UserManagement() {
       )}
 
       {/* Table */}
-      <div className="bg-[#111827] border border-gray-800 rounded-xl overflow-hidden">
+      <div className="bg-card border border-border rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-800">
+              <tr className="border-b border-border">
                 <th className="px-4 py-3 text-left">
                   <input
                     type="checkbox"
                     onChange={handleSelectAll}
                     checked={paginatedUsers.length > 0 && paginatedUsers.every(u => selectedUsers.has(u.id))}
-                    className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-indigo-500"
+                    className="w-4 h-4 rounded border-border bg-muted text-primary"
                   />
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">#</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">User</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Plan</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Credits</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Prompts</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Joined</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Last Active</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Actions</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">#</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">User</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Plan</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Credits</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Prompts</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Joined</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Last Active</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Status</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Actions</th>
               </tr>
             </thead>
             <tbody>
               {paginatedUsers.map((user, index) => (
-                <tr key={user.id} className="border-b border-gray-800/50 hover:bg-gray-800/30">
+                <tr key={user.id} className="border-b border-border/50 hover:bg-muted/30">
                   <td className="px-4 py-3">
                     <input
                       type="checkbox"
                       checked={selectedUsers.has(user.id)}
                       onChange={() => handleSelectUser(user.id)}
-                      className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-indigo-500"
+                      className="w-4 h-4 rounded border-border bg-muted text-primary"
                     />
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">
+                  <td className="px-4 py-3 text-sm text-muted-foreground">
                     {(currentPage - 1) * pageSize + index + 1}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xs font-semibold">
+                      <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-semibold">
                         {user.avatar}
                       </div>
                       <div>
                         <p className="text-sm text-white font-medium">{user.name}</p>
-                        <p className="text-xs text-gray-500">{user.email}</p>
+                        <p className="text-xs text-muted-foreground">{user.email}</p>
                       </div>
                     </div>
                   </td>
@@ -674,11 +674,11 @@ export default function UserManagement() {
                       <span className="text-sm text-amber-400 font-medium">{(user.credits || 0).toLocaleString()}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-300">{user.promptsUsed.toLocaleString()}</td>
-                  <td className="px-4 py-3 text-sm text-gray-400">
+                  <td className="px-4 py-3 text-sm text-muted-foreground">{user.promptsUsed.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">
                     {new Date(user.joinedDate).toLocaleDateString()}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-400">
+                  <td className="px-4 py-3 text-sm text-muted-foreground">
                     {new Date(user.lastActive).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3">
@@ -688,52 +688,52 @@ export default function UserManagement() {
                     <div className="relative">
                       <button
                         onClick={() => setActiveDropdown(activeDropdown === user.id ? null : user.id)}
-                        className="p-1 rounded hover:bg-gray-700"
+                        className="p-1 rounded hover:bg-muted"
                       >
-                        <MoreVertical className="w-4 h-4 text-gray-400" />
+                        <MoreVertical className="w-4 h-4 text-muted-foreground" />
                       </button>
                       
                       {activeDropdown === user.id && (
-                        <div className="absolute right-0 top-8 w-48 bg-[#1F2937] border border-gray-700 rounded-lg shadow-xl z-10">
+                        <div className="absolute right-0 top-8 w-48 bg-card border border-border rounded-lg shadow-xl z-10">
                           <button
                             onClick={() => { setViewUser(user); setActiveDropdown(null); }}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-white"
                           >
                             <Eye className="w-4 h-4" /> View Profile
                           </button>
                           <button
                             onClick={() => { handleImpersonate(user); setActiveDropdown(null); }}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-white"
                           >
                             <UserCog className="w-4 h-4" /> Impersonate
                           </button>
                           <button
                             onClick={() => { setUpgradeUser(user); setActiveDropdown(null); }}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-white"
                           >
                             <ArrowUpCircle className="w-4 h-4" /> Upgrade Plan
                           </button>
                           <button
                             onClick={() => { setCreditsModal(user); setActiveDropdown(null); }}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-amber-400 hover:bg-gray-700"
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-amber-400 hover:bg-muted"
                           >
                             <Coins className="w-4 h-4" /> Manage Credits
                           </button>
                           <button
                             onClick={() => { setConfirmAction({ type: 'suspend', user }); setActiveDropdown(null); }}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-yellow-400 hover:bg-gray-700"
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-yellow-400 hover:bg-muted"
                           >
                             <Ban className="w-4 h-4" /> {user.status === 'Suspended' ? 'Unsuspend' : 'Suspend'}
                           </button>
                           <button
                             onClick={() => { setConfirmAction({ type: 'ban', user }); setActiveDropdown(null); }}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-orange-400 hover:bg-gray-700"
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-orange-400 hover:bg-muted"
                           >
                             <Ban className="w-4 h-4" /> Ban
                           </button>
                           <button
                             onClick={() => { setConfirmAction({ type: 'delete', user }); setActiveDropdown(null); }}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-400 hover:bg-gray-700"
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-400 hover:bg-muted"
                           >
                             <Trash2 className="w-4 h-4" /> Delete
                           </button>
@@ -749,15 +749,15 @@ export default function UserManagement() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between p-4 border-t border-gray-800">
-            <p className="text-sm text-gray-400">
+          <div className="flex items-center justify-between p-4 border-t border-border">
+            <p className="text-sm text-muted-foreground">
               Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, filteredUsers.length)} of {filteredUsers.length}
             </p>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="px-3 py-1 bg-gray-800 text-gray-400 rounded hover:text-white disabled:opacity-50"
+                className="px-3 py-1 bg-muted text-muted-foreground rounded hover:text-white disabled:opacity-50"
               >
                 Prev
               </button>
@@ -766,7 +766,7 @@ export default function UserManagement() {
                   key={num}
                   onClick={() => setCurrentPage(num)}
                   className={`w-8 h-8 rounded text-sm ${
-                    currentPage === num ? 'bg-indigo-500 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'
+                    currentPage === num ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:text-white'
                   }`}
                 >
                   {num}
@@ -775,7 +775,7 @@ export default function UserManagement() {
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1 bg-gray-800 text-gray-400 rounded hover:text-white disabled:opacity-50"
+                className="px-3 py-1 bg-muted text-muted-foreground rounded hover:text-white disabled:opacity-50"
               >
                 Next
               </button>
@@ -786,23 +786,23 @@ export default function UserManagement() {
 
       {/* User Detail Drawer */}
       {viewUser && (
-        <div className="fixed inset-y-0 right-0 w-full max-w-md bg-[#111827] border-l border-gray-800 shadow-2xl z-50 overflow-y-auto">
-          <div className="sticky top-0 bg-[#111827] border-b border-gray-800 p-4 flex items-center justify-between">
+        <div className="fixed inset-y-0 right-0 w-full max-w-md bg-card border-l border-border shadow-2xl z-50 overflow-y-auto">
+          <div className="sticky top-0 bg-card border-b border-border p-4 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-white">User Details</h3>
-            <button onClick={() => setViewUser(null)} className="p-1 hover:bg-gray-800 rounded">
-              <X className="w-5 h-5 text-gray-400" />
+            <button onClick={() => setViewUser(null)} className="p-1 hover:bg-muted rounded">
+              <X className="w-5 h-5 text-muted-foreground" />
             </button>
           </div>
           
           <div className="p-6 space-y-6">
             {/* Profile */}
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xl font-bold">
+              <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white text-xl font-bold">
                 {viewUser.avatar}
               </div>
               <div>
                 <h4 className="text-xl text-white font-semibold">{viewUser.name}</h4>
-                <p className="text-gray-400">{viewUser.email}</p>
+                <p className="text-muted-foreground">{viewUser.email}</p>
                 <div className="flex items-center gap-2 mt-1">
                   <Badge label={viewUser.plan} variant={planVariants[viewUser.plan]} />
                   <Badge label={viewUser.status} variant={statusVariants[viewUser.status]} />
@@ -812,49 +812,49 @@ export default function UserManagement() {
 
             {/* Stats */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-[#0A0E1A] rounded-lg p-4">
-                <p className="text-xs text-gray-500 uppercase">Credits</p>
+              <div className="bg-background rounded-lg p-4">
+                <p className="text-xs text-muted-foreground uppercase">Credits</p>
                 <p className="text-2xl text-amber-400 font-bold">{(viewUser.credits || 0).toLocaleString()}</p>
               </div>
-              <div className="bg-[#0A0E1A] rounded-lg p-4">
-                <p className="text-xs text-gray-500 uppercase">Total Prompts</p>
+              <div className="bg-background rounded-lg p-4">
+                <p className="text-xs text-muted-foreground uppercase">Total Prompts</p>
                 <p className="text-2xl text-white font-bold">{viewUser.promptsUsed.toLocaleString()}</p>
               </div>
-              <div className="bg-[#0A0E1A] rounded-lg p-4">
-                <p className="text-xs text-gray-500 uppercase">Tokens Used</p>
+              <div className="bg-background rounded-lg p-4">
+                <p className="text-xs text-muted-foreground uppercase">Tokens Used</p>
                 <p className="text-2xl text-white font-bold">{(viewUser.tokensUsed / 1000).toFixed(0)}K</p>
               </div>
-              <div className="bg-[#0A0E1A] rounded-lg p-4">
-                <p className="text-xs text-gray-500 uppercase">Last Login</p>
+              <div className="bg-background rounded-lg p-4">
+                <p className="text-xs text-muted-foreground uppercase">Last Login</p>
                 <p className="text-lg text-white font-bold">{new Date(viewUser.lastActive).toLocaleDateString()}</p>
               </div>
             </div>
 
             {/* Subscription History */}
             <div>
-              <h5 className="text-sm font-semibold text-gray-400 uppercase mb-3">Subscription History</h5>
+              <h5 className="text-sm font-semibold text-muted-foreground uppercase mb-3">Subscription History</h5>
               <div className="space-y-2">
                 {/* MOCK DATA */}
-                <div className="flex items-center justify-between p-3 bg-[#0A0E1A] rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-background rounded-lg">
                   <span className="text-sm text-white">{viewUser.plan} Plan</span>
-                  <span className="text-xs text-gray-500">Current</span>
+                  <span className="text-xs text-muted-foreground">Current</span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-[#0A0E1A] rounded-lg">
-                  <span className="text-sm text-gray-400">Free Plan</span>
-                  <span className="text-xs text-gray-500">{new Date(viewUser.joinedDate).toLocaleDateString()}</span>
+                <div className="flex items-center justify-between p-3 bg-background rounded-lg">
+                  <span className="text-sm text-muted-foreground">Free Plan</span>
+                  <span className="text-xs text-muted-foreground">{new Date(viewUser.joinedDate).toLocaleDateString()}</span>
                 </div>
               </div>
             </div>
 
             {/* Recent Prompts */}
             <div>
-              <h5 className="text-sm font-semibold text-gray-400 uppercase mb-3">Recent Prompts</h5>
+              <h5 className="text-sm font-semibold text-muted-foreground uppercase mb-3">Recent Prompts</h5>
               <div className="space-y-2">
                 {/* MOCK DATA */}
                 {['Code review for React component', 'Marketing copy for SaaS', 'Blog post outline', 'API documentation', 'Email template'].map((prompt, i) => (
-                  <div key={i} className="p-3 bg-[#0A0E1A] rounded-lg">
+                  <div key={i} className="p-3 bg-background rounded-lg">
                     <p className="text-sm text-white truncate">{prompt}</p>
-                    <p className="text-xs text-gray-500 mt-1">{i + 1} day{i > 0 ? 's' : ''} ago</p>
+                    <p className="text-xs text-muted-foreground mt-1">{i + 1} day{i > 0 ? 's' : ''} ago</p>
                   </div>
                 ))}
               </div>
@@ -876,7 +876,7 @@ export default function UserManagement() {
               </button>
               <button
                 onClick={() => { setUpgradeUser(viewUser); setViewUser(null); }}
-                className="flex-1 py-2 bg-indigo-500/20 text-indigo-400 rounded-lg hover:bg-indigo-500/30"
+                className="flex-1 py-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/90/30"
               >
                 Upgrade
               </button>
@@ -892,16 +892,16 @@ export default function UserManagement() {
       <Modal isOpen={inviteModalOpen} onClose={() => setInviteModalOpen(false)} title="Invite Admin">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Email Address</label>
+            <label className="block text-sm text-muted-foreground mb-2">Email Address</label>
             <input
               type="email"
               placeholder="admin@example.com"
-              className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+              className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:border-primary"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Role</label>
-            <select className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500">
+            <label className="block text-sm text-muted-foreground mb-2">Role</label>
+            <select className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary">
               <option value="admin">Admin</option>
               <option value="moderator">Moderator</option>
               <option value="readonly">Read Only</option>
@@ -910,13 +910,13 @@ export default function UserManagement() {
           <div className="flex gap-3 pt-4">
             <button
               onClick={() => setInviteModalOpen(false)}
-              className="flex-1 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700"
+              className="flex-1 py-2 bg-muted text-white rounded-lg hover:bg-muted"
             >
               Cancel
             </button>
             <button
               onClick={() => { console.log('Invite sent'); setInviteModalOpen(false); }}
-              className="flex-1 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
+              className="flex-1 py-2 bg-primary text-white rounded-lg hover:bg-primary"
             >
               Send Invite
             </button>
@@ -928,7 +928,7 @@ export default function UserManagement() {
       <Modal isOpen={!!upgradeUser} onClose={() => setUpgradeUser(null)} title="Upgrade Plan">
         {upgradeUser && (
           <div className="space-y-4">
-            <p className="text-gray-400">
+            <p className="text-muted-foreground">
               Select a new plan for <span className="text-white">{upgradeUser.name}</span>
             </p>
             <div className="space-y-2">
@@ -939,8 +939,8 @@ export default function UserManagement() {
                   disabled={upgradeUser.plan === plan}
                   className={`w-full p-4 text-left rounded-lg border transition-colors ${
                     upgradeUser.plan === plan
-                      ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400'
-                      : 'border-gray-700 hover:border-gray-600 text-white'
+                      ? 'border-indigo-500 bg-primary/10 text-primary'
+                      : 'border-border hover:border-border text-white'
                   }`}
                 >
                   <span className="font-medium">{plan}</span>
@@ -956,13 +956,13 @@ export default function UserManagement() {
       <Modal isOpen={!!creditsModal} onClose={() => { setCreditsModal(null); setCreditAmount(100); setCreditReason(''); }} title="Manage User Credits">
         {creditsModal && (
           <div className="space-y-4">
-            <div className="flex items-center gap-3 p-4 bg-[#0A0E1A] rounded-lg">
-              <div className="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-white text-lg font-bold">
+            <div className="flex items-center gap-3 p-4 bg-background rounded-lg">
+              <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white text-lg font-bold">
                 {creditsModal.avatar}
               </div>
               <div>
                 <p className="text-white font-medium">{creditsModal.name}</p>
-                <p className="text-sm text-gray-400">{creditsModal.email}</p>
+                <p className="text-sm text-muted-foreground">{creditsModal.email}</p>
               </div>
             </div>
             
@@ -974,24 +974,24 @@ export default function UserManagement() {
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Amount</label>
+              <label className="block text-sm text-muted-foreground mb-2">Amount</label>
               <input
                 type="number"
                 min="1"
                 value={creditAmount}
                 onChange={(e) => setCreditAmount(Math.max(1, parseInt(e.target.value) || 0))}
-                className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Reason (optional)</label>
+              <label className="block text-sm text-muted-foreground mb-2">Reason (optional)</label>
               <input
                 type="text"
                 placeholder="e.g., Promotional bonus, Refund, Manual adjustment"
                 value={creditReason}
                 onChange={(e) => setCreditReason(e.target.value)}
-                className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:border-primary"
               />
             </div>
 
@@ -1012,14 +1012,14 @@ export default function UserManagement() {
               </button>
             </div>
 
-            <div className="pt-2 border-t border-gray-800">
-              <label className="block text-sm text-gray-400 mb-2">Or set to specific amount</label>
+            <div className="pt-2 border-t border-border">
+              <label className="block text-sm text-muted-foreground mb-2">Or set to specific amount</label>
               <div className="flex gap-2">
                 {[0, 100, 500, 1000, 5000].map(preset => (
                   <button
                     key={preset}
                     onClick={() => handleSetCredits(creditsModal, preset)}
-                    className="flex-1 py-2 bg-gray-800 text-gray-300 rounded hover:bg-gray-700 text-sm"
+                    className="flex-1 py-2 bg-muted text-muted-foreground rounded hover:bg-muted text-sm"
                   >
                     {preset.toLocaleString()}
                   </button>
@@ -1069,42 +1069,42 @@ export default function UserManagement() {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <Badge label={`${filteredAuthUsers.length} users`} variant="neutral" />
-              {authLoading && <Loader2 className="w-4 h-4 text-indigo-500 animate-spin" />}
+              {authLoading && <Loader2 className="w-4 h-4 text-primary animate-spin" />}
             </div>
             <div className="flex items-center gap-3">
               <button
                 onClick={fetchAuthUsers}
                 disabled={authLoading}
-                className="p-2 bg-[#111827] border border-gray-800 rounded-lg text-gray-400 hover:text-white hover:border-gray-700 transition-colors"
+                className="p-2 bg-card border border-border rounded-lg text-muted-foreground hover:text-white hover:border-border transition-colors"
               >
                 <RefreshCw className={`w-4 h-4 ${authLoading ? 'animate-spin' : ''}`} />
               </button>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
                   type="text"
                   placeholder="Search users..."
                   value={authSearchQuery}
                   onChange={(e) => setAuthSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 bg-[#111827] border border-gray-800 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 w-64"
+                  className="pl-10 pr-4 py-2 bg-card border border-border rounded-lg text-sm text-white placeholder-muted-foreground focus:outline-none focus:border-primary w-64"
                 />
               </div>
             </div>
           </div>
 
           {/* Auth Table */}
-          <div className="bg-[#111827] border border-gray-800 rounded-xl overflow-hidden">
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-800">
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">User</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Auth Providers</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Phone</th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-400 uppercase">Enabled</th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-400 uppercase">Verified</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Last Sign In</th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-400 uppercase">Actions</th>
+                  <tr className="border-b border-border">
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">User</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Auth Providers</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Phone</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground uppercase">Enabled</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground uppercase">Verified</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Last Sign In</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground uppercase">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1112,27 +1112,27 @@ export default function UserManagement() {
                     <tr>
                       <td colSpan={7} className="px-4 py-12 text-center">
                         <Shield className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                        <p className="text-gray-400">No users found</p>
+                        <p className="text-muted-foreground">No users found</p>
                       </td>
                     </tr>
                   ) : (
                     filteredAuthUsers.map((user) => (
-                      <tr key={user.id} className="border-b border-gray-800/50 hover:bg-gray-800/30">
+                      <tr key={user.id} className="border-b border-border/50 hover:bg-muted/30">
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xs font-semibold">
+                            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-semibold">
                               {(user.full_name || user.email || 'U').substring(0, 2).toUpperCase()}
                             </div>
                             <div>
                               <p className="text-sm text-white font-medium">{user.full_name || user.email?.split('@')[0]}</p>
-                              <p className="text-xs text-gray-500">{user.email}</p>
+                              <p className="text-xs text-muted-foreground">{user.email}</p>
                             </div>
                           </div>
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1">
                             {(user.auth_providers || ['email']).map((provider, i) => (
-                              <span key={i} className="px-2 py-0.5 text-xs rounded bg-gray-700 text-gray-300 capitalize">
+                              <span key={i} className="px-2 py-0.5 text-xs rounded bg-muted text-muted-foreground capitalize">
                                 {provider}
                               </span>
                             ))}
@@ -1141,14 +1141,14 @@ export default function UserManagement() {
                         <td className="px-4 py-3">
                           {user.phone ? (
                             <div className="flex items-center gap-1">
-                              <Phone className="w-3 h-3 text-gray-500" />
-                              <span className="text-sm text-gray-300">{user.phone}</span>
+                              <Phone className="w-3 h-3 text-muted-foreground" />
+                              <span className="text-sm text-muted-foreground">{user.phone}</span>
                               {user.phone_verified && (
                                 <CheckCircle className="w-3 h-3 text-green-500" />
                               )}
                             </div>
                           ) : (
-                            <span className="text-xs text-gray-500">-</span>
+                            <span className="text-xs text-muted-foreground">-</span>
                           )}
                         </td>
                         <td className="px-4 py-3 text-center">
@@ -1165,7 +1165,7 @@ export default function UserManagement() {
                             className="data-[state=checked]:bg-blue-600"
                           />
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-400">
+                        <td className="px-4 py-3 text-sm text-muted-foreground">
                           {user.last_sign_in ? (
                             <div className="flex items-center gap-1">
                               <Clock className="w-3 h-3" />
@@ -1173,28 +1173,28 @@ export default function UserManagement() {
                             </div>
                           ) : '-'}
                           {user.sign_in_count > 0 && (
-                            <p className="text-xs text-gray-500">{user.sign_in_count} sign-ins</p>
+                            <p className="text-xs text-muted-foreground">{user.sign_in_count} sign-ins</p>
                           )}
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-center gap-1">
                             <button
                               onClick={() => setForcePasswordResetUser(user)}
-                              className="p-1.5 rounded hover:bg-yellow-500/20 text-gray-400 hover:text-yellow-400"
+                              className="p-1.5 rounded hover:bg-yellow-500/20 text-muted-foreground hover:text-yellow-400"
                               title="Force Password Reset"
                             >
                               <Key className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => setForceLogoutUser(user)}
-                              className="p-1.5 rounded hover:bg-red-500/20 text-gray-400 hover:text-red-400"
+                              className="p-1.5 rounded hover:bg-red-500/20 text-muted-foreground hover:text-red-400"
                               title="Force Logout"
                             >
                               <LogOut className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => setSignInHistoryUser(user)}
-                              className="p-1.5 rounded hover:bg-blue-500/20 text-gray-400 hover:text-blue-400"
+                              className="p-1.5 rounded hover:bg-blue-500/20 text-muted-foreground hover:text-blue-400"
                               title="Sign-in History"
                             >
                               <Clock className="w-4 h-4" />
@@ -1213,46 +1213,46 @@ export default function UserManagement() {
           <Modal isOpen={!!signInHistoryUser} onClose={() => setSignInHistoryUser(null)} title="Sign-in History">
             {signInHistoryUser && (
               <div className="space-y-4">
-                <div className="flex items-center gap-3 p-4 bg-[#0A0E1A] rounded-lg">
-                  <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white text-lg font-bold">
+                <div className="flex items-center gap-3 p-4 bg-background rounded-lg">
+                  <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white text-lg font-bold">
                     {(signInHistoryUser.full_name || signInHistoryUser.email || 'U').substring(0, 2).toUpperCase()}
                   </div>
                   <div>
                     <p className="text-white font-medium">{signInHistoryUser.full_name || signInHistoryUser.email}</p>
-                    <p className="text-sm text-gray-400">{signInHistoryUser.email}</p>
+                    <p className="text-sm text-muted-foreground">{signInHistoryUser.email}</p>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between p-3 bg-[#0A0E1A] rounded-lg">
-                    <span className="text-sm text-gray-400">Total Sign-ins</span>
+                  <div className="flex items-center justify-between p-3 bg-background rounded-lg">
+                    <span className="text-sm text-muted-foreground">Total Sign-ins</span>
                     <span className="text-white font-medium">{signInHistoryUser.sign_in_count || 0}</span>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-[#0A0E1A] rounded-lg">
-                    <span className="text-sm text-gray-400">Last Sign-in</span>
+                  <div className="flex items-center justify-between p-3 bg-background rounded-lg">
+                    <span className="text-sm text-muted-foreground">Last Sign-in</span>
                     <span className="text-white font-medium">
                       {signInHistoryUser.last_sign_in 
                         ? new Date(signInHistoryUser.last_sign_in).toLocaleString()
                         : 'Never'}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-[#0A0E1A] rounded-lg">
-                    <span className="text-sm text-gray-400">Account Created</span>
+                  <div className="flex items-center justify-between p-3 bg-background rounded-lg">
+                    <span className="text-sm text-muted-foreground">Account Created</span>
                     <span className="text-white font-medium">
                       {new Date(signInHistoryUser.created_at).toLocaleDateString()}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-[#0A0E1A] rounded-lg">
-                    <span className="text-sm text-gray-400">Auth Providers</span>
+                  <div className="flex items-center justify-between p-3 bg-background rounded-lg">
+                    <span className="text-sm text-muted-foreground">Auth Providers</span>
                     <div className="flex gap-1">
                       {(signInHistoryUser.auth_providers || ['email']).map((p, i) => (
-                        <span key={i} className="px-2 py-0.5 text-xs rounded bg-indigo-500/20 text-indigo-400 capitalize">
+                        <span key={i} className="px-2 py-0.5 text-xs rounded bg-primary/20 text-primary capitalize">
                           {p}
                         </span>
                       ))}
                     </div>
                   </div>
                 </div>
-                <p className="text-xs text-gray-500 text-center pt-2">
+                <p className="text-xs text-muted-foreground text-center pt-2">
                   Detailed sign-in logs require Supabase Auth Hooks configuration
                 </p>
               </div>

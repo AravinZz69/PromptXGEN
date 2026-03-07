@@ -428,7 +428,7 @@ export default function TeamManager() {
               <Button
                 variant="ghost"
                 onClick={() => setMode('list')}
-                className="text-gray-400 hover:text-white"
+                className="text-muted-foreground hover:text-white"
               >
                 <ArrowLeft className="w-5 h-5" />
               </Button>
@@ -446,14 +446,14 @@ export default function TeamManager() {
               <Button
                 variant="outline"
                 onClick={() => setMode('list')}
-                className="border-gray-700 text-gray-300"
+                className="border-border text-muted-foreground"
               >
                 Cancel
               </Button>
               <Button
                 onClick={isEditingMember ? handleSaveMember : handleSaveValue}
                 disabled={saving}
-                className="bg-indigo-600 hover:bg-indigo-700"
+                className="bg-primary hover:bg-primary/90"
               >
                 {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 Save
@@ -462,12 +462,12 @@ export default function TeamManager() {
           </div>
 
           {/* Form */}
-          <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 space-y-6">
+          <div className="bg-muted rounded-xl p-6 border border-border space-y-6">
             {isEditingMember ? (
               <>
                 {/* Name */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">
                     Name *
                   </label>
                   <input
@@ -476,14 +476,14 @@ export default function TeamManager() {
                     onChange={(e) =>
                       setMemberForm({ ...memberForm, name: e.target.value })
                     }
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="John Doe"
                   />
                 </div>
 
                 {/* Role */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">
                     Role
                   </label>
                   <input
@@ -492,14 +492,14 @@ export default function TeamManager() {
                     onChange={(e) =>
                       setMemberForm({ ...memberForm, role: e.target.value })
                     }
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="Frontend Developer"
                   />
                 </div>
 
                 {/* Bio */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">
                     Bio
                   </label>
                   <textarea
@@ -508,14 +508,14 @@ export default function TeamManager() {
                       setMemberForm({ ...memberForm, bio: e.target.value })
                     }
                     rows={3}
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                    className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                     placeholder="Short bio about the team member..."
                   />
                 </div>
 
                 {/* Avatar */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">
                     Avatar URL
                   </label>
                   <input
@@ -524,14 +524,14 @@ export default function TeamManager() {
                     onChange={(e) =>
                       setMemberForm({ ...memberForm, avatar: e.target.value })
                     }
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="https://... (leave empty for auto-generated)"
                   />
                 </div>
 
                 {/* Social Links */}
                 <div className="space-y-4">
-                  <label className="block text-sm font-medium text-gray-300">
+                  <label className="block text-sm font-medium text-muted-foreground">
                     Social Links
                   </label>
                   <div className="flex items-center gap-3">
@@ -545,12 +545,12 @@ export default function TeamManager() {
                           social_linkedin: e.target.value,
                         })
                       }
-                      className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="flex-1 px-4 py-2 bg-muted border border-border rounded-lg text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="LinkedIn URL"
                     />
                   </div>
                   <div className="flex items-center gap-3">
-                    <Github className="w-5 h-5 text-gray-400" />
+                    <Github className="w-5 h-5 text-muted-foreground" />
                     <input
                       type="text"
                       value={memberForm.social_github}
@@ -560,7 +560,7 @@ export default function TeamManager() {
                           social_github: e.target.value,
                         })
                       }
-                      className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="flex-1 px-4 py-2 bg-muted border border-border rounded-lg text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="GitHub URL"
                     />
                   </div>
@@ -575,7 +575,7 @@ export default function TeamManager() {
                           social_twitter: e.target.value,
                         })
                       }
-                      className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="flex-1 px-4 py-2 bg-muted border border-border rounded-lg text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="Twitter URL"
                     />
                   </div>
@@ -589,14 +589,14 @@ export default function TeamManager() {
                       setMemberForm({ ...memberForm, is_active: checked })
                     }
                   />
-                  <span className="text-gray-300">Active (visible on website)</span>
+                  <span className="text-muted-foreground">Active (visible on website)</span>
                 </div>
               </>
             ) : (
               <>
                 {/* Title */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">
                     Title *
                   </label>
                   <input
@@ -605,14 +605,14 @@ export default function TeamManager() {
                     onChange={(e) =>
                       setValueForm({ ...valueForm, title: e.target.value })
                     }
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="Innovation First"
                   />
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">
                     Description
                   </label>
                   <textarea
@@ -621,14 +621,14 @@ export default function TeamManager() {
                       setValueForm({ ...valueForm, description: e.target.value })
                     }
                     rows={3}
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                    className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                     placeholder="Description of this company value..."
                   />
                 </div>
 
                 {/* Icon */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">
                     Icon (Lucide icon name)
                   </label>
                   <input
@@ -637,10 +637,10 @@ export default function TeamManager() {
                     onChange={(e) =>
                       setValueForm({ ...valueForm, icon: e.target.value })
                     }
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="Heart, Lightbulb, Users, etc."
                   />
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     Use Lucide icon names: Heart, Lightbulb, Trophy, Users, Eye, etc.
                   </p>
                 </div>
@@ -653,7 +653,7 @@ export default function TeamManager() {
                       setValueForm({ ...valueForm, is_active: checked })
                     }
                   />
-                  <span className="text-gray-300">Active (visible on website)</span>
+                  <span className="text-muted-foreground">Active (visible on website)</span>
                 </div>
               </>
             )}
@@ -674,23 +674,23 @@ export default function TeamManager() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-              <Users className="w-8 h-8 text-indigo-500" />
+              <Users className="w-8 h-8 text-primary" />
               Team Manager
             </h1>
-            <p className="text-gray-400 mt-1">
+            <p className="text-muted-foreground mt-1">
               Manage team members and company values
             </p>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center gap-4 border-b border-gray-800 pb-4">
+        <div className="flex items-center gap-4 border-b border-border pb-4">
           <button
             onClick={() => setActiveTab('members')}
             className={`px-4 py-2 rounded-lg transition-colors ${
               activeTab === 'members'
-                ? 'bg-indigo-600 text-white'
-                : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                ? 'bg-primary text-white'
+                : 'text-muted-foreground hover:text-white hover:bg-muted'
             }`}
           >
             Team Members ({members.length})
@@ -699,8 +699,8 @@ export default function TeamManager() {
             onClick={() => setActiveTab('values')}
             className={`px-4 py-2 rounded-lg transition-colors ${
               activeTab === 'values'
-                ? 'bg-indigo-600 text-white'
-                : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                ? 'bg-primary text-white'
+                : 'text-muted-foreground hover:text-white hover:bg-muted'
             }`}
           >
             Company Values ({values.length})
@@ -709,25 +709,25 @@ export default function TeamManager() {
 
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : activeTab === 'members' ? (
           <>
             {/* Search & Add */}
             <div className="flex items-center justify-between gap-4">
               <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
                   type="text"
                   placeholder="Search members..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-10 pr-4 py-2 bg-muted border border-border rounded-lg text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
               <Button
                 onClick={handleCreateMember}
-                className="bg-indigo-600 hover:bg-indigo-700"
+                className="bg-primary hover:bg-primary/90"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Member
@@ -736,7 +736,7 @@ export default function TeamManager() {
 
             {/* Members List */}
             {filteredMembers.length === 0 ? (
-              <div className="text-center py-20 text-gray-400">
+              <div className="text-center py-20 text-muted-foreground">
                 <Users className="w-16 h-16 mx-auto mb-4 opacity-50" />
                 <p>No team members found</p>
               </div>
@@ -745,8 +745,8 @@ export default function TeamManager() {
                 {filteredMembers.map((member, index) => (
                   <div
                     key={member.id}
-                    className={`bg-gray-900 rounded-xl p-4 border transition-colors ${
-                      member.is_active ? 'border-gray-800' : 'border-gray-800/50 opacity-60'
+                    className={`bg-muted rounded-xl p-4 border transition-colors ${
+                      member.is_active ? 'border-border' : 'border-border/50 opacity-60'
                     }`}
                   >
                     <div className="flex items-center gap-4">
@@ -754,7 +754,7 @@ export default function TeamManager() {
                       <img
                         src={member.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${member.name}&backgroundColor=6366f1`}
                         alt={member.name}
-                        className="w-14 h-14 rounded-full bg-gray-800"
+                        className="w-14 h-14 rounded-full bg-muted"
                       />
 
                       {/* Info */}
@@ -762,8 +762,8 @@ export default function TeamManager() {
                         <h3 className="text-lg font-semibold text-white">
                           {member.name}
                         </h3>
-                        <p className="text-sm text-indigo-400">{member.role}</p>
-                        <p className="text-xs text-gray-500 truncate mt-1">
+                        <p className="text-sm text-primary">{member.role}</p>
+                        <p className="text-xs text-muted-foreground truncate mt-1">
                           {member.bio}
                         </p>
                       </div>
@@ -775,7 +775,7 @@ export default function TeamManager() {
                             href={member.social_linkedin}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-gray-500 hover:text-blue-500"
+                            className="text-muted-foreground hover:text-blue-500"
                           >
                             <Linkedin className="w-4 h-4" />
                           </a>
@@ -785,7 +785,7 @@ export default function TeamManager() {
                             href={member.social_github}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-gray-500 hover:text-white"
+                            className="text-muted-foreground hover:text-white"
                           >
                             <Github className="w-4 h-4" />
                           </a>
@@ -795,7 +795,7 @@ export default function TeamManager() {
                             href={member.social_twitter}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-gray-500 hover:text-sky-500"
+                            className="text-muted-foreground hover:text-sky-500"
                           >
                             <Twitter className="w-4 h-4" />
                           </a>
@@ -809,7 +809,7 @@ export default function TeamManager() {
                           variant="ghost"
                           onClick={() => moveMember(member, 'up')}
                           disabled={index === 0}
-                          className="h-6 w-6 p-0 text-gray-500 hover:text-white"
+                          className="h-6 w-6 p-0 text-muted-foreground hover:text-white"
                         >
                           <ArrowUp className="w-4 h-4" />
                         </Button>
@@ -818,7 +818,7 @@ export default function TeamManager() {
                           variant="ghost"
                           onClick={() => moveMember(member, 'down')}
                           disabled={index === filteredMembers.length - 1}
-                          className="h-6 w-6 p-0 text-gray-500 hover:text-white"
+                          className="h-6 w-6 p-0 text-muted-foreground hover:text-white"
                         >
                           <ArrowDown className="w-4 h-4" />
                         </Button>
@@ -834,7 +834,7 @@ export default function TeamManager() {
                           size="sm"
                           variant="ghost"
                           onClick={() => handleEditMember(member)}
-                          className="text-gray-400 hover:text-indigo-400"
+                          className="text-muted-foreground hover:text-primary"
                         >
                           <Pencil className="w-4 h-4" />
                         </Button>
@@ -842,7 +842,7 @@ export default function TeamManager() {
                           size="sm"
                           variant="ghost"
                           onClick={() => setDeleteMember(member)}
-                          className="text-gray-400 hover:text-red-400"
+                          className="text-muted-foreground hover:text-red-400"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -859,7 +859,7 @@ export default function TeamManager() {
             <div className="flex justify-end">
               <Button
                 onClick={handleCreateValue}
-                className="bg-indigo-600 hover:bg-indigo-700"
+                className="bg-primary hover:bg-primary/90"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Value
@@ -868,7 +868,7 @@ export default function TeamManager() {
 
             {/* Values List */}
             {values.length === 0 ? (
-              <div className="text-center py-20 text-gray-400">
+              <div className="text-center py-20 text-muted-foreground">
                 <Heart className="w-16 h-16 mx-auto mb-4 opacity-50" />
                 <p>No company values found</p>
               </div>
@@ -877,21 +877,21 @@ export default function TeamManager() {
                 {values.map((value) => (
                   <div
                     key={value.id}
-                    className={`bg-gray-900 rounded-xl p-5 border transition-colors ${
-                      value.is_active ? 'border-gray-800' : 'border-gray-800/50 opacity-60'
+                    className={`bg-muted rounded-xl p-5 border transition-colors ${
+                      value.is_active ? 'border-border' : 'border-border/50 opacity-60'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <div className="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center">
-                            <Heart className="w-5 h-5 text-indigo-400" />
+                          <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                            <Heart className="w-5 h-5 text-primary" />
                           </div>
                           <h3 className="text-lg font-semibold text-white">
                             {value.title}
                           </h3>
                         </div>
-                        <p className="text-sm text-gray-400">{value.description}</p>
+                        <p className="text-sm text-muted-foreground">{value.description}</p>
                         <p className="text-xs text-gray-600 mt-2">
                           Icon: {value.icon}
                         </p>
@@ -901,7 +901,7 @@ export default function TeamManager() {
                           size="sm"
                           variant="ghost"
                           onClick={() => handleEditValue(value)}
-                          className="text-gray-400 hover:text-indigo-400"
+                          className="text-muted-foreground hover:text-primary"
                         >
                           <Pencil className="w-4 h-4" />
                         </Button>
@@ -909,7 +909,7 @@ export default function TeamManager() {
                           size="sm"
                           variant="ghost"
                           onClick={() => setDeleteValue(value)}
-                          className="text-gray-400 hover:text-red-400"
+                          className="text-muted-foreground hover:text-red-400"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -925,7 +925,7 @@ export default function TeamManager() {
 
       {/* Delete Member Dialog */}
       <AlertDialog open={!!deleteMember} onOpenChange={() => setDeleteMember(null)}>
-        <AlertDialogContent className="bg-gray-900 border-gray-800">
+        <AlertDialogContent className="bg-muted border-border">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Delete Team Member</AlertDialogTitle>
             <AlertDialogDescription>
@@ -933,7 +933,7 @@ export default function TeamManager() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700">
+            <AlertDialogCancel className="bg-muted border-border text-white hover:bg-muted">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
@@ -948,7 +948,7 @@ export default function TeamManager() {
 
       {/* Delete Value Dialog */}
       <AlertDialog open={!!deleteValue} onOpenChange={() => setDeleteValue(null)}>
-        <AlertDialogContent className="bg-gray-900 border-gray-800">
+        <AlertDialogContent className="bg-muted border-border">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Delete Company Value</AlertDialogTitle>
             <AlertDialogDescription>
@@ -956,7 +956,7 @@ export default function TeamManager() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700">
+            <AlertDialogCancel className="bg-muted border-border text-white hover:bg-muted">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction

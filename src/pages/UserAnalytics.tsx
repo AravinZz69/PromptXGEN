@@ -529,13 +529,13 @@ const UserAnalytics = () => {
                   >
                     <div className="flex items-center justify-between flex-wrap gap-4">
                       <div className="flex items-center gap-4">
-                        <div className="p-3 rounded-xl bg-purple-500/20">
-                          <Sparkles className="h-8 w-8 text-purple-400" />
+                        <div className="p-3 rounded-xl bg-accent/20">
+                          <Sparkles className="h-8 w-8 text-accent-foreground" />
                         </div>
                         <div>
                           <h3 className="text-xl font-semibold text-foreground">Credits Balance</h3>
                           <p className="text-muted-foreground">
-                            You have <span className="text-purple-400 font-bold">{credits.balance}</span> credits remaining
+                            You have <span className="text-accent-foreground font-bold">{credits.balance}</span> credits remaining
                           </p>
                         </div>
                       </div>
@@ -551,7 +551,7 @@ const UserAnalytics = () => {
                         </div>
                         <div className="h-10 w-px bg-border" />
                         <div className="text-center">
-                          <p className="text-2xl font-bold text-purple-400 capitalize">{credits.plan}</p>
+                          <p className="text-2xl font-bold text-accent-foreground capitalize">{credits.plan}</p>
                           <p className="text-xs text-muted-foreground">Plan</p>
                         </div>
                       </div>

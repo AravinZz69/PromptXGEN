@@ -131,7 +131,7 @@ export function FeaturesEditor() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -142,7 +142,7 @@ export function FeaturesEditor() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Features Editor</h1>
-          <p className="text-gray-400 text-sm">
+          <p className="text-muted-foreground text-sm">
             Manage your website's feature cards
           </p>
         </div>
@@ -150,7 +150,7 @@ export function FeaturesEditor() {
           <Button
             onClick={addFeature}
             variant="outline"
-            className="border-gray-700 text-gray-300 hover:bg-gray-800 gap-2"
+            className="border-border text-muted-foreground hover:bg-muted gap-2"
           >
             <Plus className="w-4 h-4" />
             Add Feature
@@ -158,7 +158,7 @@ export function FeaturesEditor() {
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="bg-indigo-600 hover:bg-indigo-700"
+            className="bg-primary hover:bg-primary/90"
           >
             {saving ? (
               <>
@@ -173,29 +173,29 @@ export function FeaturesEditor() {
       </div>
 
       {/* Features list */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+      <div className="bg-muted border border-border rounded-xl p-6">
         <DraggableList
           items={features}
           onReorder={setFeatures}
           emptyMessage="No features yet. Click 'Add Feature' to create one."
           renderItem={(feature, index, dragHandleProps) => (
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-5 space-y-4">
+            <div className="bg-muted border border-border rounded-lg p-5 space-y-4">
               {/* Header row */}
               <div className="flex items-start gap-3">
                 {/* Drag handle */}
                 <div {...dragHandleProps} className="pt-2">
-                  <GripVertical className="w-5 h-5 text-gray-500" />
+                  <GripVertical className="w-5 h-5 text-muted-foreground" />
                 </div>
 
                 {/* Icon */}
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-gray-400">Icon</label>
+                  <label className="text-xs font-medium text-muted-foreground">Icon</label>
                   <input
                     type="text"
                     value={feature.icon}
                     onChange={(e) => updateFeature(feature.id, 'icon', e.target.value)}
                     placeholder="✨"
-                    className="w-16 text-center bg-gray-900 border border-gray-700 text-white text-2xl rounded px-2 py-2"
+                    className="w-16 text-center bg-muted border border-border text-white text-2xl rounded px-2 py-2"
                   />
                 </div>
 
@@ -206,21 +206,21 @@ export function FeaturesEditor() {
                     value={feature.title}
                     onChange={(e) => updateFeature(feature.id, 'title', e.target.value)}
                     placeholder="Feature Title"
-                    className="w-full bg-gray-900 border border-gray-700 text-white placeholder-gray-500 rounded px-3 py-2 font-semibold"
+                    className="w-full bg-muted border border-border text-white placeholder-muted-foreground rounded px-3 py-2 font-semibold"
                   />
                   <textarea
                     value={feature.description}
                     onChange={(e) => updateFeature(feature.id, 'description', e.target.value)}
                     placeholder="Feature description..."
                     rows={2}
-                    className="w-full bg-gray-900 border border-gray-700 text-white placeholder-gray-500 rounded px-3 py-2 text-sm resize-none"
+                    className="w-full bg-muted border border-border text-white placeholder-muted-foreground rounded px-3 py-2 text-sm resize-none"
                   />
                 </div>
 
                 {/* Actions */}
                 <div className="flex flex-col items-end gap-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-400">Visible</span>
+                    <span className="text-xs text-muted-foreground">Visible</span>
                     <Switch
                       checked={feature.isVisible}
                       onCheckedChange={(val) => updateFeature(feature.id, 'isVisible', val)}
@@ -241,21 +241,21 @@ export function FeaturesEditor() {
               <div className="flex items-center gap-3 pl-10">
                 <div className="flex-1 grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-400">Badge Text</label>
+                    <label className="text-xs font-medium text-muted-foreground">Badge Text</label>
                     <input
                       type="text"
                       value={feature.badge}
                       onChange={(e) => updateFeature(feature.id, 'badge', e.target.value)}
                       placeholder="New / Popular"
-                      className="w-full bg-gray-900 border border-gray-700 text-white placeholder-gray-500 rounded px-3 py-1.5 text-sm"
+                      className="w-full bg-muted border border-border text-white placeholder-muted-foreground rounded px-3 py-1.5 text-sm"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-400">Badge Color</label>
+                    <label className="text-xs font-medium text-muted-foreground">Badge Color</label>
                     <select
                       value={feature.badgeColor}
                       onChange={(e) => updateFeature(feature.id, 'badgeColor', e.target.value)}
-                      className="w-full bg-gray-900 border border-gray-700 text-white rounded px-3 py-1.5 text-sm"
+                      className="w-full bg-muted border border-border text-white rounded px-3 py-1.5 text-sm"
                     >
                       <option value="blue">Blue</option>
                       <option value="purple">Purple</option>
@@ -278,7 +278,7 @@ export function FeaturesEditor() {
                         ${feature.badgeColor === 'green' && 'bg-green-500/20 text-green-400'}
                         ${feature.badgeColor === 'yellow' && 'bg-yellow-500/20 text-yellow-400'}
                         ${feature.badgeColor === 'red' && 'bg-red-500/20 text-red-400'}
-                        ${feature.badgeColor === 'gray' && 'bg-gray-500/20 text-gray-400'}
+                        ${feature.badgeColor === 'gray' && 'bg-gray-500/20 text-muted-foreground'}
                       `}
                     >
                       {feature.badge}
@@ -293,15 +293,15 @@ export function FeaturesEditor() {
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent className="bg-gray-900 border-gray-800">
+        <AlertDialogContent className="bg-muted border-border">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Delete Feature?</AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-400">
+            <AlertDialogDescription className="text-muted-foreground">
               This will permanently remove this feature. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700">
+            <AlertDialogCancel className="bg-muted text-muted-foreground border-border hover:bg-muted">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction

@@ -153,7 +153,7 @@ const GenerativeAI = () => {
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-lg font-semibold text-foreground">AI Assistant</h1>
-                  <span className="text-xs bg-white/10 text-gray-400 px-2 py-0.5 rounded-full">
+                  <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
                     Llama 3.3
                   </span>
                 </div>

@@ -434,8 +434,8 @@ export default function Analytics() {
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
     return (
-      <div className="bg-[#1F2937] border border-gray-700 rounded-lg px-3 py-2 shadow-xl">
-        <p className="text-gray-400 text-xs mb-1">{label}</p>
+      <div className="bg-card border border-border rounded-lg px-3 py-2 shadow-xl">
+        <p className="text-muted-foreground text-xs mb-1">{label}</p>
         {payload.map((entry, i) => (
           <p key={i} className="text-white text-sm font-medium">
             {entry.name}: {typeof entry.value === 'number' ? 
@@ -458,24 +458,24 @@ export default function Analytics() {
   const getTrendIcon = (trend) => {
     if (trend === 'up') return <ArrowUp className="w-4 h-4 text-emerald-400" />;
     if (trend === 'down') return <ArrowDown className="w-4 h-4 text-red-400" />;
-    return <Minus className="w-4 h-4 text-gray-400" />;
+    return <Minus className="w-4 h-4 text-muted-foreground" />;
   };
 
   return (
     <div className="space-y-6">
       {/* Filters Bar */}
-      <div className="sticky top-16 z-10 -mx-4 lg:-mx-6 px-4 lg:px-6 py-4 bg-[#0A0E1A]/95 backdrop-blur-sm border-b border-gray-800">
+      <div className="sticky top-16 z-10 -mx-4 lg:-mx-6 px-4 lg:px-6 py-4 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex flex-wrap items-center gap-4">
           {/* Date Range Tabs */}
-          <div className="flex bg-[#111827] rounded-lg p-1 border border-gray-800">
+          <div className="flex bg-card rounded-lg p-1 border border-border">
             {['Today', '7 Days', '30 Days', '90 Days', 'Custom'].map((range) => (
               <button
                 key={range}
                 onClick={() => setDateRange(range)}
                 className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                   dateRange === range
-                    ? 'bg-indigo-500 text-white'
-                    : 'text-gray-400 hover:text-white'
+                    ? 'bg-primary text-white'
+                    : 'text-muted-foreground hover:text-white'
                 }`}
               >
                 {range}
@@ -487,7 +487,7 @@ export default function Analytics() {
           <select
             value={planFilter}
             onChange={(e) => setPlanFilter(e.target.value)}
-            className="px-3 py-2 bg-[#111827] border border-gray-800 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500"
+            className="px-3 py-2 bg-card border border-border rounded-lg text-sm text-white focus:outline-none focus:border-primary"
           >
             <option value="All">All Plans</option>
             <option value="Free">Free</option>
@@ -499,7 +499,7 @@ export default function Analytics() {
           <select
             value={regionFilter}
             onChange={(e) => setRegionFilter(e.target.value)}
-            className="px-3 py-2 bg-[#111827] border border-gray-800 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500"
+            className="px-3 py-2 bg-card border border-border rounded-lg text-sm text-white focus:outline-none focus:border-primary"
           >
             <option value="Global">Global</option>
             <option value="NA">North America</option>
@@ -513,14 +513,14 @@ export default function Analytics() {
           {/* Actions */}
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 px-4 py-2 bg-[#111827] border border-gray-800 rounded-lg text-sm text-gray-300 hover:text-white hover:border-gray-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-lg text-sm text-muted-foreground hover:text-white hover:border-border transition-colors"
           >
             <Download className="w-4 h-4" />
             Export CSV
           </button>
           <button
             onClick={handleRefresh}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg text-sm text-white transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary rounded-lg text-sm text-white transition-colors"
           >
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             Refresh
@@ -543,17 +543,17 @@ export default function Analytics() {
             {funnelData.map((stage, i) => (
               <div key={stage.stage} className="relative">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm text-gray-400">{stage.stage}</span>
+                  <span className="text-sm text-muted-foreground">{stage.stage}</span>
                   <span className="text-sm text-white font-medium">
                     {stage.value.toLocaleString()}
                     {i > 0 && (
-                      <span className="text-xs text-gray-500 ml-2">
+                      <span className="text-xs text-muted-foreground ml-2">
                         ({stage.conversion}%)
                       </span>
                     )}
                   </span>
                 </div>
-                <div className="h-8 bg-[#0A0E1A] rounded-lg overflow-hidden">
+                <div className="h-8 bg-background rounded-lg overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-lg transition-all duration-500"
                     style={{ width: `${(stage.value / (funnelData[0]?.value || 1)) * 100}%` }}
@@ -614,7 +614,7 @@ export default function Analytics() {
                 <XAxis dataKey="week" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} tickFormatter={(v) => `${v}%`} />
                 <Tooltip content={<CustomTooltip />} />
-                <Legend verticalAlign="top" height={36} formatter={(value) => <span className="text-gray-400 text-sm">{value}</span>} />
+                <Legend verticalAlign="top" height={36} formatter={(value) => <span className="text-muted-foreground text-sm">{value}</span>} />
                 <Line type="monotone" dataKey="freeToPro" stroke="#6366F1" strokeWidth={2} dot={{ fill: '#6366F1' }} name="Free → Pro %" />
                 <Line type="monotone" dataKey="proToEnterprise" stroke="#10B981" strokeWidth={2} dot={{ fill: '#10B981' }} name="Pro → Enterprise %" />
               </LineChart>
@@ -648,21 +648,21 @@ export default function Analytics() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-800">
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Cohort</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Users</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-400 uppercase">Day 1</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-400 uppercase">Day 7</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-400 uppercase">Day 14</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-400 uppercase">Day 30</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Rev/User</th>
+              <tr className="border-b border-border">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Cohort</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Users</th>
+                <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground uppercase">Day 1</th>
+                <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground uppercase">Day 7</th>
+                <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground uppercase">Day 14</th>
+                <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground uppercase">Day 30</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Rev/User</th>
               </tr>
             </thead>
             <tbody>
               {cohortData.map((cohort) => (
-                <tr key={cohort.cohort} className="border-b border-gray-800/50">
+                <tr key={cohort.cohort} className="border-b border-border/50">
                   <td className="px-4 py-3 text-sm text-white font-medium">{cohort.cohort}</td>
-                  <td className="px-4 py-3 text-sm text-gray-300">{(cohort.users || 0).toLocaleString()}</td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">{(cohort.users || 0).toLocaleString()}</td>
                   <td className="px-4 py-3 text-center">
                     <span className={`px-2 py-1 rounded text-xs font-medium ${getRetentionColor(cohort.day1)}`}>
                       {cohort.day1}%
@@ -696,21 +696,21 @@ export default function Analytics() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-800">
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">#</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Template Name</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Times Used</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Avg Rating</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Category</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Trend</th>
+              <tr className="border-b border-border">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">#</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Template Name</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Times Used</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Avg Rating</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Category</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Trend</th>
               </tr>
             </thead>
             <tbody>
               {topTemplates.map((template) => (
-                <tr key={template.rank} className="border-b border-gray-800/50 hover:bg-gray-800/30">
-                  <td className="px-4 py-3 text-sm text-gray-500">{template.rank}</td>
+                <tr key={template.rank} className="border-b border-border/50 hover:bg-muted/30">
+                  <td className="px-4 py-3 text-sm text-muted-foreground">{template.rank}</td>
                   <td className="px-4 py-3 text-sm text-white">{template.name}</td>
-                  <td className="px-4 py-3 text-sm text-gray-300">{(template.timesUsed || 0).toLocaleString()}</td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">{(template.timesUsed || 0).toLocaleString()}</td>
                   <td className="px-4 py-3 text-sm text-amber-400">★ {template.avgRating}</td>
                   <td className="px-4 py-3">
                     <Badge label={template.category} variant="purple" />
@@ -738,26 +738,26 @@ export default function Analytics() {
       >
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Active Users */}
-          <div className="bg-[#0A0E1A] rounded-xl p-4">
-            <p className="text-sm text-gray-400 mb-1">Active Users Right Now</p>
+          <div className="bg-background rounded-xl p-4">
+            <p className="text-sm text-muted-foreground mb-1">Active Users Right Now</p>
             <p className="text-3xl font-bold text-white">{activeUsers.toLocaleString()}</p>
           </div>
           
           {/* Prompts/Min */}
-          <div className="bg-[#0A0E1A] rounded-xl p-4">
-            <p className="text-sm text-gray-400 mb-1">Prompts / Minute</p>
-            <p className="text-3xl font-bold text-indigo-400">{promptsPerMin}</p>
+          <div className="bg-background rounded-xl p-4">
+            <p className="text-sm text-muted-foreground mb-1">Prompts / Minute</p>
+            <p className="text-3xl font-bold text-primary">{promptsPerMin}</p>
           </div>
           
           {/* API Calls/Min */}
-          <div className="bg-[#0A0E1A] rounded-xl p-4">
-            <p className="text-sm text-gray-400 mb-1">API Calls / Minute</p>
+          <div className="bg-background rounded-xl p-4">
+            <p className="text-sm text-muted-foreground mb-1">API Calls / Minute</p>
             <p className="text-3xl font-bold text-emerald-400">{apiCallsPerMin}</p>
           </div>
           
           {/* Mini Sparkline */}
-          <div className="bg-[#0A0E1A] rounded-xl p-4">
-            <p className="text-sm text-gray-400 mb-1">Activity (Last 30s)</p>
+          <div className="bg-background rounded-xl p-4">
+            <p className="text-sm text-muted-foreground mb-1">Activity (Last 30s)</p>
             <div className="h-12">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={sparklineData}>

@@ -87,7 +87,7 @@ export function ChatInput({
             ${disabled ? 'opacity-50' : ''}
             ${input.trim() 
               ? 'border border-indigo-500/60 shadow-[0_0_15px_rgba(99,102,241,0.2)]' 
-              : 'border border-white/10 hover:border-white/20'
+              : 'border border-border hover:border-border'
             }
           `}
         >

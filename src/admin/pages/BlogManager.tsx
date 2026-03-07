@@ -377,16 +377,16 @@ export default function BlogManager() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-                <FileText className="w-8 h-8 text-indigo-500" />
+                <FileText className="w-8 h-8 text-primary" />
                 Blog Manager
               </h1>
-              <p className="text-gray-400 mt-1">
+              <p className="text-muted-foreground mt-1">
                 Manage blog posts and articles
               </p>
             </div>
             <Button
               onClick={handleCreate}
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="bg-primary hover:bg-primary/90"
             >
               <Plus className="w-4 h-4 mr-2" />
               New Post
@@ -394,26 +394,26 @@ export default function BlogManager() {
           </div>
 
           {/* Filters */}
-          <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
+          <div className="bg-muted rounded-xl p-4 border border-border">
             <div className="flex flex-wrap items-center gap-4">
               <div className="flex-1 min-w-[200px]">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     type="text"
                     placeholder="Search posts..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full pl-10 pr-4 py-2 bg-muted border border-border rounded-lg text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
               </div>
 
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-[160px] bg-gray-800 border-gray-700 text-white">
+                <SelectTrigger className="w-[160px] bg-muted border-border text-white">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectContent className="bg-muted border-border">
                   <SelectItem value="all">All Categories</SelectItem>
                   {CATEGORIES.map((cat) => (
                     <SelectItem key={cat} value={cat}>
@@ -424,10 +424,10 @@ export default function BlogManager() {
               </Select>
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[140px] bg-gray-800 border-gray-700 text-white">
+                <SelectTrigger className="w-[140px] bg-muted border-border text-white">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectContent className="bg-muted border-border">
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="published">Published</SelectItem>
                   <SelectItem value="draft">Drafts</SelectItem>
@@ -435,7 +435,7 @@ export default function BlogManager() {
                 </SelectContent>
               </Select>
 
-              <div className="text-sm text-gray-400">
+              <div className="text-sm text-muted-foreground">
                 {filteredBlogs.length} posts
               </div>
             </div>
@@ -444,10 +444,10 @@ export default function BlogManager() {
           {/* Blog List */}
           {loading ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+              <Loader2 className="w-8 h-8 text-primary animate-spin" />
             </div>
           ) : paginatedBlogs.length === 0 ? (
-            <div className="text-center py-20 text-gray-400">
+            <div className="text-center py-20 text-muted-foreground">
               <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
               <p>No blog posts found</p>
             </div>
@@ -456,11 +456,11 @@ export default function BlogManager() {
               {paginatedBlogs.map((blog) => (
                 <div
                   key={blog.id}
-                  className="bg-gray-900 rounded-xl p-4 border border-gray-800 hover:border-gray-700 transition-colors"
+                  className="bg-muted rounded-xl p-4 border border-border hover:border-border transition-colors"
                 >
                   <div className="flex items-start gap-4">
                     {/* Cover Image */}
-                    <div className="w-24 h-24 rounded-lg bg-gray-800 overflow-hidden flex-shrink-0">
+                    <div className="w-24 h-24 rounded-lg bg-muted overflow-hidden flex-shrink-0">
                       {blog.cover_image ? (
                         <img
                           src={blog.cover_image}
@@ -481,7 +481,7 @@ export default function BlogManager() {
                           <h3 className="text-lg font-semibold text-white truncate">
                             {blog.title}
                           </h3>
-                          <p className="text-sm text-gray-400 mt-1 line-clamp-2">
+                          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                             {blog.excerpt}
                           </p>
                         </div>
@@ -494,14 +494,14 @@ export default function BlogManager() {
                               Published
                             </span>
                           ) : (
-                            <span className="px-2 py-1 rounded-full bg-gray-500/20 text-gray-400 text-xs">
+                            <span className="px-2 py-1 rounded-full bg-gray-500/20 text-muted-foreground text-xs">
                               Draft
                             </span>
                           )}
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
+                      <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <User className="w-3 h-3" />
                           {blog.author_name || 'Unknown'}
@@ -524,7 +524,7 @@ export default function BlogManager() {
                         size="sm"
                         variant="ghost"
                         onClick={() => toggleFeatured(blog)}
-                        className="text-gray-400 hover:text-yellow-500"
+                        className="text-muted-foreground hover:text-yellow-500"
                       >
                         <Star
                           className={`w-4 h-4 ${
@@ -536,7 +536,7 @@ export default function BlogManager() {
                         size="sm"
                         variant="ghost"
                         onClick={() => togglePublished(blog)}
-                        className="text-gray-400 hover:text-white"
+                        className="text-muted-foreground hover:text-white"
                       >
                         {blog.is_published ? (
                           <Eye className="w-4 h-4" />
@@ -548,7 +548,7 @@ export default function BlogManager() {
                         size="sm"
                         variant="ghost"
                         onClick={() => handleEdit(blog)}
-                        className="text-gray-400 hover:text-indigo-400"
+                        className="text-muted-foreground hover:text-primary"
                       >
                         <Pencil className="w-4 h-4" />
                       </Button>
@@ -556,7 +556,7 @@ export default function BlogManager() {
                         size="sm"
                         variant="ghost"
                         onClick={() => setDeleteBlog(blog)}
-                        className="text-gray-400 hover:text-red-400"
+                        className="text-muted-foreground hover:text-red-400"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -575,11 +575,11 @@ export default function BlogManager() {
                 size="sm"
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="border-gray-700 text-gray-300"
+                className="border-border text-muted-foreground"
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
-              <span className="text-gray-400 text-sm">
+              <span className="text-muted-foreground text-sm">
                 Page {currentPage} of {totalPages}
               </span>
               <Button
@@ -587,7 +587,7 @@ export default function BlogManager() {
                 size="sm"
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="border-gray-700 text-gray-300"
+                className="border-border text-muted-foreground"
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
@@ -597,7 +597,7 @@ export default function BlogManager() {
 
         {/* Delete Dialog */}
         <AlertDialog open={!!deleteBlog} onOpenChange={() => setDeleteBlog(null)}>
-          <AlertDialogContent className="bg-gray-900 border-gray-800">
+          <AlertDialogContent className="bg-muted border-border">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-white">
                 Delete Blog Post
@@ -608,7 +608,7 @@ export default function BlogManager() {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700">
+              <AlertDialogCancel className="bg-muted border-border text-white hover:bg-muted">
                 Cancel
               </AlertDialogCancel>
               <AlertDialogAction
@@ -637,7 +637,7 @@ export default function BlogManager() {
             <Button
               variant="ghost"
               onClick={() => setMode('list')}
-              className="text-gray-400 hover:text-white"
+              className="text-muted-foreground hover:text-white"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
@@ -649,14 +649,14 @@ export default function BlogManager() {
             <Button
               variant="outline"
               onClick={() => setMode('list')}
-              className="border-gray-700 text-gray-300"
+              className="border-border text-muted-foreground"
             >
               Cancel
             </Button>
             <Button
               onClick={handleSave}
               disabled={saving}
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="bg-primary hover:bg-primary/90"
             >
               {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {editingBlog ? 'Update Post' : 'Create Post'}
@@ -665,10 +665,10 @@ export default function BlogManager() {
         </div>
 
         {/* Form */}
-        <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 space-y-6">
+        <div className="bg-muted rounded-xl p-6 border border-border space-y-6">
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
               Title *
             </label>
             <input
@@ -681,14 +681,14 @@ export default function BlogManager() {
                   slug: generateSlug(e.target.value),
                 });
               }}
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="Enter post title"
             />
           </div>
 
           {/* Slug */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
               Slug *
             </label>
             <input
@@ -697,14 +697,14 @@ export default function BlogManager() {
               onChange={(e) =>
                 setFormData({ ...formData, slug: e.target.value })
               }
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="post-url-slug"
             />
           </div>
 
           {/* Excerpt */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
               Excerpt
             </label>
             <textarea
@@ -713,14 +713,14 @@ export default function BlogManager() {
                 setFormData({ ...formData, excerpt: e.target.value })
               }
               rows={2}
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+              className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
               placeholder="Brief description of the post"
             />
           </div>
 
           {/* Content */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
               Content (Markdown supported)
             </label>
             <textarea
@@ -729,7 +729,7 @@ export default function BlogManager() {
                 setFormData({ ...formData, content: e.target.value })
               }
               rows={12}
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none font-mono text-sm"
+              className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none font-mono text-sm"
               placeholder="Write your post content here..."
             />
           </div>
@@ -737,7 +737,7 @@ export default function BlogManager() {
           {/* Category & Tags */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
                 Category
               </label>
               <Select
@@ -746,10 +746,10 @@ export default function BlogManager() {
                   setFormData({ ...formData, category: value })
                 }
               >
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                <SelectTrigger className="bg-muted border-border text-white">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectContent className="bg-muted border-border">
                   {CATEGORIES.map((cat) => (
                     <SelectItem key={cat} value={cat}>
                       {cat}
@@ -759,7 +759,7 @@ export default function BlogManager() {
               </Select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
                 Tags (comma separated)
               </label>
               <input
@@ -768,7 +768,7 @@ export default function BlogManager() {
                 onChange={(e) =>
                   setFormData({ ...formData, tags: e.target.value })
                 }
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 bg-muted border border-border rounded-lg text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="AI, Prompts, Tips"
               />
             </div>
@@ -777,7 +777,7 @@ export default function BlogManager() {
           {/* Author Info */}
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
                 Author Name
               </label>
               <input
@@ -786,12 +786,12 @@ export default function BlogManager() {
                 onChange={(e) =>
                   setFormData({ ...formData, author_name: e.target.value })
                 }
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 bg-muted border border-border rounded-lg text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="John Doe"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
                 Author Role
               </label>
               <input
@@ -800,12 +800,12 @@ export default function BlogManager() {
                 onChange={(e) =>
                   setFormData({ ...formData, author_role: e.target.value })
                 }
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 bg-muted border border-border rounded-lg text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Content Writer"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
                 Author Avatar URL
               </label>
               <input
@@ -814,7 +814,7 @@ export default function BlogManager() {
                 onChange={(e) =>
                   setFormData({ ...formData, author_avatar: e.target.value })
                 }
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 bg-muted border border-border rounded-lg text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="https://..."
               />
             </div>
@@ -823,7 +823,7 @@ export default function BlogManager() {
           {/* Images & Meta */}
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
                 Cover Image URL
               </label>
               <input
@@ -832,12 +832,12 @@ export default function BlogManager() {
                 onChange={(e) =>
                   setFormData({ ...formData, cover_image: e.target.value })
                 }
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 bg-muted border border-border rounded-lg text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="https://..."
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
                 Read Time
               </label>
               <input
@@ -846,12 +846,12 @@ export default function BlogManager() {
                 onChange={(e) =>
                   setFormData({ ...formData, read_time: e.target.value })
                 }
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 bg-muted border border-border rounded-lg text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="5 min read"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
                 Publish Date
               </label>
               <input
@@ -860,7 +860,7 @@ export default function BlogManager() {
                 onChange={(e) =>
                   setFormData({ ...formData, published_at: e.target.value })
                 }
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 bg-muted border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
           </div>
@@ -874,7 +874,7 @@ export default function BlogManager() {
                   setFormData({ ...formData, is_published: checked })
                 }
               />
-              <span className="text-gray-300">Published</span>
+              <span className="text-muted-foreground">Published</span>
             </div>
             <div className="flex items-center gap-3">
               <Switch
@@ -883,7 +883,7 @@ export default function BlogManager() {
                   setFormData({ ...formData, is_featured: checked })
                 }
               />
-              <span className="text-gray-300">Featured</span>
+              <span className="text-muted-foreground">Featured</span>
             </div>
           </div>
         </div>

@@ -69,7 +69,7 @@ export function LowCreditWarning({
         >
           <button
             onClick={handleDismiss}
-            className="absolute top-2 right-2 text-gray-400 hover:text-white transition-colors"
+            className="absolute top-2 right-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
@@ -84,7 +84,7 @@ export function LowCreditWarning({
               <h4 className={cn('font-semibold', isExhausted ? 'text-red-200' : 'text-amber-200')}>
                 {isExhausted ? 'Credits Exhausted' : 'Low Credits Warning'}
               </h4>
-              <p className="text-sm text-gray-300 mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 {isExhausted
                   ? "You've run out of credits. Upgrade your plan to continue using AI features."
                   : `Only ${credits?.remainingCredits} credits remaining. Consider upgrading for uninterrupted access.`}

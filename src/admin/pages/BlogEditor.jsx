@@ -231,11 +231,11 @@ export function BlogEditor() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-white">Blog Manager</h1>
-            <p className="text-gray-400 text-sm">Manage your blog posts</p>
+            <p className="text-muted-foreground text-sm">Manage your blog posts</p>
           </div>
           <Button
             onClick={handleNewPost}
-            className="bg-indigo-600 hover:bg-indigo-700 gap-2"
+            className="bg-primary hover:bg-primary/90 gap-2"
           >
             <Plus className="w-4 h-4" />
             New Post
@@ -244,57 +244,57 @@ export function BlogEditor() {
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search posts..."
-            className="w-full pl-10 pr-4 py-2 bg-gray-900 border border-gray-800 text-white placeholder-gray-500 rounded-lg"
+            className="w-full pl-10 pr-4 py-2 bg-muted border border-border text-white placeholder-muted-foreground rounded-lg"
           />
         </div>
 
         {/* Table */}
         {loading ? (
           <div className="flex items-center justify-center h-64">
-            <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : filteredPosts.length === 0 ? (
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-12 text-center">
+          <div className="bg-muted border border-border rounded-xl p-12 text-center">
             <div className="max-w-sm mx-auto space-y-4">
-              <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto">
+              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
                 <FileText className="w-8 h-8 text-gray-600" />
               </div>
               <h3 className="text-lg font-medium text-white">No posts yet</h3>
-              <p className="text-gray-400 text-sm">
+              <p className="text-muted-foreground text-sm">
                 Create your first blog post to get started.
               </p>
-              <Button onClick={handleNewPost} className="bg-indigo-600 hover:bg-indigo-700 gap-2">
+              <Button onClick={handleNewPost} className="bg-primary hover:bg-primary/90 gap-2">
                 <Plus className="w-4 h-4" />
                 Create First Post
               </Button>
             </div>
           </div>
         ) : (
-          <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+          <div className="bg-muted border border-border rounded-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-800">
-                    <th className="text-left p-4 text-sm font-medium text-gray-400">Title</th>
-                    <th className="text-left p-4 text-sm font-medium text-gray-400">Category</th>
-                    <th className="text-left p-4 text-sm font-medium text-gray-400">Author</th>
-                    <th className="text-left p-4 text-sm font-medium text-gray-400">Status</th>
-                    <th className="text-left p-4 text-sm font-medium text-gray-400">Date</th>
-                    <th className="text-right p-4 text-sm font-medium text-gray-400">Actions</th>
+                  <tr className="border-b border-border">
+                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">Title</th>
+                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">Category</th>
+                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">Author</th>
+                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status</th>
+                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">Date</th>
+                    <th className="text-right p-4 text-sm font-medium text-muted-foreground">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredPosts.map((post) => (
-                    <tr key={post.id} className="border-b border-gray-800 hover:bg-gray-800/50">
+                    <tr key={post.id} className="border-b border-border hover:bg-muted/50">
                       <td className="p-4 text-white font-medium">{post.title}</td>
-                      <td className="p-4 text-gray-400 text-sm">{post.category}</td>
-                      <td className="p-4 text-gray-400 text-sm">{post.author || '-'}</td>
+                      <td className="p-4 text-muted-foreground text-sm">{post.category}</td>
+                      <td className="p-4 text-muted-foreground text-sm">{post.author || '-'}</td>
                       <td className="p-4">
                         <span
                           className={`inline-block px-2 py-0.5 text-xs font-medium rounded ${
@@ -306,7 +306,7 @@ export function BlogEditor() {
                           {post.status}
                         </span>
                       </td>
-                      <td className="p-4 text-gray-400 text-sm">
+                      <td className="p-4 text-muted-foreground text-sm">
                         {new Date(post.created_at).toLocaleDateString()}
                       </td>
                       <td className="p-4">
@@ -315,7 +315,7 @@ export function BlogEditor() {
                             size="sm"
                             variant="ghost"
                             onClick={() => handleEditPost(post)}
-                            className="text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10"
+                            className="text-primary hover:text-indigo-300 hover:bg-primary/90/10"
                           >
                             <Pencil className="w-4 h-4" />
                           </Button>
@@ -323,7 +323,7 @@ export function BlogEditor() {
                             size="sm"
                             variant="ghost"
                             onClick={() => window.open(`/blog/${post.slug}`, '_blank')}
-                            className="text-gray-400 hover:text-gray-300 hover:bg-gray-700"
+                            className="text-muted-foreground hover:text-muted-foreground hover:bg-muted"
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
@@ -347,15 +347,15 @@ export function BlogEditor() {
 
         {/* Delete Dialog */}
         <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-          <AlertDialogContent className="bg-gray-900 border-gray-800">
+          <AlertDialogContent className="bg-muted border-border">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-white">Delete Post?</AlertDialogTitle>
-              <AlertDialogDescription className="text-gray-400">
+              <AlertDialogDescription className="text-muted-foreground">
                 This will permanently delete this blog post. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel className="bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700">
+              <AlertDialogCancel className="bg-muted text-muted-foreground border-border hover:bg-muted">
                 Cancel
               </AlertDialogCancel>
               <AlertDialogAction
@@ -379,7 +379,7 @@ export function BlogEditor() {
         <Button
           variant="ghost"
           onClick={() => setMode('list')}
-          className="text-gray-400 hover:text-white gap-2"
+          className="text-muted-foreground hover:text-white gap-2"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Posts
@@ -389,14 +389,14 @@ export function BlogEditor() {
             variant="outline"
             onClick={() => handleSavePost(false)}
             disabled={saving}
-            className="border-gray-700 text-gray-300 hover:bg-gray-800"
+            className="border-border text-muted-foreground hover:bg-muted"
           >
             Save Draft
           </Button>
           <Button
             onClick={() => handleSavePost(true)}
             disabled={saving}
-            className="bg-indigo-600 hover:bg-indigo-700"
+            className="bg-primary hover:bg-primary/90"
           >
             {saving ? (
               <>
@@ -420,61 +420,61 @@ export function BlogEditor() {
               value={formData.title}
               onChange={(e) => handleFieldChange('title', e.target.value)}
               placeholder="Post title..."
-              className="w-full bg-transparent border-none text-3xl font-bold text-white placeholder-gray-600 focus:outline-none"
+              className="w-full bg-transparent border-none text-3xl font-bold text-white placeholder-muted-foreground focus:outline-none"
             />
           </div>
 
           {/* Slug */}
           <div className="space-y-2">
-            <label className="text-xs font-medium text-gray-400">URL Slug</label>
+            <label className="text-xs font-medium text-muted-foreground">URL Slug</label>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">/blog/</span>
+              <span className="text-sm text-muted-foreground">/blog/</span>
               <input
                 type="text"
                 value={formData.slug}
                 onChange={(e) => handleFieldChange('slug', e.target.value)}
                 placeholder="post-slug"
-                className="flex-1 bg-gray-900 border border-gray-800 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm font-mono"
+                className="flex-1 bg-muted border border-border text-white placeholder-muted-foreground rounded-lg px-3 py-2 text-sm font-mono"
               />
             </div>
           </div>
 
           {/* Content */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">Content</label>
+            <label className="text-sm font-medium text-muted-foreground">Content</label>
             <textarea
               value={formData.content}
               onChange={(e) => handleFieldChange('content', e.target.value)}
               placeholder="Write your post content here... (Markdown supported)"
               rows={20}
-              className="w-full bg-gray-900 border border-gray-800 text-white placeholder-gray-500 rounded-lg px-4 py-3 font-mono text-sm resize-y"
+              className="w-full bg-muted border border-border text-white placeholder-muted-foreground rounded-lg px-4 py-3 font-mono text-sm resize-y"
             />
           </div>
 
           {/* SEO Section */}
-          <details className="bg-gray-900 border border-gray-800 rounded-xl">
-            <summary className="p-4 cursor-pointer text-sm font-medium text-gray-300 hover:text-white">
+          <details className="bg-muted border border-border rounded-xl">
+            <summary className="p-4 cursor-pointer text-sm font-medium text-muted-foreground hover:text-white">
               SEO Settings
             </summary>
             <div className="p-4 pt-0 space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-300">Meta Title</label>
+                <label className="text-sm font-medium text-muted-foreground">Meta Title</label>
                 <input
                   type="text"
                   value={formData.meta_title}
                   onChange={(e) => handleFieldChange('meta_title', e.target.value)}
                   placeholder="SEO title"
-                  className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-3 py-2"
+                  className="w-full bg-muted border border-border text-white placeholder-muted-foreground rounded-lg px-3 py-2"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-300">Meta Description</label>
+                <label className="text-sm font-medium text-muted-foreground">Meta Description</label>
                 <textarea
                   value={formData.meta_description}
                   onChange={(e) => handleFieldChange('meta_description', e.target.value)}
                   placeholder="SEO description"
                   rows={3}
-                  className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 resize-none"
+                  className="w-full bg-muted border border-border text-white placeholder-muted-foreground rounded-lg px-3 py-2 resize-none"
                 />
               </div>
             </div>
@@ -484,14 +484,14 @@ export function BlogEditor() {
         {/* Right: Metadata */}
         <div className="space-y-6">
           {/* Status */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
-            <h3 className="text-sm font-semibold text-gray-300">Publish Settings</h3>
+          <div className="bg-muted border border-border rounded-xl p-4 space-y-3">
+            <h3 className="text-sm font-semibold text-muted-foreground">Publish Settings</h3>
             <div className="space-y-2">
-              <label className="text-xs font-medium text-gray-400">Status</label>
+              <label className="text-xs font-medium text-muted-foreground">Status</label>
               <select
                 value={formData.status}
                 onChange={(e) => handleFieldChange('status', e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+                className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
               >
                 <option value="draft">Draft</option>
                 <option value="published">Published</option>
@@ -500,14 +500,14 @@ export function BlogEditor() {
           </div>
 
           {/* Category & Author */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-4">
-            <h3 className="text-sm font-semibold text-gray-300">Organization</h3>
+          <div className="bg-muted border border-border rounded-xl p-4 space-y-4">
+            <h3 className="text-sm font-semibold text-muted-foreground">Organization</h3>
             <div className="space-y-2">
-              <label className="text-xs font-medium text-gray-400">Category</label>
+              <label className="text-xs font-medium text-muted-foreground">Category</label>
               <select
                 value={formData.category}
                 onChange={(e) => handleFieldChange('category', e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+                className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>{cat}</option>
@@ -515,28 +515,28 @@ export function BlogEditor() {
               </select>
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-medium text-gray-400">Author</label>
+              <label className="text-xs font-medium text-muted-foreground">Author</label>
               <input
                 type="text"
                 value={formData.author}
                 onChange={(e) => handleFieldChange('author', e.target.value)}
                 placeholder="Author name"
-                className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-3 py-2"
+                className="w-full bg-muted border border-border text-white placeholder-muted-foreground rounded-lg px-3 py-2"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-medium text-gray-400">Tags (comma-separated)</label>
+              <label className="text-xs font-medium text-muted-foreground">Tags (comma-separated)</label>
               <input
                 type="text"
                 value={formData.tags}
                 onChange={(e) => handleFieldChange('tags', e.target.value)}
                 placeholder="ai, prompts, tutorial"
-                className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-3 py-2"
+                className="w-full bg-muted border border-border text-white placeholder-muted-foreground rounded-lg px-3 py-2"
               />
               {formData.tags && (
                 <div className="flex flex-wrap gap-2 mt-2">
                   {formData.tags.split(',').map((tag, i) => (
-                    <span key={i} className="inline-block px-2 py-0.5 bg-indigo-500/20 text-indigo-400 text-xs rounded">
+                    <span key={i} className="inline-block px-2 py-0.5 bg-primary/20 text-primary text-xs rounded">
                       {tag.trim()}
                     </span>
                   ))}
@@ -546,8 +546,8 @@ export function BlogEditor() {
           </div>
 
           {/* Cover Image */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
-            <h3 className="text-sm font-semibold text-gray-300">Cover Image</h3>
+          <div className="bg-muted border border-border rounded-xl p-4 space-y-3">
+            <h3 className="text-sm font-semibold text-muted-foreground">Cover Image</h3>
             <ImageUpload
               bucket="cms-media"
               filePath="blog/"

@@ -11,7 +11,7 @@ export default function AdminApp() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#0A0E1A]">
+    <div className="min-h-screen bg-background">
       {/* Sidebar */}
       <AdminSidebar 
         isOpen={sidebarOpen} 

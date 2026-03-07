@@ -103,7 +103,7 @@ export default function DataTable({
       {searchable && (
         <div className="mb-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
               placeholder={searchPlaceholder}
@@ -112,7 +112,7 @@ export default function DataTable({
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full max-w-xs pl-10 pr-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+              className="w-full max-w-xs pl-10 pr-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:border-primary"
             />
           </div>
         </div>
@@ -122,7 +122,7 @@ export default function DataTable({
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-800">
+            <tr className="border-b border-border">
               {selectable && (
                 <th className="px-4 py-3 text-left">
                   <input
@@ -131,14 +131,14 @@ export default function DataTable({
                     checked={paginatedData.length > 0 && paginatedData.every((_, i) => 
                       selectedRows.has((currentPage - 1) * pageSize + i)
                     )}
-                    className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0"
+                    className="w-4 h-4 rounded border-border bg-muted text-primary focus:ring-primary focus:ring-offset-0"
                   />
                 </th>
               )}
               {columns.map(col => (
                 <th
                   key={col.key}
-                  className={`px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider ${
+                  className={`px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider ${
                     col.sortable ? 'cursor-pointer hover:text-white' : ''
                   }`}
                   onClick={() => col.sortable && handleSort(col.key)}
@@ -160,7 +160,7 @@ export default function DataTable({
               <tr>
                 <td 
                   colSpan={columns.length + (selectable ? 1 : 0)} 
-                  className="px-4 py-8 text-center text-gray-500"
+                  className="px-4 py-8 text-center text-muted-foreground"
                 >
                   No data found
                 </td>
@@ -169,7 +169,7 @@ export default function DataTable({
               paginatedData.map((row, index) => (
                 <tr
                   key={row.id || index}
-                  className={`border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors ${
+                  className={`border-b border-border/50 hover:bg-muted/30 transition-colors ${
                     onRowClick ? 'cursor-pointer' : ''
                   }`}
                   onClick={() => onRowClick?.(row)}
@@ -180,12 +180,12 @@ export default function DataTable({
                         type="checkbox"
                         checked={selectedRows.has((currentPage - 1) * pageSize + index)}
                         onChange={() => handleSelectRow(index)}
-                        className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0"
+                        className="w-4 h-4 rounded border-border bg-muted text-primary focus:ring-primary focus:ring-offset-0"
                       />
                     </td>
                   )}
                   {columns.map(col => (
-                    <td key={col.key} className="px-4 py-3 text-sm text-gray-300">
+                    <td key={col.key} className="px-4 py-3 text-sm text-muted-foreground">
                       {col.render ? col.render(row[col.key], row) : row[col.key]}
                     </td>
                   ))}
@@ -199,7 +199,7 @@ export default function DataTable({
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-4 px-2">
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, sortedData.length)} of {sortedData.length}
           </p>
           
@@ -207,7 +207,7 @@ export default function DataTable({
             <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="p-2 rounded-lg bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg bg-muted text-muted-foreground hover:text-white hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -230,8 +230,8 @@ export default function DataTable({
                   onClick={() => setCurrentPage(pageNum)}
                   className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
                     currentPage === pageNum
-                      ? 'bg-indigo-500 text-white'
-                      : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
+                      ? 'bg-primary text-white'
+                      : 'bg-muted text-muted-foreground hover:text-white hover:bg-muted'
                   }`}
                 >
                   {pageNum}
@@ -242,7 +242,7 @@ export default function DataTable({
             <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="p-2 rounded-lg bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg bg-muted text-muted-foreground hover:text-white hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>

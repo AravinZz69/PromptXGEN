@@ -57,25 +57,25 @@ export function HeroPreview({ heroData = {} }) {
   const getCTAStyle = (color) => {
     switch (color) {
       case 'primary':
-        return 'bg-indigo-600 text-white hover:bg-indigo-700';
+        return 'bg-primary text-white hover:bg-primary/90';
       case 'accent':
         return 'bg-purple-600 text-white hover:bg-purple-700';
       case 'outline':
         return 'border-2 border-white text-white bg-transparent hover:bg-white/10';
       default:
-        return 'bg-indigo-600 text-white hover:bg-indigo-700';
+        return 'bg-primary text-white hover:bg-primary/90';
     }
   };
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-      <div className="p-4 border-b border-gray-800 flex items-center gap-2">
+    <div className="bg-muted border border-border rounded-xl overflow-hidden">
+      <div className="p-4 border-b border-border flex items-center gap-2">
         <div className="flex gap-1.5">
           <div className="w-3 h-3 rounded-full bg-red-500"></div>
           <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
           <div className="w-3 h-3 rounded-full bg-green-500"></div>
         </div>
-        <span className="text-xs text-gray-400 ml-2">Hero Section Preview</span>
+        <span className="text-xs text-muted-foreground ml-2">Hero Section Preview</span>
       </div>
 
       <div
@@ -102,7 +102,7 @@ export function HeroPreview({ heroData = {} }) {
         {/* Content */}
         <div className="relative z-10 max-w-3xl mx-auto text-center space-y-6">
           {badge && (
-            <div className="inline-block px-4 py-1.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white text-sm">
+            <div className="inline-block px-4 py-1.5 bg-white/10 backdrop-blur-sm border border-border rounded-full text-white text-sm">
               {badge}
             </div>
           )}

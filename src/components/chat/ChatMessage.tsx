@@ -85,7 +85,7 @@ export function ChatMessage({
 
         {/* Timestamp & Actions for Assistant */}
         {!isUser && !isStreaming && message.content && (
-          <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/5">
+          <div className="flex items-center justify-between mt-3 pt-2 border-t border-border">
             <span className="text-xs text-muted-foreground">
               {formatTime(message.timestamp)}
             </span>
@@ -93,7 +93,7 @@ export function ChatMessage({
               {/* Copy */}
               <button
                 onClick={handleCopy}
-                className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
+                className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                 title="Copy message"
               >
                 {copied ? (
@@ -109,7 +109,7 @@ export function ChatMessage({
                 className={`p-1 rounded-md transition-colors ${
                   liked === 'up'
                     ? 'text-green-500 bg-green-500/10'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                 }`}
                 title="Good response"
               >
@@ -122,7 +122,7 @@ export function ChatMessage({
                 className={`p-1 rounded-md transition-colors ${
                   liked === 'down'
                     ? 'text-red-500 bg-red-500/10'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                 }`}
                 title="Bad response"
               >
@@ -133,7 +133,7 @@ export function ChatMessage({
               {onRegenerate && (
                 <button
                   onClick={onRegenerate}
-                  className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
+                  className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                   title="Regenerate response"
                 >
                   <RotateCcw className="h-[15px] w-[15px]" />

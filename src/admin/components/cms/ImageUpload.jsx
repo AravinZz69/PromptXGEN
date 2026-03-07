@@ -164,7 +164,7 @@ export function ImageUpload({
           <img
             src={previewUrl}
             alt="Preview"
-            className="w-full h-48 object-cover rounded-lg border border-gray-700"
+            className="w-full h-48 object-cover rounded-lg border border-border"
           />
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
             <Button
@@ -190,8 +190,8 @@ export function ImageUpload({
           relative border-2 border-dashed rounded-lg p-8
           cursor-pointer transition-all
           ${isDragging 
-            ? 'border-indigo-500 bg-indigo-500/10' 
-            : 'border-gray-700 hover:border-gray-600 bg-gray-800/50'
+            ? 'border-indigo-500 bg-primary/10' 
+            : 'border-border hover:border-border bg-muted/50'
           }
           ${uploading ? 'pointer-events-none opacity-60' : ''}
         `}
@@ -199,23 +199,23 @@ export function ImageUpload({
         <div className="flex flex-col items-center gap-3 text-center">
           {uploading ? (
             <>
-              <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
-              <p className="text-sm text-gray-300">Uploading...</p>
+              <Loader2 className="w-10 h-10 text-primary animate-spin" />
+              <p className="text-sm text-muted-foreground">Uploading...</p>
             </>
           ) : (
             <>
-              <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
                 {previewUrl ? (
-                  <ImageIcon className="w-6 h-6 text-gray-400" />
+                  <ImageIcon className="w-6 h-6 text-muted-foreground" />
                 ) : (
-                  <Upload className="w-6 h-6 text-gray-400" />
+                  <Upload className="w-6 h-6 text-muted-foreground" />
                 )}
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-300">
+                <p className="text-sm font-medium text-muted-foreground">
                   {previewUrl ? 'Change Image' : 'Upload Image'}
                 </p>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Drag & drop or click to browse
                 </p>
                 <p className="text-xs text-gray-600 mt-1">
@@ -240,7 +240,7 @@ export function ImageUpload({
       {uploading && progress > 0 && (
         <div className="space-y-2">
           <Progress value={progress} className="h-2" />
-          <p className="text-xs text-center text-gray-400">{progress}%</p>
+          <p className="text-xs text-center text-muted-foreground">{progress}%</p>
         </div>
       )}
     </div>

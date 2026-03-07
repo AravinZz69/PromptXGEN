@@ -144,24 +144,24 @@ export default function PaymentGateway() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white">Payment Gateway</h1>
-        <p className="text-gray-400 text-sm">
+        <p className="text-muted-foreground text-sm">
           Configure payment providers and view transactions
         </p>
       </div>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)}>
-        <TabsList className="bg-gray-800 border border-gray-700">
+        <TabsList className="bg-muted border border-border">
           <TabsTrigger
             value="gateways"
-            className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white gap-2"
+            className="data-[state=active]:bg-primary data-[state=active]:text-white gap-2"
           >
             <Settings className="w-4 h-4" />
             Gateway Config
           </TabsTrigger>
           <TabsTrigger
             value="transactions"
-            className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white gap-2"
+            className="data-[state=active]:bg-primary data-[state=active]:text-white gap-2"
           >
             <CreditCard className="w-4 h-4" />
             Transactions
@@ -255,7 +255,7 @@ function GatewayConfigTab() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -387,14 +387,14 @@ if (error) {
   };
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+    <div className="bg-muted border border-border rounded-xl overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-gray-800 flex items-center justify-between">
+      <div className="p-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-2xl">{gatewayIcons[gateway.name] || '💳'}</span>
           <div>
             <h3 className="text-lg font-semibold text-white">{gateway.display_name}</h3>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Last updated: {gateway.updated_at ? formatDistanceToNow(new Date(gateway.updated_at), { addSuffix: true }) : 'Never'}
             </p>
           </div>
@@ -402,7 +402,7 @@ if (error) {
         <div className="flex items-center gap-4">
           {/* Test Mode */}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-400">Test Mode</span>
+            <span className="text-sm text-muted-foreground">Test Mode</span>
             <Switch
               checked={gateway.is_test_mode}
               onCheckedChange={(checked) => onUpdate({ is_test_mode: checked })}
@@ -411,7 +411,7 @@ if (error) {
           </div>
           {/* Enable/Disable */}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-400">Enabled</span>
+            <span className="text-sm text-muted-foreground">Enabled</span>
             <Switch
               checked={gateway.is_enabled}
               onCheckedChange={(checked) => onUpdate({ is_enabled: checked })}
@@ -437,20 +437,20 @@ if (error) {
         <div className="grid md:grid-cols-2 gap-4">
           {configFields.map((field) => (
             <div key={field.key}>
-              <label className="block text-sm text-gray-400 mb-1">{field.label}</label>
+              <label className="block text-sm text-muted-foreground mb-1">{field.label}</label>
               <div className="relative">
                 <input
                   type={field.secret && !showSecrets[field.key] ? 'password' : 'text'}
                   value={config[field.key] || ''}
                   onChange={(e) => handleConfigChange(field.key, e.target.value)}
                   placeholder={`Enter ${field.label.toLowerCase()}...`}
-                  className="w-full px-3 py-2 pr-10 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg"
+                  className="w-full px-3 py-2 pr-10 bg-muted border border-border text-white placeholder-muted-foreground rounded-lg"
                 />
                 {field.secret && (
                   <button
                     type="button"
                     onClick={() => toggleSecret(field.key)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white"
                   >
                     {showSecrets[field.key] ? (
                       <EyeOff className="w-4 h-4" />
@@ -469,7 +469,7 @@ if (error) {
           <Button
             variant="outline"
             onClick={() => setShowCode(!showCode)}
-            className="border-gray-700 text-gray-300 hover:bg-gray-800 gap-2"
+            className="border-border text-muted-foreground hover:bg-muted gap-2"
           >
             <Code className="w-4 h-4" />
             {showCode ? 'Hide' : 'Show'} Integration Code
@@ -477,7 +477,7 @@ if (error) {
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="bg-indigo-600 hover:bg-indigo-700"
+            className="bg-primary hover:bg-primary/90"
           >
             {saving ? (
               <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -489,12 +489,12 @@ if (error) {
         {/* Integration Code */}
         {showCode && (
           <div className="relative">
-            <pre className="p-4 bg-gray-950 border border-gray-800 rounded-lg text-sm text-gray-300 overflow-x-auto">
+            <pre className="p-4 bg-gray-950 border border-border rounded-lg text-sm text-muted-foreground overflow-x-auto">
               <code>{getIntegrationCode()}</code>
             </pre>
             <button
               onClick={copyCode}
-              className="absolute top-2 right-2 p-2 rounded bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white"
+              className="absolute top-2 right-2 p-2 rounded bg-muted hover:bg-muted text-muted-foreground hover:text-white"
             >
               {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
             </button>
@@ -682,7 +682,7 @@ function TransactionsTab() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -716,21 +716,21 @@ function TransactionsTab() {
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by email or transaction ID..."
-            className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg"
+            className="w-full pl-10 pr-4 py-2 bg-muted border border-border text-white placeholder-muted-foreground rounded-lg"
           />
         </div>
 
         <Select value={gatewayFilter} onValueChange={setGatewayFilter}>
-          <SelectTrigger className="w-[140px] bg-gray-800 border-gray-700 text-white">
+          <SelectTrigger className="w-[140px] bg-muted border-border text-white">
             <SelectValue placeholder="Gateway" />
           </SelectTrigger>
-          <SelectContent className="bg-gray-800 border-gray-700">
+          <SelectContent className="bg-muted border-border">
             <SelectItem value="all">All Gateways</SelectItem>
             <SelectItem value="razorpay">Razorpay</SelectItem>
             <SelectItem value="paypal">PayPal</SelectItem>
@@ -739,10 +739,10 @@ function TransactionsTab() {
         </Select>
 
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[130px] bg-gray-800 border-gray-700 text-white">
+          <SelectTrigger className="w-[130px] bg-muted border-border text-white">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
-          <SelectContent className="bg-gray-800 border-gray-700">
+          <SelectContent className="bg-muted border-border">
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="success">Success</SelectItem>
             <SelectItem value="failed">Failed</SelectItem>
@@ -754,7 +754,7 @@ function TransactionsTab() {
         <Button
           variant="outline"
           onClick={handleExportCSV}
-          className="border-gray-700 text-gray-300 hover:bg-gray-800 gap-2"
+          className="border-border text-muted-foreground hover:bg-muted gap-2"
         >
           <Download className="w-4 h-4" />
           Export CSV
@@ -762,33 +762,33 @@ function TransactionsTab() {
       </div>
 
       {/* Table */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+      <div className="bg-muted border border-border rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-800/50">
+            <thead className="bg-muted/50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                   User
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                   Gateway
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase">
                   Amount
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                   Plan
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
                   Status
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                   Transaction ID
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                   Date
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase">
+                <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
                   Actions
                 </th>
               </tr>
@@ -798,25 +798,25 @@ function TransactionsTab() {
                 <tr>
                   <td colSpan={8} className="px-4 py-12 text-center">
                     <CreditCard className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                    <p className="text-gray-400">No transactions found</p>
+                    <p className="text-muted-foreground">No transactions found</p>
                   </td>
                 </tr>
               ) : (
                 paginatedItems.map((tx) => (
-                  <tr key={tx.id} className="hover:bg-gray-800/50">
-                    <td className="px-4 py-3 text-sm text-gray-300">
+                  <tr key={tx.id} className="hover:bg-muted/50">
+                    <td className="px-4 py-3 text-sm text-muted-foreground">
                       {tx.user_email || 'Unknown'}
                     </td>
-                    <td className="px-4 py-3 text-sm capitalize text-gray-400">
+                    <td className="px-4 py-3 text-sm capitalize text-muted-foreground">
                       {tx.gateway}
                     </td>
                     <td className="px-4 py-3 text-sm text-right font-medium text-white">
                       {tx.currency || '$'}{tx.amount?.toFixed(2)}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-400">
+                    <td className="px-4 py-3 text-sm text-muted-foreground">
                       {tx.plan_name || 'N/A'}
                       {tx.credits_purchased && (
-                        <span className="text-xs text-gray-500 ml-1">
+                        <span className="text-xs text-muted-foreground ml-1">
                           ({tx.credits_purchased} credits)
                         </span>
                       )}
@@ -824,10 +824,10 @@ function TransactionsTab() {
                     <td className="px-4 py-3 text-center">
                       {getStatusBadge(tx.status)}
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-500 font-mono">
+                    <td className="px-4 py-3 text-xs text-muted-foreground font-mono">
                       {tx.transaction_id?.substring(0, 16)}...
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-500">
+                    <td className="px-4 py-3 text-xs text-muted-foreground">
                       {formatDistanceToNow(new Date(tx.created_at), { addSuffix: true })}
                     </td>
                     <td className="px-4 py-3">
@@ -835,7 +835,7 @@ function TransactionsTab() {
                         {tx.status === 'success' && (
                           <button
                             onClick={() => setRefundItem(tx)}
-                            className="p-1.5 rounded hover:bg-yellow-500/20 text-gray-400 hover:text-yellow-400"
+                            className="p-1.5 rounded hover:bg-yellow-500/20 text-muted-foreground hover:text-yellow-400"
                             title="Refund"
                           >
                             <RotateCcw className="w-4 h-4" />
@@ -852,8 +852,8 @@ function TransactionsTab() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-gray-800">
-            <span className="text-sm text-gray-400">
+          <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+            <span className="text-sm text-muted-foreground">
               Page {currentPage} of {totalPages}
             </span>
             <div className="flex items-center gap-2">
@@ -862,7 +862,7 @@ function TransactionsTab() {
                 variant="outline"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((p) => p - 1)}
-                className="border-gray-700 text-gray-300"
+                className="border-border text-muted-foreground"
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
@@ -871,7 +871,7 @@ function TransactionsTab() {
                 variant="outline"
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((p) => p + 1)}
-                className="border-gray-700 text-gray-300"
+                className="border-border text-muted-foreground"
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
@@ -882,16 +882,16 @@ function TransactionsTab() {
 
       {/* Refund Confirmation */}
       <AlertDialog open={!!refundItem} onOpenChange={() => setRefundItem(null)}>
-        <AlertDialogContent className="bg-gray-900 border-gray-800">
+        <AlertDialogContent className="bg-muted border-border">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Process Refund?</AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-400">
+            <AlertDialogDescription className="text-muted-foreground">
               This will refund ${refundItem?.amount?.toFixed(2)} to {refundItem?.user_email}.
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-gray-800 text-gray-300 border-gray-700">
+            <AlertDialogCancel className="bg-muted text-muted-foreground border-border">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction onClick={handleRefund} className="bg-yellow-600 hover:bg-yellow-700">
@@ -918,9 +918,9 @@ function StatCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+    <div className="bg-muted border border-border rounded-xl p-4">
       <div className="flex items-center justify-between">
-        <p className="text-gray-400 text-xs uppercase tracking-wider">{label}</p>
+        <p className="text-muted-foreground text-xs uppercase tracking-wider">{label}</p>
         {icon}
       </div>
       <p className="text-2xl font-bold mt-2 text-white">{value}</p>

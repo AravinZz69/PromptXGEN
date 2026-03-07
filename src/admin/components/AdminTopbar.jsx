@@ -42,31 +42,31 @@ export default function AdminTopbar({ onMenuClick }) {
   };
 
   return (
-    <header className="sticky top-0 z-10 h-16 bg-[#111827] border-b border-gray-800 flex items-center justify-between px-4 lg:px-6">
+    <header className="sticky top-0 z-10 h-16 bg-sidebar border-b border-sidebar-border flex items-center justify-between px-4 lg:px-6">
       {/* Left section */}
       <div className="flex items-center gap-4">
         {/* Mobile menu button */}
         <button
           onClick={onMenuClick}
-          className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 lg:hidden"
+          className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-sidebar-accent lg:hidden"
         >
           <Menu className="w-5 h-5" />
         </button>
         
         {/* Page title */}
-        <h1 className="text-xl font-semibold text-white">{pageTitle}</h1>
+        <h1 className="text-xl font-semibold text-foreground">{pageTitle}</h1>
       </div>
 
       {/* Center - Search */}
       <div className="hidden md:flex flex-1 max-w-md mx-8">
         <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search..."
-            className="w-full pl-10 pr-20 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+            className="w-full pl-10 pr-20 py-2 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary"
           />
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 bg-gray-800 px-1.5 py-0.5 rounded">
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
             ⌘K
           </span>
         </div>
@@ -75,7 +75,7 @@ export default function AdminTopbar({ onMenuClick }) {
       {/* Right section */}
       <div className="flex items-center gap-4">
         {/* Notifications */}
-        <button className="relative p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800">
+        <button className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-sidebar-accent">
           <Bell className="w-5 h-5" />
           {/* MOCK DATA - Notification badge */}
           <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs font-medium rounded-full flex items-center justify-center">
@@ -87,31 +87,31 @@ export default function AdminTopbar({ onMenuClick }) {
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setShowDropdown(!showDropdown)}
-            className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-800 transition-colors"
+            className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-sidebar-accent transition-colors"
           >
             {/* Avatar */}
-            <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-sm font-semibold">
+            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-semibold">
               SA
             </div>
-            <span className="hidden sm:block text-sm font-medium text-white">
+            <span className="hidden sm:block text-sm font-medium text-foreground">
               {session?.name || 'Admin'}
             </span>
-            <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
           </button>
 
           {/* Dropdown */}
           {showDropdown && (
-            <div className="absolute right-0 mt-2 w-48 bg-[#111827] border border-gray-800 rounded-xl shadow-xl overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-800">
-                <p className="text-sm font-medium text-white">{session?.name}</p>
-                <p className="text-xs text-gray-400">{session?.email}</p>
+            <div className="absolute right-0 mt-2 w-48 bg-sidebar border border-sidebar-border rounded-xl shadow-xl overflow-hidden">
+              <div className="px-4 py-3 border-b border-sidebar-border">
+                <p className="text-sm font-medium text-foreground">{session?.name}</p>
+                <p className="text-xs text-muted-foreground">{session?.email}</p>
               </div>
               <div className="py-1">
-                <button className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white">
+                <button className="flex items-center gap-2 w-full px-4 py-2 text-sm text-muted-foreground hover:bg-sidebar-accent hover:text-foreground">
                   <User className="w-4 h-4" />
                   Profile
                 </button>
-                <button className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white">
+                <button className="flex items-center gap-2 w-full px-4 py-2 text-sm text-muted-foreground hover:bg-sidebar-accent hover:text-foreground">
                   <Key className="w-4 h-4" />
                   Change Password
                 </button>

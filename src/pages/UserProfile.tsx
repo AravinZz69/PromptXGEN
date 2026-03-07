@@ -434,7 +434,7 @@ const UserProfile = () => {
                     {/* Credits Badge */}
                     {credits && (
                       <div className="bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-500/20 rounded-xl p-4 text-center">
-                        <div className="flex items-center gap-2 text-purple-400 mb-1">
+                        <div className="flex items-center gap-2 text-accent-foreground mb-1">
                           <Sparkles className="h-4 w-4" />
                           <span className="text-xs font-medium uppercase">Credits</span>
                         </div>

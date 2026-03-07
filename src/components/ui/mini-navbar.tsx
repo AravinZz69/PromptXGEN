@@ -51,8 +51,8 @@ interface NavLinkProps {
 }
 
 const AnimatedNavLink = ({ to, children, onClick }: NavLinkProps) => {
-  const defaultTextColor = 'text-gray-300';
-  const hoverTextColor = 'text-white';
+  const defaultTextColor = 'text-muted-foreground';
+  const hoverTextColor = 'text-foreground';
   const textSizeClass = 'text-sm';
   const location = useLocation();
   const navigate = useNavigate();
@@ -205,7 +205,7 @@ export function MiniNavbar() {
   const loginButtonElement = (
     <button 
       onClick={() => navigate('/auth')}
-      className="px-4 py-2 sm:px-3 text-xs sm:text-sm border border-[#333] bg-[rgba(31,31,31,0.62)] text-gray-300 rounded-full hover:border-white/50 hover:text-white transition-colors duration-200 w-full sm:w-auto"
+      className="px-4 py-2 sm:px-3 text-xs sm:text-sm border border-[#333] bg-[rgba(31,31,31,0.62)] text-muted-foreground rounded-full hover:border-border hover:text-foreground transition-colors duration-200 w-full sm:w-auto"
     >
       Log In
     </button>
@@ -309,7 +309,7 @@ export function MiniNavbar() {
         )}
 
         <button 
-          className="sm:hidden flex items-center justify-center w-8 h-8 text-gray-300 focus:outline-none" 
+          className="sm:hidden flex items-center justify-center w-8 h-8 text-muted-foreground focus:outline-none" 
           onClick={toggleMenu} 
           aria-label={isOpen ? 'Close Menu' : 'Open Menu'}
         >
@@ -337,7 +337,7 @@ export function MiniNavbar() {
                   }
                   setIsOpen(false);
                 }}
-                className="text-gray-300 hover:text-white transition-colors w-full text-center"
+                className="text-muted-foreground hover:text-foreground transition-colors w-full text-center"
               >
                 {link.label}
               </a>
@@ -346,7 +346,7 @@ export function MiniNavbar() {
                 key={link.to}
                 to={link.to}
                 onClick={() => setIsOpen(false)}
-                className="text-gray-300 hover:text-white transition-colors w-full text-center"
+                className="text-muted-foreground hover:text-foreground transition-colors w-full text-center"
               >
                 {link.label}
               </Link>

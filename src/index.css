@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -177,3 +177,150 @@
     animation: stop-pulse 1.5s ease-in-out infinite;
   }
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SITE-WIDE THEME SYSTEM
+   Three complete visual themes controlled by admin
+   Applied via data-theme attribute on <html>
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* ── THEME: COSMOS (default - dark indigo) ── */
+html[data-theme="cosmos"] {
+  /* Shadcn core variables (HSL format) */
+  --background: 240 15% 4% !important;
+  --foreground: 210 40% 96% !important;
+  --card: 240 12% 7% !important;
+  --card-foreground: 210 40% 96% !important;
+  --popover: 240 12% 7% !important;
+  --popover-foreground: 210 40% 96% !important;
+  --primary: 239 84% 67% !important;
+  --primary-foreground: 0 0% 100% !important;
+  --secondary: 240 10% 12% !important;
+  --secondary-foreground: 210 40% 96% !important;
+  --muted: 240 10% 14% !important;
+  --muted-foreground: 215 20% 55% !important;
+  --accent: 260 80% 60% !important;
+  --accent-foreground: 0 0% 100% !important;
+  --border: 240 10% 16% !important;
+  --input: 240 10% 16% !important;
+  --ring: 239 84% 67% !important;
+  --glow: 239 84% 67% !important;
+  --gradient-start: 239 84% 67% !important;
+  --gradient-end: 260 80% 60% !important;
+  
+  /* Sidebar */
+  --sidebar-background: 240 14% 5% !important;
+  --sidebar-foreground: 210 40% 96% !important;
+  --sidebar-primary: 239 84% 67% !important;
+  --sidebar-primary-foreground: 0 0% 100% !important;
+  --sidebar-accent: 240 10% 12% !important;
+  --sidebar-accent-foreground: 210 40% 96% !important;
+  --sidebar-border: 240 10% 14% !important;
+
+  /* Custom tokens */
+  --bg-primary: #05060f;
+  --bg-card: #131629;
+  --text-primary: #e2e8f0;
+  --accent-primary: #6366f1;
+  --shadow-glow: 0 0 40px rgba(99,102,241,0.2);
+  --radius-card: 12px;
+  --font-heading: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+
+/* ── THEME: AURORA (Neon/Hacker) ── */
+html[data-theme="aurora"] {
+  /* Shadcn core variables (HSL format) */
+  --background: 0 0% 0% !important;
+  --foreground: 120 100% 94% !important;
+  --card: 0 0% 7% !important;
+  --card-foreground: 120 100% 94% !important;
+  --popover: 0 0% 7% !important;
+  --popover-foreground: 120 100% 94% !important;
+  --primary: 152 100% 50% !important;
+  --primary-foreground: 0 0% 0% !important;
+  --secondary: 0 0% 10% !important;
+  --secondary-foreground: 120 100% 94% !important;
+  --muted: 0 0% 15% !important;
+  --muted-foreground: 150 50% 50% !important;
+  --accent: 190 100% 50% !important;
+  --accent-foreground: 0 0% 0% !important;
+  --border: 152 50% 20% !important;
+  --input: 0 0% 12% !important;
+  --ring: 152 100% 50% !important;
+  --glow: 152 100% 50% !important;
+  --gradient-start: 152 100% 50% !important;
+  --gradient-end: 190 100% 50% !important;
+  
+  /* Sidebar */
+  --sidebar-background: 0 0% 4% !important;
+  --sidebar-foreground: 120 100% 94% !important;
+  --sidebar-primary: 152 100% 50% !important;
+  --sidebar-primary-foreground: 0 0% 0% !important;
+  --sidebar-accent: 0 0% 10% !important;
+  --sidebar-accent-foreground: 120 100% 94% !important;
+  --sidebar-border: 152 50% 20% !important;
+
+  /* Custom tokens */
+  --bg-primary: #000000;
+  --bg-card: #111111;
+  --text-primary: #e0ffe0;
+  --accent-primary: #00ff90;
+  --shadow-glow: 0 0 40px rgba(0,255,144,0.15);
+  --radius-card: 4px;
+  --font-heading: 'JetBrains Mono', monospace;
+  --font-body: 'Space Mono', monospace;
+  --font-mono: 'Fira Code', monospace;
+}
+
+/* ── THEME: LUMINA (Light SaaS) ── */
+html[data-theme="lumina"] {
+  /* Shadcn core variables (HSL format) */
+  --background: 210 40% 98% !important;
+  --foreground: 222 47% 11% !important;
+  --card: 0 0% 100% !important;
+  --card-foreground: 222 47% 11% !important;
+  --popover: 0 0% 100% !important;
+  --popover-foreground: 222 47% 11% !important;
+  --primary: 263 70% 58% !important;
+  --primary-foreground: 0 0% 100% !important;
+  --secondary: 210 40% 96% !important;
+  --secondary-foreground: 222 47% 11% !important;
+  --muted: 210 40% 96% !important;
+  --muted-foreground: 215 16% 47% !important;
+  --accent: 280 70% 60% !important;
+  --accent-foreground: 0 0% 100% !important;
+  --border: 214 32% 91% !important;
+  --input: 214 32% 91% !important;
+  --ring: 263 70% 58% !important;
+  --glow: 263 70% 58% !important;
+  --gradient-start: 263 70% 58% !important;
+  --gradient-end: 280 70% 60% !important;
+  
+  /* Sidebar */
+  --sidebar-background: 0 0% 100% !important;
+  --sidebar-foreground: 222 47% 11% !important;
+  --sidebar-primary: 263 70% 58% !important;
+  --sidebar-primary-foreground: 0 0% 100% !important;
+  --sidebar-accent: 210 40% 96% !important;
+  --sidebar-accent-foreground: 222 47% 11% !important;
+  --sidebar-border: 214 32% 91% !important;
+
+  /* Custom tokens */
+  --bg-primary: #f8fafc;
+  --bg-card: #ffffff;
+  --text-primary: #0f172a;
+  --accent-primary: #7c3aed;
+  --shadow-glow: 0 0 40px rgba(124,58,237,0.1);
+  --radius-card: 16px;
+  --font-heading: 'Poppins', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'Fira Code', monospace;
+}
+
+/* Theme utility classes */
+.theme-bg { background-color: hsl(var(--background)); }
+.theme-card { background-color: hsl(var(--card)); }
+.theme-text { color: hsl(var(--foreground)); }
+.theme-accent { color: hsl(var(--primary)); }

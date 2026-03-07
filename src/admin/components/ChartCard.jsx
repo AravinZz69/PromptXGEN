@@ -11,12 +11,12 @@ import React from 'react';
  */
 export default function ChartCard({ title, subtitle, children, actions, className = '' }) {
   return (
-    <div className={`bg-[#111827] border border-gray-800 rounded-xl overflow-hidden ${className}`}>
+    <div className={`bg-card border border-border rounded-xl overflow-hidden ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border">
         <div>
           <h3 className="text-white font-semibold">{title}</h3>
-          {subtitle && <p className="text-sm text-gray-400 mt-0.5">{subtitle}</p>}
+          {subtitle && <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>}
         </div>
         {actions && <div className="flex items-center gap-2">{actions}</div>}
       </div>

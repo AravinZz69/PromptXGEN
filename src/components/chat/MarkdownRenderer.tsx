@@ -35,7 +35,7 @@ function MathBlock({ expression, raw }: { expression: string; raw: string }) {
       <span dangerouslySetInnerHTML={{ __html: expression }} />
       <button
         onClick={handleCopy}
-        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-xs text-indigo-400 bg-indigo-500/20 px-2 py-0.5 rounded transition-opacity"
+        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-xs text-primary bg-primary/20 px-2 py-0.5 rounded transition-opacity"
       >
         {copied ? 'Copied!' : 'Copy'}
       </button>
@@ -74,8 +74,8 @@ function CodeBlock({ language, code }: { language: string; code: string }) {
   };
 
   return (
-    <div className="my-3 rounded-xl overflow-hidden border border-white/10">
-      <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/10">
+    <div className="my-3 rounded-xl overflow-hidden border border-border">
+      <div className="flex items-center justify-between px-4 py-2 bg-muted/50 border-b border-border">
         <span className="text-xs text-muted-foreground font-mono">{language || 'code'}</span>
         <button
           onClick={handleCopy}
@@ -105,13 +105,13 @@ function CodeBlock({ language, code }: { language: string; code: string }) {
 function StepHeading({ text }: { text: string }) {
   return (
     <div className="flex items-center gap-3 my-4">
-      <div className="flex items-center gap-2 bg-indigo-500/15 border border-indigo-500/30 rounded-lg px-3 py-1.5">
-        <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-        <span className="text-indigo-300 font-semibold text-xs tracking-widest uppercase">
+      <div className="flex items-center gap-2 bg-primary/15 border border-primary/30 rounded-lg px-3 py-1.5">
+        <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+        <span className="text-primary font-semibold text-xs tracking-widest uppercase">
           {text}
         </span>
       </div>
-      <div className="flex-1 h-px bg-indigo-500/15" />
+      <div className="flex-1 h-px bg-primary/15" />
     </div>
   );
 }
@@ -190,7 +190,7 @@ function parseInline(text: string): ReactNode[] {
     match = remaining.match(/^\*\*(.+?)\*\*/);
     if (match) {
       elements.push(
-        <strong key={key++} className="font-semibold text-white">
+        <strong key={key++} className="font-semibold text-foreground">
           {match[1]}
         </strong>
       );
@@ -202,7 +202,7 @@ function parseInline(text: string): ReactNode[] {
     match = remaining.match(/^\*(.+?)\*/);
     if (match) {
       elements.push(
-        <em key={key++} className="italic text-gray-300">
+        <em key={key++} className="italic text-muted-foreground">
           {match[1]}
         </em>
       );
@@ -326,7 +326,7 @@ function parseMarkdown(content: string): ReactNode[] {
     // Horizontal rule
     if (line.match(/^-{3,}$/) || line.match(/^\*{3,}$/)) {
       flushList();
-      elements.push(<hr key={key++} className="border-white/10 my-4" />);
+      elements.push(<hr key={key++} className="border-border my-4" />);
       continue;
     }
 
@@ -386,7 +386,7 @@ function parseMarkdown(content: string): ReactNode[] {
       elements.push(
         <blockquote
           key={key++}
-          className="relative border-l-2 border-indigo-500 pl-6 pr-4 my-3 py-3 bg-indigo-500/[0.08] rounded-r-lg"
+          className="relative border-l-2 border-primary pl-6 pr-4 my-3 py-3 bg-primary/[0.08] rounded-r-lg"
         >
           <span className="absolute -top-2 left-2 text-6xl text-indigo-500/20 font-serif leading-none select-none">"</span>
           <p className="italic text-gray-200 relative z-10">{parseInline(line.slice(2))}</p>

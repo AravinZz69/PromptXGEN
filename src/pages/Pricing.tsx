@@ -26,8 +26,8 @@ const plans = [
     yearlyPrice: 0,
     credits: '10',
     icon: Zap,
-    iconColor: 'text-gray-400',
-    bgColor: 'bg-gray-500/10',
+    iconColor: 'text-muted-foreground',
+    bgColor: 'bg-muted/10',
     features: [
       { text: '10 prompts/month', included: true },
       { text: '5 basic templates', included: true },

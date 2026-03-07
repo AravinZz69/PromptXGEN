@@ -115,7 +115,7 @@ export function TeamEditor() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -126,7 +126,7 @@ export function TeamEditor() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Team Editor</h1>
-          <p className="text-gray-400 text-sm">
+          <p className="text-muted-foreground text-sm">
             Manage your team members and their profiles
           </p>
         </div>
@@ -134,7 +134,7 @@ export function TeamEditor() {
           <Button
             onClick={handleAddMember}
             variant="outline"
-            className="border-gray-700 text-gray-300 hover:bg-gray-800 gap-2"
+            className="border-border text-muted-foreground hover:bg-muted gap-2"
           >
             <Plus className="w-4 h-4" />
             Add Member
@@ -142,7 +142,7 @@ export function TeamEditor() {
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="bg-indigo-600 hover:bg-indigo-700"
+            className="bg-primary hover:bg-primary/90"
           >
             {saving ? (
               <>
@@ -158,18 +158,18 @@ export function TeamEditor() {
 
       {/* Team members grid */}
       {members.length === 0 ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-12 text-center">
+        <div className="bg-muted border border-border rounded-xl p-12 text-center">
           <div className="max-w-sm mx-auto space-y-4">
-            <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto">
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
               <Plus className="w-8 h-8 text-gray-600" />
             </div>
             <h3 className="text-lg font-medium text-white">No team members yet</h3>
-            <p className="text-gray-400 text-sm">
+            <p className="text-muted-foreground text-sm">
               Add your first team member to showcase your amazing team.
             </p>
             <Button
               onClick={handleAddMember}
-              className="bg-indigo-600 hover:bg-indigo-700 gap-2"
+              className="bg-primary hover:bg-primary/90 gap-2"
             >
               <Plus className="w-4 h-4" />
               Add First Member
@@ -181,7 +181,7 @@ export function TeamEditor() {
           {members.map((member) => (
             <div
               key={member.id}
-              className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4 relative group hover:border-gray-700 transition-colors"
+              className="bg-muted border border-border rounded-xl p-6 space-y-4 relative group hover:border-border transition-colors"
             >
               {/* Visibility indicator */}
               <div className="absolute top-4 right-4">
@@ -198,10 +198,10 @@ export function TeamEditor() {
                   <img
                     src={member.avatar}
                     alt={member.name}
-                    className="w-24 h-24 rounded-full object-cover border-2 border-gray-700"
+                    className="w-24 h-24 rounded-full object-cover border-2 border-border"
                   />
                 ) : (
-                  <div className="w-24 h-24 rounded-full bg-gray-800 flex items-center justify-center text-2xl font-bold text-gray-400 border-2 border-gray-700">
+                  <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center text-2xl font-bold text-muted-foreground border-2 border-border">
                     {getInitials(member.name || 'NA')}
                   </div>
                 )}
@@ -210,9 +210,9 @@ export function TeamEditor() {
               {/* Info */}
               <div className="text-center space-y-1">
                 <h3 className="text-lg font-semibold text-white">{member.name}</h3>
-                <p className="text-sm text-indigo-400">{member.role}</p>
+                <p className="text-sm text-primary">{member.role}</p>
                 {member.bio && (
-                  <p className="text-xs text-gray-400 line-clamp-2 mt-2">{member.bio}</p>
+                  <p className="text-xs text-muted-foreground line-clamp-2 mt-2">{member.bio}</p>
                 )}
               </div>
 
@@ -220,18 +220,18 @@ export function TeamEditor() {
               {(member.linkedinUrl || member.twitterUrl || member.githubUrl) && (
                 <div className="flex items-center justify-center gap-2">
                   {member.linkedinUrl && (
-                    <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
-                      <Linkedin className="w-4 h-4 text-gray-400" />
+                    <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+                      <Linkedin className="w-4 h-4 text-muted-foreground" />
                     </div>
                   )}
                   {member.twitterUrl && (
-                    <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
-                      <Twitter className="w-4 h-4 text-gray-400" />
+                    <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+                      <Twitter className="w-4 h-4 text-muted-foreground" />
                     </div>
                   )}
                   {member.githubUrl && (
-                    <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
-                      <Github className="w-4 h-4 text-gray-400" />
+                    <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+                      <Github className="w-4 h-4 text-muted-foreground" />
                     </div>
                   )}
                 </div>
@@ -243,7 +243,7 @@ export function TeamEditor() {
                   size="sm"
                   variant="outline"
                   onClick={() => handleEditMember(member)}
-                  className="flex-1 border-gray-700 text-gray-300 hover:bg-gray-800 gap-2"
+                  className="flex-1 border-border text-muted-foreground hover:bg-muted gap-2"
                 >
                   <Pencil className="w-3 h-3" />
                   Edit
@@ -259,7 +259,7 @@ export function TeamEditor() {
               </div>
 
               {/* Display order badge */}
-              <div className="absolute bottom-4 left-4 text-xs text-gray-500">
+              <div className="absolute bottom-4 left-4 text-xs text-muted-foreground">
                 Order: {member.displayOrder}
               </div>
             </div>
@@ -277,15 +277,15 @@ export function TeamEditor() {
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent className="bg-gray-900 border-gray-800">
+        <AlertDialogContent className="bg-muted border-border">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Delete Team Member?</AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-400">
+            <AlertDialogDescription className="text-muted-foreground">
               This will permanently remove this team member from your website. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700">
+            <AlertDialogCancel className="bg-muted text-muted-foreground border-border hover:bg-muted">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction

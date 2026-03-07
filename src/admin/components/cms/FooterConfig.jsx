@@ -97,13 +97,13 @@ export function FooterConfig({ config, onChange }) {
   return (
     <div className="space-y-6">
       {/* Logo & Tagline */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-5">
-        <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">
+      <div className="bg-muted border border-border rounded-xl p-6 space-y-5">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
           Footer Branding
         </h3>
 
         <div>
-          <label className="text-sm font-medium text-gray-300 mb-2 block">
+          <label className="text-sm font-medium text-muted-foreground mb-2 block">
             Footer Logo
           </label>
           <ImageUpload
@@ -115,7 +115,7 @@ export function FooterConfig({ config, onChange }) {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-300">
+          <label className="text-sm font-medium text-muted-foreground">
             Tagline / Description
           </label>
           <textarea
@@ -123,22 +123,22 @@ export function FooterConfig({ config, onChange }) {
             onChange={(e) => handleFieldChange('footerTagline', e.target.value)}
             placeholder="Your AI-powered prompt generator"
             rows={2}
-            className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none"
+            className="w-full bg-muted border border-border text-white placeholder-muted-foreground rounded-lg px-3 py-2 focus:border-primary focus:ring-1 focus:ring-primary resize-none"
           />
         </div>
       </div>
 
       {/* Social Links */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-5">
-        <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">
+      <div className="bg-muted border border-border rounded-xl p-6 space-y-5">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
           Social Links
         </h3>
 
         <div className="space-y-4">
           {SOCIAL_PLATFORMS.map(({ key, label, icon: Icon }) => (
             <div key={key} className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center">
-                <Icon className="w-5 h-5 text-gray-400" />
+              <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center">
+                <Icon className="w-5 h-5 text-muted-foreground" />
               </div>
               <div className="flex-1">
                 <input
@@ -146,7 +146,7 @@ export function FooterConfig({ config, onChange }) {
                   value={config.social?.[key]?.url || ''}
                   onChange={(e) => handleSocialChange(key, 'url', e.target.value)}
                   placeholder={`${label} URL`}
-                  className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm"
+                  className="w-full bg-muted border border-border text-white placeholder-muted-foreground rounded-lg px-3 py-2 text-sm"
                 />
               </div>
               <Switch
@@ -159,15 +159,15 @@ export function FooterConfig({ config, onChange }) {
       </div>
 
       {/* Footer Columns */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-5">
+      <div className="bg-muted border border-border rounded-xl p-6 space-y-5">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
             Footer Columns
           </h3>
           <Button
             size="sm"
             onClick={addColumn}
-            className="bg-indigo-600 hover:bg-indigo-700 gap-2"
+            className="bg-primary hover:bg-primary/90 gap-2"
           >
             <Plus className="w-4 h-4" />
             Add Column
@@ -179,12 +179,12 @@ export function FooterConfig({ config, onChange }) {
           onReorder={(newCols) => handleFieldChange('columns', newCols)}
           emptyMessage="No footer columns yet"
           renderItem={(column, index, dragHandleProps) => (
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 space-y-3">
+            <div className="bg-muted border border-border rounded-lg p-4 space-y-3">
               {/* Column header */}
               <div className="flex items-start gap-3">
                 {/* Drag handle */}
                 <div {...dragHandleProps} className="pt-2">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="text-gray-500">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="text-muted-foreground">
                     <circle cx="4" cy="4" r="1.5" />
                     <circle cx="12" cy="4" r="1.5" />
                     <circle cx="4" cy="8" r="1.5" />
@@ -200,7 +200,7 @@ export function FooterConfig({ config, onChange }) {
                   value={column.title}
                   onChange={(e) => updateColumn(column.id, 'title', e.target.value)}
                   placeholder="Column Title"
-                  className="flex-1 bg-gray-900 border border-gray-700 text-white placeholder-gray-500 rounded px-3 py-2 text-sm font-medium"
+                  className="flex-1 bg-muted border border-border text-white placeholder-muted-foreground rounded px-3 py-2 text-sm font-medium"
                 />
 
                 {/* Delete column */}
@@ -223,14 +223,14 @@ export function FooterConfig({ config, onChange }) {
                       value={link.label}
                       onChange={(e) => updateColumnLink(column.id, link.id, 'label', e.target.value)}
                       placeholder="Label"
-                      className="flex-1 bg-gray-900 border border-gray-700 text-white placeholder-gray-500 rounded px-2 py-1.5 text-xs"
+                      className="flex-1 bg-muted border border-border text-white placeholder-muted-foreground rounded px-2 py-1.5 text-xs"
                     />
                     <input
                       type="text"
                       value={link.url}
                       onChange={(e) => updateColumnLink(column.id, link.id, 'url', e.target.value)}
                       placeholder="/url"
-                      className="flex-1 bg-gray-900 border border-gray-700 text-white placeholder-gray-500 rounded px-2 py-1.5 text-xs"
+                      className="flex-1 bg-muted border border-border text-white placeholder-muted-foreground rounded px-2 py-1.5 text-xs"
                     />
                     <Button
                       size="sm"
@@ -247,7 +247,7 @@ export function FooterConfig({ config, onChange }) {
                   size="sm"
                   variant="outline"
                   onClick={() => addLinkToColumn(column.id)}
-                  className="w-full border-gray-700 text-gray-400 hover:bg-gray-800 gap-2 h-8"
+                  className="w-full border-border text-muted-foreground hover:bg-muted gap-2 h-8"
                 >
                   <Plus className="w-3 h-3" />
                   Add Link
@@ -259,13 +259,13 @@ export function FooterConfig({ config, onChange }) {
       </div>
 
       {/* Copyright & Newsletter */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-5">
-        <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">
+      <div className="bg-muted border border-border rounded-xl p-6 space-y-5">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
           Additional Settings
         </h3>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-300">
+          <label className="text-sm font-medium text-muted-foreground">
             Copyright Text
           </label>
           <input
@@ -273,16 +273,16 @@ export function FooterConfig({ config, onChange }) {
             value={config.copyrightText || ''}
             onChange={(e) => handleFieldChange('copyrightText', e.target.value)}
             placeholder="© 2025 AskJai. All rights reserved."
-            className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-3 py-2"
+            className="w-full bg-muted border border-border text-white placeholder-muted-foreground rounded-lg px-3 py-2"
           />
         </div>
 
         <div className="flex items-center justify-between py-2">
           <div>
-            <label className="text-sm font-medium text-gray-300">
+            <label className="text-sm font-medium text-muted-foreground">
               Show Newsletter Signup
             </label>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Display newsletter subscription form in footer
             </p>
           </div>
@@ -294,7 +294,7 @@ export function FooterConfig({ config, onChange }) {
 
         {config.showNewsletter && (
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">
+            <label className="text-sm font-medium text-muted-foreground">
               Newsletter Placeholder
             </label>
             <input
@@ -302,7 +302,7 @@ export function FooterConfig({ config, onChange }) {
               value={config.newsletterPlaceholder || ''}
               onChange={(e) => handleFieldChange('newsletterPlaceholder', e.target.value)}
               placeholder="Enter your email"
-              className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-3 py-2"
+              className="w-full bg-muted border border-border text-white placeholder-muted-foreground rounded-lg px-3 py-2"
             />
           </div>
         )}

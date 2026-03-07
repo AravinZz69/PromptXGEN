@@ -84,9 +84,9 @@ export function CreditModal({ open, onOpenChange }: CreditModalProps) {
       case 'reset':
         return <RefreshCw className="h-4 w-4 text-blue-400" />;
       case 'signup_bonus':
-        return <Gift className="h-4 w-4 text-purple-400" />;
+        return <Gift className="h-4 w-4 text-accent-foreground" />;
       default:
-        return <Coins className="h-4 w-4 text-gray-400" />;
+        return <Coins className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
@@ -94,7 +94,7 @@ export function CreditModal({ open, onOpenChange }: CreditModalProps) {
     switch (credits?.planType) {
       case 'enterprise':
         return (
-          <span className="flex items-center gap-1 px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded-full text-xs font-medium">
+          <span className="flex items-center gap-1 px-2 py-0.5 bg-accent/20 text-accent-foreground rounded-full text-xs font-medium">
             <Sparkles className="h-3 w-3" /> Enterprise
           </span>
         );
@@ -106,7 +106,7 @@ export function CreditModal({ open, onOpenChange }: CreditModalProps) {
         );
       default:
         return (
-          <span className="flex items-center gap-1 px-2 py-0.5 bg-gray-500/20 text-gray-400 rounded-full text-xs font-medium">
+          <span className="flex items-center gap-1 px-2 py-0.5 bg-muted text-muted-foreground rounded-full text-xs font-medium">
             <Coins className="h-3 w-3" /> Free
           </span>
         );
@@ -138,23 +138,23 @@ export function CreditModal({ open, onOpenChange }: CreditModalProps) {
         <div className="space-y-6 py-4">
           {/* Credit Stats */}
           <div className="grid grid-cols-3 gap-4">
-            <div className="text-center p-3 rounded-lg bg-white/5 border border-white/10">
+            <div className="text-center p-3 rounded-lg bg-muted/50 border border-border">
               <p className="text-2xl font-bold text-primary">
                 {isLoading ? '...' : isUnlimited ? '∞' : credits?.remainingCredits?.toLocaleString()}
               </p>
-              <p className="text-xs text-gray-400 mt-1">Remaining</p>
+              <p className="text-xs text-muted-foreground mt-1">Remaining</p>
             </div>
-            <div className="text-center p-3 rounded-lg bg-white/5 border border-white/10">
-              <p className="text-2xl font-bold text-gray-300">
+            <div className="text-center p-3 rounded-lg bg-muted/50 border border-border">
+              <p className="text-2xl font-bold text-muted-foreground">
                 {isLoading ? '...' : credits?.usedCredits?.toLocaleString()}
               </p>
-              <p className="text-xs text-gray-400 mt-1">Used</p>
+              <p className="text-xs text-muted-foreground mt-1">Used</p>
             </div>
-            <div className="text-center p-3 rounded-lg bg-white/5 border border-white/10">
-              <p className="text-2xl font-bold text-gray-300">
+            <div className="text-center p-3 rounded-lg bg-muted/50 border border-border">
+              <p className="text-2xl font-bold text-muted-foreground">
                 {isLoading ? '...' : isUnlimited ? '∞' : credits?.totalCredits?.toLocaleString()}
               </p>
-              <p className="text-xs text-gray-400 mt-1">Total</p>
+              <p className="text-xs text-muted-foreground mt-1">Total</p>
             </div>
           </div>
 
@@ -162,10 +162,10 @@ export function CreditModal({ open, onOpenChange }: CreditModalProps) {
           {!isUnlimited && (
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Usage</span>
+                <span className="text-muted-foreground">Usage</span>
                 <span className="font-medium">{creditPercentage}% remaining</span>
               </div>
-              <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
                 <motion.div
                   className={cn('h-full rounded-full', getProgressColor())}
                   initial={{ width: 0 }}
@@ -181,7 +181,7 @@ export function CreditModal({ open, onOpenChange }: CreditModalProps) {
             <div className="flex items-center justify-between p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-blue-400" />
-                <span className="text-sm text-gray-300">Credits reset in</span>
+                <span className="text-sm text-muted-foreground">Credits reset in</span>
               </div>
               <span className="font-semibold text-blue-400">{countdown}</span>
             </div>
@@ -189,12 +189,12 @@ export function CreditModal({ open, onOpenChange }: CreditModalProps) {
 
           {/* Transaction History */}
           <div className="space-y-2">
-            <h4 className="text-sm font-medium text-gray-400">Recent Activity</h4>
+            <h4 className="text-sm font-medium text-muted-foreground">Recent Activity</h4>
             <ScrollArea className="h-48">
               <div className="space-y-2">
                 <AnimatePresence>
                   {transactions.length === 0 ? (
-                    <p className="text-center text-gray-500 py-4 text-sm">
+                    <p className="text-center text-muted-foreground py-4 text-sm">
                       No transactions yet
                     </p>
                   ) : (
@@ -204,7 +204,7 @@ export function CreditModal({ open, onOpenChange }: CreditModalProps) {
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: i * 0.05 }}
-                        className="flex items-center justify-between p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                        className="flex items-center justify-between p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
                       >
                         <div className="flex items-center gap-2">
                           {getTransactionIcon(tx.type)}
@@ -212,7 +212,7 @@ export function CreditModal({ open, onOpenChange }: CreditModalProps) {
                             <p className="text-sm text-gray-200">
                               {tx.description || tx.type}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-muted-foreground">
                               {tx.modelUsed && `${tx.modelUsed} • `}
                               {new Date(tx.createdAt).toLocaleDateString()}
                             </p>

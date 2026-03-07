@@ -45,7 +45,7 @@ const activityIcons = {
 const activityColors = {
   upgrade: 'text-emerald-400 bg-emerald-400/20',
   signup: 'text-blue-400 bg-blue-400/20',
-  prompt: 'text-indigo-400 bg-indigo-400/20',
+  prompt: 'text-primary bg-primary/20',
   payment: 'text-amber-400 bg-amber-400/20',
   downgrade: 'text-red-400 bg-red-400/20',
 };
@@ -59,13 +59,13 @@ const severityConfig = {
 // Skeleton loader component
 function SkeletonCard() {
   return (
-    <div className="bg-[#111827] border border-gray-800 rounded-xl p-4 animate-pulse">
+    <div className="bg-card border border-border rounded-xl p-4 animate-pulse">
       <div className="flex items-center gap-3 mb-3">
-        <div className="w-10 h-10 bg-gray-700 rounded-lg" />
-        <div className="h-4 w-16 bg-gray-700 rounded" />
+        <div className="w-10 h-10 bg-muted rounded-lg" />
+        <div className="h-4 w-16 bg-muted rounded" />
       </div>
-      <div className="h-8 w-24 bg-gray-700 rounded mb-2" />
-      <div className="h-3 w-20 bg-gray-700 rounded" />
+      <div className="h-8 w-24 bg-muted rounded mb-2" />
+      <div className="h-3 w-20 bg-muted rounded" />
     </div>
   );
 }
@@ -250,8 +250,8 @@ export default function AdminDashboard() {
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
     return (
-      <div className="bg-[#1F2937] border border-gray-700 rounded-lg px-3 py-2 shadow-xl">
-        <p className="text-gray-400 text-xs mb-1">{label}</p>
+      <div className="bg-card border border-border rounded-lg px-3 py-2 shadow-xl">
+        <p className="text-muted-foreground text-xs mb-1">{label}</p>
         {payload.map((entry, i) => (
           <p key={i} className="text-white text-sm font-medium">
             {entry.name}: {typeof entry.value === 'number' ? entry.value.toLocaleString() : entry.value}
@@ -297,7 +297,7 @@ export default function AdminDashboard() {
           <div className="h-72">
             {loading ? (
               <div className="flex items-center justify-center h-full">
-                <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
@@ -340,7 +340,7 @@ export default function AdminDashboard() {
           <div className="h-72">
             {loading ? (
               <div className="flex items-center justify-center h-full">
-                <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
@@ -372,7 +372,7 @@ export default function AdminDashboard() {
           <div className="h-64">
             {loading ? (
               <div className="flex items-center justify-center h-full">
-                <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
@@ -394,7 +394,7 @@ export default function AdminDashboard() {
                   <Legend 
                     verticalAlign="bottom" 
                     height={36}
-                    formatter={(value) => <span className="text-gray-400 text-sm">{value}</span>}
+                    formatter={(value) => <span className="text-muted-foreground text-sm">{value}</span>}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -407,29 +407,29 @@ export default function AdminDashboard() {
           <div className="h-64 flex flex-col justify-center space-y-4">
             {loading ? (
               <div className="flex items-center justify-center h-full">
-                <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
               </div>
             ) : stats ? (
               <>
-                <div className="flex justify-between items-center p-3 bg-[#0A0E1A] rounded-lg">
-                  <span className="text-gray-400">Total Users</span>
+                <div className="flex justify-between items-center p-3 bg-background rounded-lg">
+                  <span className="text-muted-foreground">Total Users</span>
                   <span className="text-white font-semibold">{stats.total_users?.toLocaleString() || 0}</span>
                 </div>
-                <div className="flex justify-between items-center p-3 bg-[#0A0E1A] rounded-lg">
-                  <span className="text-gray-400">Total Prompts</span>
+                <div className="flex justify-between items-center p-3 bg-background rounded-lg">
+                  <span className="text-muted-foreground">Total Prompts</span>
                   <span className="text-white font-semibold">{stats.total_prompts?.toLocaleString() || 0}</span>
                 </div>
-                <div className="flex justify-between items-center p-3 bg-[#0A0E1A] rounded-lg">
-                  <span className="text-gray-400">New This Week</span>
+                <div className="flex justify-between items-center p-3 bg-background rounded-lg">
+                  <span className="text-muted-foreground">New This Week</span>
                   <span className="text-emerald-400 font-semibold">+{stats.new_users_week || 0}</span>
                 </div>
-                <div className="flex justify-between items-center p-3 bg-[#0A0E1A] rounded-lg">
-                  <span className="text-gray-400">Credits Used</span>
+                <div className="flex justify-between items-center p-3 bg-background rounded-lg">
+                  <span className="text-muted-foreground">Credits Used</span>
                   <span className="text-white font-semibold">{stats.total_credits_used?.toLocaleString() || 0}</span>
                 </div>
               </>
             ) : (
-              <p className="text-gray-500 text-center">No data available</p>
+              <p className="text-muted-foreground text-center">No data available</p>
             )}
           </div>
         </ChartCard>
@@ -441,14 +441,14 @@ export default function AdminDashboard() {
               <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse" />
               <span className="text-emerald-400">Supabase Connected</span>
             </div>
-            <div className="flex items-center gap-3 p-3 bg-[#0A0E1A] rounded-lg">
-              <span className="text-gray-400">Last Refresh</span>
+            <div className="flex items-center gap-3 p-3 bg-background rounded-lg">
+              <span className="text-muted-foreground">Last Refresh</span>
               <span className="text-white ml-auto">{new Date().toLocaleTimeString()}</span>
             </div>
             <button
               onClick={fetchDashboardData}
               disabled={loading}
-              className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-600/50 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+              className="w-full py-2.5 bg-primary hover:bg-primary/90 disabled:bg-primary/50 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
               Refresh Data
@@ -464,10 +464,10 @@ export default function AdminDashboard() {
           <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
             {loading ? (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
               </div>
             ) : recentActivity.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">No recent activity</p>
+              <p className="text-muted-foreground text-center py-8">No recent activity</p>
             ) : (
               recentActivity.map((activity) => {
                 const Icon = activityIcons[activity.type] || Zap;
@@ -476,18 +476,18 @@ export default function AdminDashboard() {
                 return (
                   <div 
                     key={activity.id}
-                    className="flex items-center gap-3 p-3 bg-[#0A0E1A] rounded-lg"
+                    className="flex items-center gap-3 p-3 bg-background rounded-lg"
                   >
                     <div className={`p-2 rounded-lg ${colorClass}`}>
                       <Icon className="w-4 h-4" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-white truncate">
-                        <span className="text-gray-400">{activity.user}</span>{' '}
+                        <span className="text-muted-foreground">{activity.user}</span>{' '}
                         {activity.action}
                       </p>
                     </div>
-                    <span className="text-xs text-gray-500 whitespace-nowrap">{activity.time}</span>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">{activity.time}</span>
                   </div>
                 );
               })
@@ -499,7 +499,7 @@ export default function AdminDashboard() {
         <ChartCard title="System Alerts">
           <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
             {alerts.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">No alerts</p>
+              <p className="text-muted-foreground text-center py-8">No alerts</p>
             ) : (
               alerts.map((alert) => {
                 const config = severityConfig[alert.severity] || severityConfig.info;
@@ -514,11 +514,11 @@ export default function AdminDashboard() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className={`text-sm ${config.color}`}>{alert.message}</p>
-                      <p className="text-xs text-gray-500 mt-1">{alert.timestamp}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{alert.timestamp}</p>
                     </div>
                     <button
                       onClick={() => dismissAlert(alert.id)}
-                      className="text-gray-500 hover:text-white p-1"
+                      className="text-muted-foreground hover:text-white p-1"
                     >
                       <X className="w-4 h-4" />
                     </button>

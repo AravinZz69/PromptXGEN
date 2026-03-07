@@ -34,8 +34,8 @@ export function ThemePreview({ themeData = {} }) {
   }[borderRadius] || '8px';
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4 sticky top-6">
-      <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">
+    <div className="bg-muted border border-border rounded-xl p-6 space-y-4 sticky top-6">
+      <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
         Live Preview
       </h3>
 
@@ -120,7 +120,7 @@ export function ThemePreview({ themeData = {} }) {
       </div>
 
       {/* Applied fonts info */}
-      <div className="text-xs text-gray-400 space-y-1 pt-2 border-t border-gray-800">
+      <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t border-border">
         <p>Heading: <span className="text-white">{headingFont}</span></p>
         <p>Body: <span className="text-white">{bodyFont}</span></p>
         <p>Size: <span className="text-white">{baseFontSize}</span></p>

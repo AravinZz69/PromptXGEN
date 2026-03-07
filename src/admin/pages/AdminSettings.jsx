@@ -303,13 +303,13 @@ export default function AdminSettings() {
         return (
           <div className="space-y-6">
             <div className="flex items-center gap-6">
-              <div className="w-20 h-20 bg-indigo-500/20 rounded-full flex items-center justify-center">
-                <User className="w-10 h-10 text-indigo-400" />
+              <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center">
+                <User className="w-10 h-10 text-primary" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-white">{profile.name}</h3>
-                <p className="text-gray-400">{profile.email}</p>
-                <button className="mt-2 text-sm text-indigo-400 hover:text-indigo-300">
+                <p className="text-muted-foreground">{profile.email}</p>
+                <button className="mt-2 text-sm text-primary hover:text-indigo-300">
                   Change Avatar
                 </button>
               </div>
@@ -317,29 +317,29 @@ export default function AdminSettings() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Full Name</label>
+                <label className="block text-sm text-muted-foreground mb-2">Full Name</label>
                 <input
                   type="text"
                   value={profile.name}
                   onChange={(e) => { setProfile({ ...profile, name: e.target.value }); setHasChanges(true); }}
-                  className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Email</label>
+                <label className="block text-sm text-muted-foreground mb-2">Email</label>
                 <input
                   type="email"
                   value={profile.email}
                   onChange={(e) => { setProfile({ ...profile, email: e.target.value }); setHasChanges(true); }}
-                  className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Timezone</label>
+                <label className="block text-sm text-muted-foreground mb-2">Timezone</label>
                 <select
                   value={profile.timezone}
                   onChange={(e) => { setProfile({ ...profile, timezone: e.target.value }); setHasChanges(true); }}
-                  className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
                 >
                   <option value="UTC">UTC</option>
                   <option value="EST">Eastern Time (EST)</option>
@@ -348,11 +348,11 @@ export default function AdminSettings() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Language</label>
+                <label className="block text-sm text-muted-foreground mb-2">Language</label>
                 <select
                   value={profile.language}
                   onChange={(e) => { setProfile({ ...profile, language: e.target.value }); setHasChanges(true); }}
-                  className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
                 >
                   <option value="en">English</option>
                   <option value="es">Spanish</option>
@@ -368,18 +368,18 @@ export default function AdminSettings() {
         return (
           <div className="space-y-6">
             {/* Password */}
-            <div className="bg-[#0A0E1A] border border-gray-800 rounded-lg p-4">
+            <div className="bg-background border border-border rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Key className="w-5 h-5 text-gray-400" />
+                  <Key className="w-5 h-5 text-muted-foreground" />
                   <div>
                     <h4 className="text-white font-medium">Password</h4>
-                    <p className="text-sm text-gray-500">Last changed: {security.lastPasswordChange}</p>
+                    <p className="text-sm text-muted-foreground">Last changed: {security.lastPasswordChange}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowPasswordModal(true)}
-                  className="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg text-sm hover:bg-gray-700"
+                  className="px-4 py-2 bg-muted text-muted-foreground rounded-lg text-sm hover:bg-muted"
                 >
                   Change Password
                 </button>
@@ -387,19 +387,19 @@ export default function AdminSettings() {
             </div>
 
             {/* 2FA */}
-            <div className="bg-[#0A0E1A] border border-gray-800 rounded-lg p-4">
+            <div className="bg-background border border-border rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Shield className="w-5 h-5 text-gray-400" />
+                  <Shield className="w-5 h-5 text-muted-foreground" />
                   <div>
                     <h4 className="text-white font-medium">Two-Factor Authentication</h4>
-                    <p className="text-sm text-gray-500">Add an extra layer of security</p>
+                    <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
                   </div>
                 </div>
                 <button
                   onClick={() => { setSecurity({ ...security, twoFactorEnabled: !security.twoFactorEnabled }); setHasChanges(true); }}
                   className={`relative w-12 h-6 rounded-full transition-colors ${
-                    security.twoFactorEnabled ? 'bg-emerald-500' : 'bg-gray-700'
+                    security.twoFactorEnabled ? 'bg-emerald-500' : 'bg-muted'
                   }`}
                 >
                   <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
@@ -410,19 +410,19 @@ export default function AdminSettings() {
             </div>
 
             {/* Session Timeout */}
-            <div className="bg-[#0A0E1A] border border-gray-800 rounded-lg p-4">
+            <div className="bg-background border border-border rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Lock className="w-5 h-5 text-gray-400" />
+                  <Lock className="w-5 h-5 text-muted-foreground" />
                   <div>
                     <h4 className="text-white font-medium">Session Timeout</h4>
-                    <p className="text-sm text-gray-500">Automatically log out after inactivity</p>
+                    <p className="text-sm text-muted-foreground">Automatically log out after inactivity</p>
                   </div>
                 </div>
                 <select
                   value={security.sessionTimeout}
                   onChange={(e) => { setSecurity({ ...security, sessionTimeout: parseInt(e.target.value) }); setHasChanges(true); }}
-                  className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none"
+                  className="px-3 py-2 bg-muted border border-border rounded-lg text-white text-sm focus:outline-none"
                 >
                   <option value="1">1 hour</option>
                   <option value="4">4 hours</option>
@@ -433,26 +433,26 @@ export default function AdminSettings() {
             </div>
 
             {/* IP Whitelist */}
-            <div className="bg-[#0A0E1A] border border-gray-800 rounded-lg p-4">
+            <div className="bg-background border border-border rounded-lg p-4">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <Globe className="w-5 h-5 text-gray-400" />
+                  <Globe className="w-5 h-5 text-muted-foreground" />
                   <div>
                     <h4 className="text-white font-medium">IP Whitelist</h4>
-                    <p className="text-sm text-gray-500">Restrict admin access to specific IPs</p>
+                    <p className="text-sm text-muted-foreground">Restrict admin access to specific IPs</p>
                   </div>
                 </div>
               </div>
               <div className="space-y-2">
                 {security.ipWhitelist.map((ip, i) => (
                   <div key={i} className="flex items-center gap-2">
-                    <code className="flex-1 px-3 py-2 bg-gray-800 rounded text-sm text-gray-300 font-mono">{ip}</code>
-                    <button className="text-gray-400 hover:text-red-400">
+                    <code className="flex-1 px-3 py-2 bg-muted rounded text-sm text-muted-foreground font-mono">{ip}</code>
+                    <button className="text-muted-foreground hover:text-red-400">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 ))}
-                <button className="flex items-center gap-2 text-sm text-indigo-400 hover:text-indigo-300">
+                <button className="flex items-center gap-2 text-sm text-primary hover:text-indigo-300">
                   <Plus className="w-4 h-4" />
                   Add IP Address
                 </button>
@@ -467,7 +467,7 @@ export default function AdminSettings() {
             <div className="flex justify-end">
               <button
                 onClick={() => setShowInviteModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm hover:bg-indigo-600"
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary"
               >
                 <Plus className="w-4 h-4" />
                 Invite Admin
@@ -477,25 +477,25 @@ export default function AdminSettings() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-800">
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Admin</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Role</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Last Login</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Actions</th>
+                  <tr className="border-b border-border">
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Admin</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Role</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Last Login</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {admins.map(admin => (
-                    <tr key={admin.id} className="border-b border-gray-800/50">
+                    <tr key={admin.id} className="border-b border-border/50">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-indigo-500/20 rounded-full flex items-center justify-center">
-                            <User className="w-4 h-4 text-indigo-400" />
+                          <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                            <User className="w-4 h-4 text-primary" />
                           </div>
                           <div>
                             <p className="text-white font-medium">{admin.name}</p>
-                            <p className="text-xs text-gray-500">{admin.email}</p>
+                            <p className="text-xs text-muted-foreground">{admin.email}</p>
                           </div>
                         </div>
                       </td>
@@ -505,7 +505,7 @@ export default function AdminSettings() {
                           variant={admin.role === 'Super Admin' ? 'purple' : 'info'} 
                         />
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-400">
+                      <td className="px-4 py-3 text-sm text-muted-foreground">
                         {admin.lastLogin ? new Date(admin.lastLogin).toLocaleDateString() : 'Never'}
                       </td>
                       <td className="px-4 py-3">
@@ -518,7 +518,7 @@ export default function AdminSettings() {
                         {admin.role !== 'Super Admin' && (
                           <button
                             onClick={() => setConfirmDelete(admin)}
-                            className="text-gray-400 hover:text-red-400"
+                            className="text-muted-foreground hover:text-red-400"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -536,19 +536,19 @@ export default function AdminSettings() {
         return (
           <div className="space-y-6">
             {/* Maintenance Mode */}
-            <div className="bg-[#0A0E1A] border border-gray-800 rounded-lg p-4">
+            <div className="bg-background border border-border rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Database className="w-5 h-5 text-gray-400" />
+                  <Database className="w-5 h-5 text-muted-foreground" />
                   <div>
                     <h4 className="text-white font-medium">Maintenance Mode</h4>
-                    <p className="text-sm text-gray-500">Temporarily disable public access</p>
+                    <p className="text-sm text-muted-foreground">Temporarily disable public access</p>
                   </div>
                 </div>
                 <button
                   onClick={() => { setAppConfig({ ...appConfig, maintenanceMode: !appConfig.maintenanceMode }); setHasChanges(true); }}
                   className={`relative w-12 h-6 rounded-full transition-colors ${
-                    appConfig.maintenanceMode ? 'bg-amber-500' : 'bg-gray-700'
+                    appConfig.maintenanceMode ? 'bg-amber-500' : 'bg-muted'
                   }`}
                 >
                   <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
@@ -559,19 +559,19 @@ export default function AdminSettings() {
             </div>
 
             {/* Registration */}
-            <div className="bg-[#0A0E1A] border border-gray-800 rounded-lg p-4">
+            <div className="bg-background border border-border rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Users className="w-5 h-5 text-gray-400" />
+                  <Users className="w-5 h-5 text-muted-foreground" />
                   <div>
                     <h4 className="text-white font-medium">User Registration</h4>
-                    <p className="text-sm text-gray-500">Allow new users to sign up</p>
+                    <p className="text-sm text-muted-foreground">Allow new users to sign up</p>
                   </div>
                 </div>
                 <button
                   onClick={() => { setAppConfig({ ...appConfig, registrationEnabled: !appConfig.registrationEnabled }); setHasChanges(true); }}
                   className={`relative w-12 h-6 rounded-full transition-colors ${
-                    appConfig.registrationEnabled ? 'bg-emerald-500' : 'bg-gray-700'
+                    appConfig.registrationEnabled ? 'bg-emerald-500' : 'bg-muted'
                   }`}
                 >
                   <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
@@ -584,20 +584,20 @@ export default function AdminSettings() {
             {/* Other Settings */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Max Prompts Per Day (Free)</label>
+                <label className="block text-sm text-muted-foreground mb-2">Max Prompts Per Day (Free)</label>
                 <input
                   type="number"
                   value={appConfig.maxPromptsPerDay}
                   onChange={(e) => { setAppConfig({ ...appConfig, maxPromptsPerDay: parseInt(e.target.value) }); setHasChanges(true); }}
-                  className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Default Plan</label>
+                <label className="block text-sm text-muted-foreground mb-2">Default Plan</label>
                 <select
                   value={appConfig.defaultPlan}
                   onChange={(e) => { setAppConfig({ ...appConfig, defaultPlan: e.target.value }); setHasChanges(true); }}
-                  className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
                 >
                   <option value="free">Free</option>
                   <option value="starter">Starter</option>
@@ -605,12 +605,12 @@ export default function AdminSettings() {
                 </select>
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm text-gray-400 mb-2">Support Email</label>
+                <label className="block text-sm text-muted-foreground mb-2">Support Email</label>
                 <input
                   type="email"
                   value={appConfig.supportEmail}
                   onChange={(e) => { setAppConfig({ ...appConfig, supportEmail: e.target.value }); setHasChanges(true); }}
-                  className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
                 />
               </div>
             </div>
@@ -623,7 +623,7 @@ export default function AdminSettings() {
             <div className="flex justify-end">
               <button
                 onClick={() => setShowWebhookModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm hover:bg-indigo-600"
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary"
               >
                 <Plus className="w-4 h-4" />
                 Add Webhook
@@ -632,25 +632,25 @@ export default function AdminSettings() {
 
             <div className="space-y-3">
               {webhooks.map(webhook => (
-                <div key={webhook.id} className="bg-[#0A0E1A] border border-gray-800 rounded-lg p-4">
+                <div key={webhook.id} className="bg-background border border-border rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <Webhook className="w-5 h-5 text-indigo-400" />
+                      <Webhook className="w-5 h-5 text-primary" />
                       <h4 className="text-white font-medium">{webhook.name}</h4>
                       <Badge label={webhook.status} variant={webhook.status === 'Active' ? 'success' : 'neutral'} />
                     </div>
                     <div className="flex items-center gap-2">
-                      <button className="text-gray-400 hover:text-white">
+                      <button className="text-muted-foreground hover:text-white">
                         <RefreshCw className="w-4 h-4" />
                       </button>
-                      <button className="text-gray-400 hover:text-red-400">
+                      <button className="text-muted-foreground hover:text-red-400">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 mb-2">
-                    <code className="text-sm text-gray-400 font-mono truncate">{webhook.url}</code>
-                    <button className="text-gray-500 hover:text-gray-300">
+                    <code className="text-sm text-muted-foreground font-mono truncate">{webhook.url}</code>
+                    <button className="text-muted-foreground hover:text-muted-foreground">
                       <Copy className="w-3 h-3" />
                     </button>
                   </div>
@@ -681,7 +681,7 @@ export default function AdminSettings() {
                 <div className="flex items-center justify-between p-3 bg-red-500/5 border border-red-500/20 rounded-lg">
                   <div>
                     <h5 className="text-white font-medium">Clear All Cache</h5>
-                    <p className="text-sm text-gray-500">Purge all cached data across the platform</p>
+                    <p className="text-sm text-muted-foreground">Purge all cached data across the platform</p>
                   </div>
                   <button 
                     onClick={() => { setDangerAction('cache'); setShowDangerConfirm(true); }}
@@ -696,7 +696,7 @@ export default function AdminSettings() {
                 <div className="flex items-center justify-between p-3 bg-red-500/5 border border-red-500/20 rounded-lg">
                   <div>
                     <h5 className="text-white font-medium">Reset All User Sessions</h5>
-                    <p className="text-sm text-gray-500">Force all users to log in again</p>
+                    <p className="text-sm text-muted-foreground">Force all users to log in again</p>
                   </div>
                   <button 
                     onClick={() => { setDangerAction('sessions'); setShowDangerConfirm(true); }}
@@ -711,7 +711,7 @@ export default function AdminSettings() {
                 <div className="flex items-center justify-between p-3 bg-red-500/5 border border-red-500/20 rounded-lg">
                   <div>
                     <h5 className="text-white font-medium">Export All Data</h5>
-                    <p className="text-sm text-gray-500">Download complete platform data backup</p>
+                    <p className="text-sm text-muted-foreground">Download complete platform data backup</p>
                   </div>
                   <button 
                     onClick={() => { setDangerAction('export'); setShowDangerConfirm(true); }}
@@ -737,15 +737,15 @@ export default function AdminSettings() {
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
       {/* Sidebar Navigation */}
       <div className="lg:col-span-1">
-        <div className="bg-[#111827] border border-gray-800 rounded-xl p-2">
+        <div className="bg-card border border-border rounded-xl p-2">
           {sections.map(section => (
             <button
               key={section.id}
               onClick={() => setActiveSection(section.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
                 activeSection === section.id
-                  ? 'bg-indigo-500/20 text-indigo-400'
-                  : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                  ? 'bg-primary/20 text-primary'
+                  : 'text-muted-foreground hover:bg-muted hover:text-white'
               }`}
             >
               <section.icon className="w-5 h-5" />
@@ -757,7 +757,7 @@ export default function AdminSettings() {
 
       {/* Main Content */}
       <div className="lg:col-span-3">
-        <div className="bg-[#111827] border border-gray-800 rounded-xl p-6">
+        <div className="bg-card border border-border rounded-xl p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-white">
               {sections.find(s => s.id === activeSection)?.label}
@@ -765,7 +765,7 @@ export default function AdminSettings() {
             {hasChanges && (
               <button
                 onClick={handleSave}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary"
               >
                 <Save className="w-4 h-4" />
                 Save Changes
@@ -781,58 +781,58 @@ export default function AdminSettings() {
       <Modal isOpen={showPasswordModal} onClose={() => setShowPasswordModal(false)} title="Change Password">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Current Password</label>
+            <label className="block text-sm text-muted-foreground mb-2">Current Password</label>
             <div className="relative">
               <input
                 type={showPassword.current ? 'text' : 'password'}
                 value={passwordForm.current}
                 onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
-                className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500 pr-10"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary pr-10"
               />
               <button
                 onClick={() => setShowPassword({ ...showPassword, current: !showPassword.current })}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
               >
                 {showPassword.current ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-2">New Password</label>
+            <label className="block text-sm text-muted-foreground mb-2">New Password</label>
             <div className="relative">
               <input
                 type={showPassword.new ? 'text' : 'password'}
                 value={passwordForm.new}
                 onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })}
-                className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500 pr-10"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary pr-10"
               />
               <button
                 onClick={() => setShowPassword({ ...showPassword, new: !showPassword.new })}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
               >
                 {showPassword.new ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Confirm New Password</label>
+            <label className="block text-sm text-muted-foreground mb-2">Confirm New Password</label>
             <input
               type="password"
               value={passwordForm.confirm}
               onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
-              className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+              className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
             />
           </div>
           <div className="flex gap-3 pt-4">
             <button
               onClick={() => setShowPasswordModal(false)}
-              className="flex-1 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700"
+              className="flex-1 py-2 bg-muted text-white rounded-lg hover:bg-muted"
             >
               Cancel
             </button>
             <button
               onClick={handlePasswordChange}
-              className="flex-1 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
+              className="flex-1 py-2 bg-primary text-white rounded-lg hover:bg-primary"
             >
               Change Password
             </button>
@@ -844,21 +844,21 @@ export default function AdminSettings() {
       <Modal isOpen={showInviteModal} onClose={() => setShowInviteModal(false)} title="Invite Admin">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Email Address</label>
+            <label className="block text-sm text-muted-foreground mb-2">Email Address</label>
             <input
               type="email"
               value={inviteForm.email}
               onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })}
               placeholder="admin@example.com"
-              className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+              className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:border-primary"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Role</label>
+            <label className="block text-sm text-muted-foreground mb-2">Role</label>
             <select
               value={inviteForm.role}
               onChange={(e) => setInviteForm({ ...inviteForm, role: e.target.value })}
-              className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+              className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
             >
               <option value="Admin">Admin</option>
               <option value="Support">Support</option>
@@ -868,13 +868,13 @@ export default function AdminSettings() {
           <div className="flex gap-3 pt-4">
             <button
               onClick={() => setShowInviteModal(false)}
-              className="flex-1 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700"
+              className="flex-1 py-2 bg-muted text-white rounded-lg hover:bg-muted"
             >
               Cancel
             </button>
             <button
               onClick={handleInviteAdmin}
-              className="flex-1 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
+              className="flex-1 py-2 bg-primary text-white rounded-lg hover:bg-primary"
             >
               Send Invite
             </button>
@@ -886,27 +886,27 @@ export default function AdminSettings() {
       <Modal isOpen={showWebhookModal} onClose={() => setShowWebhookModal(false)} title="Add Webhook">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Name</label>
+            <label className="block text-sm text-muted-foreground mb-2">Name</label>
             <input
               type="text"
               value={webhookForm.name}
               onChange={(e) => setWebhookForm({ ...webhookForm, name: e.target.value })}
               placeholder="e.g., Slack Notification"
-              className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+              className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:border-primary"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-2">URL</label>
+            <label className="block text-sm text-muted-foreground mb-2">URL</label>
             <input
               type="url"
               value={webhookForm.url}
               onChange={(e) => setWebhookForm({ ...webhookForm, url: e.target.value })}
               placeholder="https://example.com/webhook"
-              className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+              className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:border-primary"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Events</label>
+            <label className="block text-sm text-muted-foreground mb-2">Events</label>
             <div className="flex flex-wrap gap-2">
               {['user.created', 'user.deleted', 'prompt.generated', 'payment.completed', 'payment.failed'].map(event => (
                 <button
@@ -919,8 +919,8 @@ export default function AdminSettings() {
                   })}
                   className={`px-3 py-1 rounded-lg text-sm border transition-colors ${
                     webhookForm.events.includes(event)
-                      ? 'bg-indigo-500/20 border-indigo-500 text-indigo-400'
-                      : 'bg-gray-800 border-gray-700 text-gray-400'
+                      ? 'bg-primary/20 border-indigo-500 text-primary'
+                      : 'bg-muted border-border text-muted-foreground'
                   }`}
                 >
                   {event}
@@ -931,13 +931,13 @@ export default function AdminSettings() {
           <div className="flex gap-3 pt-4">
             <button
               onClick={() => setShowWebhookModal(false)}
-              className="flex-1 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700"
+              className="flex-1 py-2 bg-muted text-white rounded-lg hover:bg-muted"
             >
               Cancel
             </button>
             <button
               onClick={handleAddWebhook}
-              className="flex-1 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
+              className="flex-1 py-2 bg-primary text-white rounded-lg hover:bg-primary"
             >
               Add Webhook
             </button>

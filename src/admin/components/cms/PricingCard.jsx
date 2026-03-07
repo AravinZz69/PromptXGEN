@@ -43,11 +43,11 @@ export function PricingCard({ plan, onChange, showAnnual }) {
   };
 
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 space-y-5 relative">
+    <div className="bg-muted border border-border rounded-xl p-6 space-y-5 relative">
       {/* Popular badge indicator */}
       {plan.isPopular && (
         <div className="absolute top-0 right-6 -translate-y-1/2">
-          <span className="inline-block px-3 py-1 bg-indigo-600 text-white text-xs font-semibold rounded-full">
+          <span className="inline-block px-3 py-1 bg-primary text-white text-xs font-semibold rounded-full">
             {plan.badgeText || 'Most Popular'}
           </span>
         </div>
@@ -55,41 +55,41 @@ export function PricingCard({ plan, onChange, showAnnual }) {
 
       {/* Plan Name */}
       <div className="space-y-2">
-        <label className="text-xs font-medium text-gray-400">Plan Name</label>
+        <label className="text-xs font-medium text-muted-foreground">Plan Name</label>
         <input
           type="text"
           value={plan.name}
           onChange={(e) => updateField('name', e.target.value)}
           placeholder="Pro"
-          className="w-full bg-gray-900 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 font-semibold"
+          className="w-full bg-muted border border-border text-white placeholder-muted-foreground rounded-lg px-3 py-2 font-semibold"
         />
       </div>
 
       {/* Pricing */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          <label className="text-xs font-medium text-gray-400">Monthly Price</label>
+          <label className="text-xs font-medium text-muted-foreground">Monthly Price</label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
             <input
               type="number"
               value={plan.monthlyPrice}
               onChange={(e) => updateField('monthlyPrice', e.target.value)}
               placeholder="29"
-              className="w-full pl-7 pr-3 py-2 bg-gray-900 border border-gray-700 text-white placeholder-gray-500 rounded-lg"
+              className="w-full pl-7 pr-3 py-2 bg-muted border border-border text-white placeholder-muted-foreground rounded-lg"
             />
           </div>
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-medium text-gray-400">Annual Price</label>
+          <label className="text-xs font-medium text-muted-foreground">Annual Price</label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
             <input
               type="number"
               value={plan.annualPrice}
               onChange={(e) => updateField('annualPrice', e.target.value)}
               placeholder="290"
-              className="w-full pl-7 pr-3 py-2 bg-gray-900 border border-gray-700 text-white placeholder-gray-500 rounded-lg"
+              className="w-full pl-7 pr-3 py-2 bg-muted border border-border text-white placeholder-muted-foreground rounded-lg"
             />
           </div>
         </div>
@@ -97,37 +97,37 @@ export function PricingCard({ plan, onChange, showAnnual }) {
 
       {/* Description */}
       <div className="space-y-2">
-        <label className="text-xs font-medium text-gray-400">Description</label>
+        <label className="text-xs font-medium text-muted-foreground">Description</label>
         <textarea
           value={plan.description}
           onChange={(e) => updateField('description', e.target.value)}
           placeholder="Perfect for professionals"
           rows={2}
-          className="w-full bg-gray-900 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm resize-none"
+          className="w-full bg-muted border border-border text-white placeholder-muted-foreground rounded-lg px-3 py-2 text-sm resize-none"
         />
       </div>
 
       {/* CTA Button */}
       <div className="space-y-2">
-        <label className="text-xs font-medium text-gray-400">CTA Button Text</label>
+        <label className="text-xs font-medium text-muted-foreground">CTA Button Text</label>
         <input
           type="text"
           value={plan.ctaText}
           onChange={(e) => updateField('ctaText', e.target.value)}
           placeholder="Get Started"
-          className="w-full bg-gray-900 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-3 py-2"
+          className="w-full bg-muted border border-border text-white placeholder-muted-foreground rounded-lg px-3 py-2"
         />
       </div>
 
       {/* Features */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-medium text-gray-400">Features</label>
+          <label className="text-xs font-medium text-muted-foreground">Features</label>
           <Button
             size="sm"
             variant="ghost"
             onClick={addFeature}
-            className="h-7 text-xs text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 px-2"
+            className="h-7 text-xs text-primary hover:text-indigo-300 hover:bg-primary/90/10 px-2"
           >
             <Plus className="w-3 h-3 mr-1" />
             Add
@@ -137,13 +137,13 @@ export function PricingCard({ plan, onChange, showAnnual }) {
         <div className="space-y-2">
           {(plan.features || []).map((feature) => (
             <div key={feature.id} className="flex items-center gap-2">
-              <span className="text-gray-500 text-sm">✓</span>
+              <span className="text-muted-foreground text-sm">✓</span>
               <input
                 type="text"
                 value={feature.text}
                 onChange={(e) => updateFeature(feature.id, e.target.value)}
                 placeholder="Feature item"
-                className="flex-1 bg-gray-900 border border-gray-700 text-white placeholder-gray-500 rounded px-2 py-1.5 text-sm"
+                className="flex-1 bg-muted border border-border text-white placeholder-muted-foreground rounded px-2 py-1.5 text-sm"
               />
               <Button
                 size="sm"
@@ -159,9 +159,9 @@ export function PricingCard({ plan, onChange, showAnnual }) {
       </div>
 
       {/* Settings */}
-      <div className="pt-4 border-t border-gray-700 space-y-3">
+      <div className="pt-4 border-t border-border space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-medium text-gray-400">Mark as Popular</label>
+          <label className="text-xs font-medium text-muted-foreground">Mark as Popular</label>
           <Switch
             checked={plan.isPopular}
             onCheckedChange={(val) => updateField('isPopular', val)}
@@ -170,19 +170,19 @@ export function PricingCard({ plan, onChange, showAnnual }) {
 
         {plan.isPopular && (
           <div className="space-y-2">
-            <label className="text-xs font-medium text-gray-400">Badge Text</label>
+            <label className="text-xs font-medium text-muted-foreground">Badge Text</label>
             <input
               type="text"
               value={plan.badgeText}
               onChange={(e) => updateField('badgeText', e.target.value)}
               placeholder="Most Popular"
-              className="w-full bg-gray-900 border border-gray-700 text-white placeholder-gray-500 rounded px-3 py-1.5 text-sm"
+              className="w-full bg-muted border border-border text-white placeholder-muted-foreground rounded px-3 py-1.5 text-sm"
             />
           </div>
         )}
 
         <div className="flex items-center justify-between">
-          <label className="text-xs font-medium text-gray-400">Show Plan</label>
+          <label className="text-xs font-medium text-muted-foreground">Show Plan</label>
           <Switch
             checked={plan.isVisible}
             onCheckedChange={(val) => updateField('isVisible', val)}

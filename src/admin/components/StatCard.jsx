@@ -15,7 +15,7 @@ export default function StatCard({ title, value, change, changeType = 'positive'
   const colors = {
     blue: 'bg-blue-500/20 text-blue-400',
     green: 'bg-green-500/20 text-green-400',
-    indigo: 'bg-indigo-500/20 text-indigo-400',
+    indigo: 'bg-primary/20 text-primary',
     emerald: 'bg-emerald-500/20 text-emerald-400',
     red: 'bg-red-500/20 text-red-400',
     amber: 'bg-amber-500/20 text-amber-400',
@@ -24,7 +24,7 @@ export default function StatCard({ title, value, change, changeType = 'positive'
   const isPositive = changeType === 'positive';
 
   return (
-    <div className="bg-[#111827] border border-gray-800 rounded-xl p-6 hover:border-gray-700 hover:scale-[1.02] hover:shadow-lg hover:shadow-indigo-500/5 transition-all duration-200">
+    <div className="bg-card border border-border rounded-xl p-6 hover:border-border hover:scale-[1.02] hover:shadow-lg hover:shadow-indigo-500/5 transition-all duration-200">
       <div className="flex items-start justify-between">
         {/* Icon */}
         <div className={`p-3 rounded-xl ${colors[color] || colors.blue}`}>
@@ -51,7 +51,7 @@ export default function StatCard({ title, value, change, changeType = 'positive'
       {/* Value */}
       <div className="mt-4">
         <p className="text-3xl font-bold text-white">{value}</p>
-        <p className="text-sm text-gray-400 mt-1">{title}</p>
+        <p className="text-sm text-muted-foreground mt-1">{title}</p>
       </div>
     </div>
   );

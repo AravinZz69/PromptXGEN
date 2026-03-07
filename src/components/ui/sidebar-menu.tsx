@@ -87,10 +87,10 @@ export default function Sidebar({
 
   const sidebarWidth = isCollapsed ? 'w-[70px]' : 'w-[240px]';
   const bgColor = 'bg-[#1a1a2e]';
-  const textColor = 'text-gray-300';
-  const textMutedColor = 'text-gray-500';
+  const textColor = 'text-muted-foreground';
+  const textMutedColor = 'text-muted-foreground';
   const borderColor = 'border-gray-700/50';
-  const hoverBg = 'hover:bg-white/5';
+  const hoverBg = 'hover:bg-muted/50';
 
   return (
     <aside

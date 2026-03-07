@@ -119,7 +119,7 @@ export function DraggableList({
   // Empty state
   if (!items || items.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500 text-sm">
+      <div className="text-center py-12 text-muted-foreground text-sm">
         {emptyMessage}
       </div>
     );
@@ -158,8 +158,8 @@ export function DraggableList({
       {/* Drag overlay (optional, for better visual feedback) */}
       <DragOverlay>
         {activeId ? (
-          <div className="bg-gray-800 border border-indigo-500 rounded-lg p-4 shadow-xl opacity-90">
-            <GripVertical className="w-5 h-5 text-gray-400" />
+          <div className="bg-muted border border-indigo-500 rounded-lg p-4 shadow-xl opacity-90">
+            <GripVertical className="w-5 h-5 text-muted-foreground" />
           </div>
         ) : null}
       </DragOverlay>

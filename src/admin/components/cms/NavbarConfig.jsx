@@ -49,13 +49,13 @@ export function NavbarConfig({ config, onChange }) {
   return (
     <div className="space-y-6">
       {/* Logo & Brand */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-5">
-        <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">
+      <div className="bg-muted border border-border rounded-xl p-6 space-y-5">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
           Logo & Branding
         </h3>
 
         <div>
-          <label className="text-sm font-medium text-gray-300 mb-2 block">
+          <label className="text-sm font-medium text-muted-foreground mb-2 block">
             Logo Image
           </label>
           <ImageUpload
@@ -67,7 +67,7 @@ export function NavbarConfig({ config, onChange }) {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-300">
+          <label className="text-sm font-medium text-muted-foreground">
             Site Name
           </label>
           <input
@@ -75,12 +75,12 @@ export function NavbarConfig({ config, onChange }) {
             value={config.siteName || ''}
             onChange={(e) => handleFieldChange('siteName', e.target.value)}
             placeholder="AskJai"
-            className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+            className="w-full bg-muted border border-border text-white placeholder-muted-foreground rounded-lg px-3 py-2 focus:border-primary focus:ring-1 focus:ring-primary"
           />
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-300">
+          <label className="text-sm font-medium text-muted-foreground">
             Tagline
           </label>
           <input
@@ -88,21 +88,21 @@ export function NavbarConfig({ config, onChange }) {
             value={config.tagline || ''}
             onChange={(e) => handleFieldChange('tagline', e.target.value)}
             placeholder="AI Prompt Generator"
-            className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+            className="w-full bg-muted border border-border text-white placeholder-muted-foreground rounded-lg px-3 py-2 focus:border-primary focus:ring-1 focus:ring-primary"
           />
         </div>
       </div>
 
       {/* Navigation Links */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-5">
+      <div className="bg-muted border border-border rounded-xl p-6 space-y-5">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
             Navigation Links
           </h3>
           <Button
             size="sm"
             onClick={addLink}
-            className="bg-indigo-600 hover:bg-indigo-700 gap-2"
+            className="bg-primary hover:bg-primary/90 gap-2"
           >
             <Plus className="w-4 h-4" />
             Add Link
@@ -114,11 +114,11 @@ export function NavbarConfig({ config, onChange }) {
           onReorder={handleLinksChange}
           emptyMessage="No navigation links yet"
           renderItem={(link, index, dragHandleProps) => (
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 space-y-3">
+            <div className="bg-muted border border-border rounded-lg p-4 space-y-3">
               <div className="flex items-start gap-3">
                 {/* Drag handle */}
                 <div {...dragHandleProps} className="pt-2">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="text-gray-500">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="text-muted-foreground">
                     <circle cx="4" cy="4" r="1.5" />
                     <circle cx="12" cy="4" r="1.5" />
                     <circle cx="4" cy="8" r="1.5" />
@@ -135,14 +135,14 @@ export function NavbarConfig({ config, onChange }) {
                     value={link.label}
                     onChange={(e) => updateLink(link.id, 'label', e.target.value)}
                     placeholder="Label"
-                    className="bg-gray-900 border border-gray-700 text-white placeholder-gray-500 rounded px-3 py-2 text-sm"
+                    className="bg-muted border border-border text-white placeholder-muted-foreground rounded px-3 py-2 text-sm"
                   />
                   <input
                     type="text"
                     value={link.url}
                     onChange={(e) => updateLink(link.id, 'url', e.target.value)}
                     placeholder="/url"
-                    className="bg-gray-900 border border-gray-700 text-white placeholder-gray-500 rounded px-3 py-2 text-sm"
+                    className="bg-muted border border-border text-white placeholder-muted-foreground rounded px-3 py-2 text-sm"
                   />
                 </div>
 
@@ -169,7 +169,7 @@ export function NavbarConfig({ config, onChange }) {
                   checked={link.isExternal}
                   onCheckedChange={(val) => updateLink(link.id, 'isExternal', val)}
                 />
-                <label className="text-xs text-gray-400 flex items-center gap-1">
+                <label className="text-xs text-muted-foreground flex items-center gap-1">
                   <ExternalLink className="w-3 h-3" />
                   Open in new tab
                 </label>
@@ -180,14 +180,14 @@ export function NavbarConfig({ config, onChange }) {
       </div>
 
       {/* CTA Button */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-5">
-        <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">
+      <div className="bg-muted border border-border rounded-xl p-6 space-y-5">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
           CTA Button
         </h3>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">
+            <label className="text-sm font-medium text-muted-foreground">
               Button Text
             </label>
             <input
@@ -195,12 +195,12 @@ export function NavbarConfig({ config, onChange }) {
               value={config.ctaText || ''}
               onChange={(e) => handleFieldChange('ctaText', e.target.value)}
               placeholder="Sign In"
-              className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-3 py-2"
+              className="w-full bg-muted border border-border text-white placeholder-muted-foreground rounded-lg px-3 py-2"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">
+            <label className="text-sm font-medium text-muted-foreground">
               Button URL
             </label>
             <input
@@ -208,19 +208,19 @@ export function NavbarConfig({ config, onChange }) {
               value={config.ctaUrl || ''}
               onChange={(e) => handleFieldChange('ctaUrl', e.target.value)}
               placeholder="/auth"
-              className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-3 py-2"
+              className="w-full bg-muted border border-border text-white placeholder-muted-foreground rounded-lg px-3 py-2"
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-300">
+          <label className="text-sm font-medium text-muted-foreground">
             Button Style
           </label>
           <select
             value={config.ctaStyle || 'primary'}
             onChange={(e) => handleFieldChange('ctaStyle', e.target.value)}
-            className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"
+            className="w-full bg-muted border border-border text-white rounded-lg px-3 py-2"
           >
             <option value="primary">Primary (Filled)</option>
             <option value="outline">Outline</option>
@@ -229,7 +229,7 @@ export function NavbarConfig({ config, onChange }) {
         </div>
 
         <div className="flex items-center justify-between py-2">
-          <label className="text-sm font-medium text-gray-300">
+          <label className="text-sm font-medium text-muted-foreground">
             Show CTA Button
           </label>
           <Switch
@@ -240,17 +240,17 @@ export function NavbarConfig({ config, onChange }) {
       </div>
 
       {/* Navbar Behavior */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-5">
-        <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">
+      <div className="bg-muted border border-border rounded-xl p-6 space-y-5">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
           Behavior
         </h3>
 
         <div className="flex items-center justify-between py-2">
           <div>
-            <label className="text-sm font-medium text-gray-300">
+            <label className="text-sm font-medium text-muted-foreground">
               Sticky Navbar
             </label>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Navbar stays at top when scrolling
             </p>
           </div>
@@ -262,10 +262,10 @@ export function NavbarConfig({ config, onChange }) {
 
         <div className="flex items-center justify-between py-2">
           <div>
-            <label className="text-sm font-medium text-gray-300">
+            <label className="text-sm font-medium text-muted-foreground">
               Transparent on Hero
             </label>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Transparent background on hero section
             </p>
           </div>

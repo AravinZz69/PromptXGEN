@@ -213,13 +213,13 @@ export function MediaManager() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Media Manager</h1>
-          <p className="text-gray-400 text-sm">
+          <p className="text-muted-foreground text-sm">
             Manage your website's media files
           </p>
         </div>
         <Button
           onClick={() => setShowUploadZone(!showUploadZone)}
-          className="bg-indigo-600 hover:bg-indigo-700 gap-2"
+          className="bg-primary hover:bg-primary/90 gap-2"
         >
           <Upload className="w-4 h-4" />
           Upload Files
@@ -228,26 +228,26 @@ export function MediaManager() {
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search files..."
-          className="w-full pl-10 pr-4 py-2 bg-gray-900 border border-gray-800 text-white placeholder-gray-500 rounded-lg"
+          className="w-full pl-10 pr-4 py-2 bg-muted border border-border text-white placeholder-muted-foreground rounded-lg"
         />
       </div>
 
       {/* Upload Zone */}
       {showUploadZone && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+        <div className="bg-muted border border-border rounded-xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-300">Upload Files</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground">Upload Files</h3>
             <Button
               size="sm"
               variant="ghost"
               onClick={() => setShowUploadZone(false)}
-              className="text-gray-400 hover:text-white"
+              className="text-muted-foreground hover:text-white"
             >
               <X className="w-4 h-4" />
             </Button>
@@ -262,25 +262,25 @@ export function MediaManager() {
               relative border-2 border-dashed rounded-lg p-12 text-center
               cursor-pointer transition-all
               ${isDragging
-                ? 'border-indigo-500 bg-indigo-500/10'
-                : 'border-gray-700 hover:border-gray-600 bg-gray-800/50'
+                ? 'border-indigo-500 bg-primary/10'
+                : 'border-border hover:border-border bg-muted/50'
               }
               ${uploading ? 'pointer-events-none opacity-60' : ''}
             `}
           >
             <div className="flex flex-col items-center gap-4">
               {uploading ? (
-                <Loader2 className="w-12 h-12 text-indigo-500 animate-spin" />
+                <Loader2 className="w-12 h-12 text-primary animate-spin" />
               ) : (
-                <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center">
-                  <Upload className="w-8 h-8 text-gray-400" />
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                  <Upload className="w-8 h-8 text-muted-foreground" />
                 </div>
               )}
               <div>
-                <p className="text-sm font-medium text-gray-300">
+                <p className="text-sm font-medium text-muted-foreground">
                   {uploading ? 'Uploading files...' : 'Drag & drop files here or click to browse'}
                 </p>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   JPG, PNG, WebP, SVG, GIF (max 5MB each)
                 </p>
               </div>
@@ -302,8 +302,8 @@ export function MediaManager() {
               {Object.entries(uploadProgress).map(([fileName, progress]) => (
                 <div key={fileName} className="space-y-1">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-400 truncate flex-1">{fileName}</span>
-                    <span className="text-gray-500 ml-2">{progress}%</span>
+                    <span className="text-muted-foreground truncate flex-1">{fileName}</span>
+                    <span className="text-muted-foreground ml-2">{progress}%</span>
                   </div>
                   <Progress value={progress} className="h-1" />
                 </div>
@@ -316,16 +316,16 @@ export function MediaManager() {
       {/* Files Grid */}
       {loading ? (
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       ) : paginatedFiles.length === 0 ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-12 text-center">
+        <div className="bg-muted border border-border rounded-xl p-12 text-center">
           <div className="max-w-sm mx-auto space-y-4">
-            <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto">
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
               <FileImage className="w-8 h-8 text-gray-600" />
             </div>
             <h3 className="text-lg font-medium text-white">No files yet</h3>
-            <p className="text-gray-400 text-sm">
+            <p className="text-muted-foreground text-sm">
               Upload your first media file to get started.
             </p>
           </div>
@@ -336,11 +336,11 @@ export function MediaManager() {
             {paginatedFiles.map((file) => (
               <div
                 key={file.id}
-                className="group relative bg-gray-900 border border-gray-800 rounded-lg overflow-hidden hover:border-gray-700 transition-all"
+                className="group relative bg-muted border border-border rounded-lg overflow-hidden hover:border-border transition-all"
               >
                 {/* Image */}
                 <div
-                  className="aspect-square bg-gray-800 cursor-pointer"
+                  className="aspect-square bg-muted cursor-pointer"
                   onClick={() => setSelectedFile(file)}
                 >
                   <img
@@ -357,7 +357,7 @@ export function MediaManager() {
                     size="sm"
                     variant="ghost"
                     onClick={() => handleCopyUrl(file.url)}
-                    className="bg-gray-800 text-white hover:bg-gray-700"
+                    className="bg-muted text-white hover:bg-muted"
                   >
                     <Copy className="w-4 h-4" />
                   </Button>
@@ -372,8 +372,8 @@ export function MediaManager() {
                 </div>
 
                 {/* File info */}
-                <div className="p-2 border-t border-gray-800">
-                  <p className="text-xs text-gray-400 truncate">{file.name}</p>
+                <div className="p-2 border-t border-border">
+                  <p className="text-xs text-muted-foreground truncate">{file.name}</p>
                   <p className="text-xs text-gray-600">{formatFileSize(file.metadata?.size || 0)}</p>
                 </div>
               </div>
@@ -388,11 +388,11 @@ export function MediaManager() {
                 variant="outline"
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                className="border-border text-muted-foreground hover:bg-muted"
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
-              <span className="text-sm text-gray-400">
+              <span className="text-sm text-muted-foreground">
                 Page {currentPage} of {totalPages}
               </span>
               <Button
@@ -400,7 +400,7 @@ export function MediaManager() {
                 variant="outline"
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                className="border-border text-muted-foreground hover:bg-muted"
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
@@ -411,7 +411,7 @@ export function MediaManager() {
 
       {/* Lightbox Dialog */}
       <Dialog open={!!selectedFile} onOpenChange={() => setSelectedFile(null)}>
-        <DialogContent className="bg-gray-900 border-gray-800 max-w-4xl">
+        <DialogContent className="bg-muted border-border max-w-4xl">
           <DialogHeader>
             <DialogTitle className="text-white">{selectedFile?.name}</DialogTitle>
           </DialogHeader>
@@ -426,17 +426,17 @@ export function MediaManager() {
                 type="text"
                 value={selectedFile?.url || ''}
                 readOnly
-                className="flex-1 bg-gray-800 border border-gray-700 text-white rounded px-3 py-2 text-sm font-mono"
+                className="flex-1 bg-muted border border-border text-white rounded px-3 py-2 text-sm font-mono"
               />
               <Button
                 onClick={() => handleCopyUrl(selectedFile?.url)}
-                className="bg-indigo-600 hover:bg-indigo-700 gap-2"
+                className="bg-primary hover:bg-primary/90 gap-2"
               >
                 <Copy className="w-4 h-4" />
                 Copy URL
               </Button>
             </div>
-            <div className="text-xs text-gray-400 space-y-1">
+            <div className="text-xs text-muted-foreground space-y-1">
               <p>Size: {formatFileSize(selectedFile?.metadata?.size || 0)}</p>
               <p>Uploaded: {new Date(selectedFile?.created_at).toLocaleString()}</p>
             </div>
@@ -446,15 +446,15 @@ export function MediaManager() {
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteFile} onOpenChange={() => setDeleteFile(null)}>
-        <AlertDialogContent className="bg-gray-900 border-gray-800">
+        <AlertDialogContent className="bg-muted border-border">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Delete File?</AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-400">
+            <AlertDialogDescription className="text-muted-foreground">
               This will permanently delete "{deleteFile?.name}". This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700">
+            <AlertDialogCancel className="bg-muted text-muted-foreground border-border hover:bg-muted">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction

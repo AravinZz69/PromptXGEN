@@ -119,7 +119,7 @@ export function SiteConfig() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -130,14 +130,14 @@ export function SiteConfig() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Site Configuration</h1>
-          <p className="text-gray-400 text-sm">
+          <p className="text-muted-foreground text-sm">
             Configure your website's navigation and footer
           </p>
         </div>
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="bg-indigo-600 hover:bg-indigo-700"
+          className="bg-primary hover:bg-primary/90"
         >
           {saving ? (
             <>
@@ -152,16 +152,16 @@ export function SiteConfig() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-gray-900 border border-gray-800">
+        <TabsList className="bg-muted border border-border">
           <TabsTrigger
             value="navbar"
-            className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
+            className="data-[state=active]:bg-primary data-[state=active]:text-white"
           >
             Navbar
           </TabsTrigger>
           <TabsTrigger
             value="footer"
-            className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
+            className="data-[state=active]:bg-primary data-[state=active]:text-white"
           >
             Footer
           </TabsTrigger>

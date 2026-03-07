@@ -295,7 +295,7 @@ export default function PromptManagement() {
         <button
           onClick={fetchData}
           disabled={loading}
-          className="flex items-center gap-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-3 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm transition-colors disabled:opacity-50"
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
           Refresh
@@ -303,13 +303,13 @@ export default function PromptManagement() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-4 border-b border-gray-800">
+      <div className="flex gap-4 border-b border-border">
         <button
           onClick={() => setActiveTab('generated')}
           className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'generated'
-              ? 'text-indigo-400 border-indigo-500'
-              : 'text-gray-400 border-transparent hover:text-white'
+              ? 'text-primary border-indigo-500'
+              : 'text-muted-foreground border-transparent hover:text-white'
           }`}
         >
           Generated Prompts ({prompts.length})
@@ -318,8 +318,8 @@ export default function PromptManagement() {
           onClick={() => setActiveTab('templates')}
           className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'templates'
-              ? 'text-indigo-400 border-indigo-500'
-              : 'text-gray-400 border-transparent hover:text-white'
+              ? 'text-primary border-indigo-500'
+              : 'text-muted-foreground border-transparent hover:text-white'
           }`}
         >
           System Templates
@@ -332,20 +332,20 @@ export default function PromptManagement() {
           {/* Filters */}
           <div className="flex flex-wrap items-center gap-4">
             <div className="relative flex-1 max-w-xs">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search prompts..."
                 value={searchQuery}
                 onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-                className="w-full pl-10 pr-4 py-2 bg-[#111827] border border-gray-800 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg text-sm text-white placeholder-muted-foreground focus:outline-none focus:border-primary"
               />
             </div>
             
             <select
               value={categoryFilter}
               onChange={(e) => { setCategoryFilter(e.target.value); setCurrentPage(1); }}
-              className="px-3 py-2 bg-[#111827] border border-gray-800 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500"
+              className="px-3 py-2 bg-card border border-border rounded-lg text-sm text-white focus:outline-none focus:border-primary"
             >
               {categoryOptions.map(opt => (
                 <option key={opt} value={opt}>{opt === 'All' ? 'All Categories' : opt}</option>
@@ -355,7 +355,7 @@ export default function PromptManagement() {
             <select
               value={modelFilter}
               onChange={(e) => { setModelFilter(e.target.value); setCurrentPage(1); }}
-              className="px-3 py-2 bg-[#111827] border border-gray-800 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500"
+              className="px-3 py-2 bg-card border border-border rounded-lg text-sm text-white focus:outline-none focus:border-primary"
             >
               {modelOptions.map(opt => (
                 <option key={opt} value={opt}>{opt === 'All' ? 'All Models' : opt}</option>
@@ -364,35 +364,35 @@ export default function PromptManagement() {
           </div>
 
           {/* Prompts Table */}
-          <div className="bg-[#111827] border border-gray-800 rounded-xl overflow-hidden">
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-800">
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">ID</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">User</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Category</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Model</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Tokens</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Created</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Rating</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Actions</th>
+                  <tr className="border-b border-border">
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">ID</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">User</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Category</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Model</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Tokens</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Created</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Rating</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {paginatedPrompts.map(prompt => (
-                    <tr key={prompt.id} className="border-b border-gray-800/50 hover:bg-gray-800/30">
-                      <td className="px-4 py-3 text-sm text-gray-500">#{prompt.id}</td>
-                      <td className="px-4 py-3 text-sm text-gray-300">{prompt.userEmail}</td>
+                    <tr key={prompt.id} className="border-b border-border/50 hover:bg-muted/30">
+                      <td className="px-4 py-3 text-sm text-muted-foreground">#{prompt.id}</td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">{prompt.userEmail}</td>
                       <td className="px-4 py-3">
                         <Badge label={prompt.category} variant="purple" />
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-300">{prompt.model}</td>
-                      <td className="px-4 py-3 text-sm text-gray-400">
+                      <td className="px-4 py-3 text-sm text-muted-foreground">{prompt.model}</td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">
                         {prompt.inputTokens} / {prompt.outputTokens}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-400">
+                      <td className="px-4 py-3 text-sm text-muted-foreground">
                         {new Date(prompt.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-4 py-3">
@@ -411,21 +411,21 @@ export default function PromptManagement() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => setViewPrompt(prompt)}
-                            className="p-1 text-gray-400 hover:text-white"
+                            className="p-1 text-muted-foreground hover:text-white"
                             title="View"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleFlag(prompt.id)}
-                            className={`p-1 ${prompt.status === 'Flagged' ? 'text-red-400' : 'text-gray-400 hover:text-red-400'}`}
+                            className={`p-1 ${prompt.status === 'Flagged' ? 'text-red-400' : 'text-muted-foreground hover:text-red-400'}`}
                             title="Flag"
                           >
                             <Flag className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => setConfirmDelete({ type: 'prompt', id: prompt.id })}
-                            className="p-1 text-gray-400 hover:text-red-400"
+                            className="p-1 text-muted-foreground hover:text-red-400"
                             title="Delete"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -440,22 +440,22 @@ export default function PromptManagement() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between p-4 border-t border-gray-800">
-                <p className="text-sm text-gray-400">
+              <div className="flex items-center justify-between p-4 border-t border-border">
+                <p className="text-sm text-muted-foreground">
                   Page {currentPage} of {totalPages}
                 </p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
-                    className="px-3 py-1 bg-gray-800 text-gray-400 rounded hover:text-white disabled:opacity-50"
+                    className="px-3 py-1 bg-muted text-muted-foreground rounded hover:text-white disabled:opacity-50"
                   >
                     Prev
                   </button>
                   <button
                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-1 bg-gray-800 text-gray-400 rounded hover:text-white disabled:opacity-50"
+                    className="px-3 py-1 bg-muted text-muted-foreground rounded hover:text-white disabled:opacity-50"
                   >
                     Next
                   </button>
@@ -473,7 +473,7 @@ export default function PromptManagement() {
           <div className="flex justify-end">
             <button
               onClick={() => setEditTemplate({ name: '', category: 'Coding', description: '', template: '', variables: [] })}
-              className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg text-sm text-white"
+              className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary rounded-lg text-sm text-white"
             >
               <Plus className="w-4 h-4" />
               New Template
@@ -483,32 +483,32 @@ export default function PromptManagement() {
           {/* Templates Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {templates.map(template => (
-              <div key={template.id} className="bg-[#111827] border border-gray-800 rounded-xl p-4 hover:border-gray-700 transition-colors">
+              <div key={template.id} className="bg-card border border-border rounded-xl p-4 hover:border-border transition-colors">
                 <div className="flex items-start justify-between mb-3">
                   <h3 className="text-white font-medium">{template.name}</h3>
                   <Badge label={template.category} variant="purple" />
                 </div>
-                <p className="text-sm text-gray-400 mb-4 line-clamp-2">{template.description}</p>
-                <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{template.description}</p>
+                <div className="flex items-center justify-between text-xs text-muted-foreground mb-4">
                   <span>Used {template.timesUsed.toLocaleString()} times</span>
                   <span>Edited {new Date(template.lastEdited).toLocaleDateString()}</span>
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setEditTemplate(template)}
-                    className="flex-1 flex items-center justify-center gap-1 py-2 bg-gray-800 text-gray-300 rounded hover:bg-gray-700 hover:text-white text-sm"
+                    className="flex-1 flex items-center justify-center gap-1 py-2 bg-muted text-muted-foreground rounded hover:bg-muted hover:text-white text-sm"
                   >
                     <Edit className="w-4 h-4" /> Edit
                   </button>
                   <button
                     onClick={() => handleDuplicate(template)}
-                    className="flex-1 flex items-center justify-center gap-1 py-2 bg-gray-800 text-gray-300 rounded hover:bg-gray-700 hover:text-white text-sm"
+                    className="flex-1 flex items-center justify-center gap-1 py-2 bg-muted text-muted-foreground rounded hover:bg-muted hover:text-white text-sm"
                   >
                     <Copy className="w-4 h-4" /> Duplicate
                   </button>
                   <button
                     onClick={() => setConfirmDelete({ type: 'template', id: template.id })}
-                    className="p-2 bg-gray-800 text-gray-400 rounded hover:bg-red-500/20 hover:text-red-400"
+                    className="p-2 bg-muted text-muted-foreground rounded hover:bg-red-500/20 hover:text-red-400"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -520,21 +520,21 @@ export default function PromptManagement() {
       )}
 
       {/* Plan Limits Section */}
-      <div className="bg-[#111827] border border-gray-800 rounded-xl p-6">
+      <div className="bg-card border border-border rounded-xl p-6">
         <h3 className="text-lg font-semibold text-white mb-4">Per-Plan Prompt Limits</h3>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-800">
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Plan</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Monthly Limit</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Avg Usage</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Action</th>
+              <tr className="border-b border-border">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Plan</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Monthly Limit</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Avg Usage</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Action</th>
               </tr>
             </thead>
             <tbody>
               {limits.map((item, i) => (
-                <tr key={item.plan} className="border-b border-gray-800/50">
+                <tr key={item.plan} className="border-b border-border/50">
                   <td className="px-4 py-3">
                     <Badge label={item.plan} variant={item.plan === 'Free' ? 'neutral' : item.plan === 'Pro' ? 'purple' : 'success'} />
                   </td>
@@ -547,12 +547,12 @@ export default function PromptManagement() {
                         newLimits[i].limit = e.target.value;
                         setLimits(newLimits);
                       }}
-                      className="px-3 py-1 bg-[#0A0E1A] border border-gray-700 rounded text-white text-sm w-32 focus:outline-none focus:border-indigo-500"
+                      className="px-3 py-1 bg-background border border-border rounded text-white text-sm w-32 focus:outline-none focus:border-primary"
                     />
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-400">{item.avgUsage} prompts/mo</td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">{item.avgUsage} prompts/mo</td>
                   <td className="px-4 py-3">
-                    <button className="text-sm text-indigo-400 hover:text-indigo-300">Edit</button>
+                    <button className="text-sm text-primary hover:text-indigo-300">Edit</button>
                   </td>
                 </tr>
               ))}
@@ -562,7 +562,7 @@ export default function PromptManagement() {
         <div className="mt-4 flex justify-end">
           <button
             onClick={() => console.log('Saving limits:', limits)}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg text-sm text-white"
+            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary rounded-lg text-sm text-white"
           >
             <Save className="w-4 h-4" />
             Save Limits
@@ -576,33 +576,33 @@ export default function PromptManagement() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="text-gray-400">Model:</span>
+                <span className="text-muted-foreground">Model:</span>
                 <span className="ml-2 text-white">{viewPrompt.model}</span>
               </div>
               <div>
-                <span className="text-gray-400">Tokens:</span>
+                <span className="text-muted-foreground">Tokens:</span>
                 <span className="ml-2 text-white">{viewPrompt.inputTokens} in / {viewPrompt.outputTokens} out</span>
               </div>
               <div>
-                <span className="text-gray-400">User:</span>
+                <span className="text-muted-foreground">User:</span>
                 <span className="ml-2 text-white">{viewPrompt.userEmail}</span>
               </div>
               <div>
-                <span className="text-gray-400">Created:</span>
+                <span className="text-muted-foreground">Created:</span>
                 <span className="ml-2 text-white">{new Date(viewPrompt.createdAt).toLocaleString()}</span>
               </div>
             </div>
             
             <div>
-              <h4 className="text-sm font-semibold text-gray-400 mb-2">Input</h4>
-              <div className="p-4 bg-[#0A0E1A] rounded-lg max-h-40 overflow-y-auto">
+              <h4 className="text-sm font-semibold text-muted-foreground mb-2">Input</h4>
+              <div className="p-4 bg-background rounded-lg max-h-40 overflow-y-auto">
                 <p className="text-sm text-white whitespace-pre-wrap">{viewPrompt.input}</p>
               </div>
             </div>
             
             <div>
-              <h4 className="text-sm font-semibold text-gray-400 mb-2">Output</h4>
-              <div className="p-4 bg-[#0A0E1A] rounded-lg max-h-60 overflow-y-auto">
+              <h4 className="text-sm font-semibold text-muted-foreground mb-2">Output</h4>
+              <div className="p-4 bg-background rounded-lg max-h-60 overflow-y-auto">
                 <p className="text-sm text-white whitespace-pre-wrap">{viewPrompt.output}</p>
               </div>
             </div>
@@ -612,7 +612,7 @@ export default function PromptManagement() {
                 onClick={() => { handleFlag(viewPrompt.id); setViewPrompt(null); }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
                   viewPrompt.status === 'Flagged' 
-                    ? 'bg-gray-700 text-gray-300' 
+                    ? 'bg-muted text-muted-foreground' 
                     : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
                 }`}
               >
@@ -629,22 +629,22 @@ export default function PromptManagement() {
         {editTemplate && (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Template Name</label>
+              <label className="block text-sm text-muted-foreground mb-2">Template Name</label>
               <input
                 type="text"
                 value={editTemplate.name}
                 onChange={(e) => setEditTemplate({ ...editTemplate, name: e.target.value })}
-                className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:border-primary"
                 placeholder="e.g., Code Review Assistant"
               />
             </div>
             
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Category</label>
+              <label className="block text-sm text-muted-foreground mb-2">Category</label>
               <select
                 value={editTemplate.category}
                 onChange={(e) => setEditTemplate({ ...editTemplate, category: e.target.value })}
-                className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
               >
                 {categoryOptions.filter(c => c !== 'All').map(cat => (
                   <option key={cat} value={cat}>{cat}</option>
@@ -653,34 +653,34 @@ export default function PromptManagement() {
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Description</label>
+              <label className="block text-sm text-muted-foreground mb-2">Description</label>
               <input
                 type="text"
                 value={editTemplate.description}
                 onChange={(e) => setEditTemplate({ ...editTemplate, description: e.target.value })}
-                className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:border-primary"
                 placeholder="Brief description of what this template does"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Template Text</label>
+              <label className="block text-sm text-muted-foreground mb-2">Template Text</label>
               <textarea
                 value={editTemplate.template}
                 onChange={(e) => setEditTemplate({ ...editTemplate, template: e.target.value })}
                 rows={6}
-                className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 font-mono text-sm"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:border-primary font-mono text-sm"
                 placeholder="Use {variable_name} for dynamic variables"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Variables (comma-separated)</label>
+              <label className="block text-sm text-muted-foreground mb-2">Variables (comma-separated)</label>
               <input
                 type="text"
                 value={editTemplate.variables?.join(', ') || ''}
                 onChange={(e) => setEditTemplate({ ...editTemplate, variables: e.target.value.split(',').map(v => v.trim()).filter(Boolean) })}
-                className="w-full px-4 py-2 bg-[#0A0E1A] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:border-primary"
                 placeholder="e.g., code, language, focus_areas"
               />
             </div>
@@ -688,13 +688,13 @@ export default function PromptManagement() {
             <div className="flex gap-3 pt-4">
               <button
                 onClick={() => setEditTemplate(null)}
-                className="flex-1 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700"
+                className="flex-1 py-2 bg-muted text-white rounded-lg hover:bg-muted"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleSaveTemplate(editTemplate)}
-                className="flex-1 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
+                className="flex-1 py-2 bg-primary text-white rounded-lg hover:bg-primary"
               >
                 Save Template
               </button>

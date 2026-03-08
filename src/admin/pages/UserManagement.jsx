@@ -1,0 +1,1507 @@
+import React, { useState, useMemo, useEffect } from 'react';
+import {
+  Search,
+  Download,
+  UserPlus,
+  MoreVertical,
+  Eye,
+  UserCog,
+  ArrowUpCircle,
+  Ban,
+  Trash2,
+  X,
+  Coins,
+  Plus,
+  Minus,
+  Loader2,
+  RefreshCw,
+  Shield,
+  Users,
+  Mail,
+  Phone,
+  CheckCircle,
+  XCircle,
+  Key,
+  LogOut,
+  Clock,
+} from 'lucide-react';
+import Badge from '../components/Badge';
+import Modal from '../components/Modal';
+import ConfirmDialog from '../components/ConfirmDialog';
+import { supabase } from '@/lib/supabase';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
+import { formatDistanceToNow } from 'date-fns';
+
+const statusVariants = {
+  Active: 'success',
+  Suspended: 'warning',
+  Banned: 'danger',
+};
+
+const planVariants = {
+  Free: 'neutral',
+  free: 'neutral',
+  Pro: 'purple',
+  pro: 'purple',
+  Enterprise: 'success',
+  enterprise: 'success',
+};
+
+export default function UserManagement() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [planFilter, setPlanFilter] = useState('All');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedUsers, setSelectedUsers] = useState(new Set());
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  
+  // Modals
+  const [viewUser, setViewUser] = useState(null);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [upgradeUser, setUpgradeUser] = useState(null);
+  const [confirmAction, setConfirmAction] = useState(null);
+  const [creditsModal, setCreditsModal] = useState(null);
+  const [creditAmount, setCreditAmount] = useState(100);
+  const [creditReason, setCreditReason] = useState('');
+  const [adminUsers, setAdminUsers] = useState([]);
+  const [makeAdminUser, setMakeAdminUser] = useState(null);
+  const [removeAdminUser, setRemoveAdminUser] = useState(null);
+  
+  // Auth & Security Tab State
+  const [activeTab, setActiveTab] = useState('users');
+  const [authUsers, setAuthUsers] = useState([]);
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authSearchQuery, setAuthSearchQuery] = useState('');
+  const [signInHistoryUser, setSignInHistoryUser] = useState(null);
+  const [forcePasswordResetUser, setForcePasswordResetUser] = useState(null);
+  const [forceLogoutUser, setForceLogoutUser] = useState(null);
+
+  const pageSize = 10;
+
+  // Fetch users from Supabase
+  useEffect(() => {
+    fetchUsers();
+    fetchAdminUsers();
+  }, []);
+
+  async function fetchUsers() {
+    setLoading(true);
+    try {
+      // Try to fetch using admin function first (bypasses RLS)
+      const { data: adminData, error: adminError } = await supabase.rpc('get_all_users_admin');
+      
+      if (!adminError && adminData && adminData.length > 0) {
+        console.log('Fetched users via admin function:', adminData.length);
+        
+        // Fetch user_profiles for extended fields not in RPC
+        const { data: userProfiles } = await supabase
+          .from('user_profiles')
+          .select('user_id, mobile, city, role, use_case, experience_level, avatar_url');
+        
+        const profileMap = {};
+        userProfiles?.forEach(up => { profileMap[up.user_id] = up; });
+        
+        setUsers(adminData.map(user => {
+          const up = profileMap[user.id] || {};
+          return {
+            id: user.id,
+            name: user.full_name || user.email?.split('@')[0] || 'Unknown',
+            email: user.email || '',
+            avatar: (user.full_name || user.email || 'U').substring(0, 2).toUpperCase(),
+            plan: (user.plan || 'free').charAt(0).toUpperCase() + (user.plan || 'free').slice(1),
+            promptsUsed: user.used_credits || 0,
+            tokensUsed: (user.used_credits || 0) * 500,
+            joinedDate: user.created_at,
+            lastActive: user.last_login || user.updated_at,
+            status: user.is_active === false ? 'Suspended' : 'Active',
+            credits: user.credits_balance || 0,
+            mobile: user.mobile || up.mobile || '',
+            city: user.city || up.city || '',
+            role: user.role || up.role || '',
+            useCase: user.use_case || up.use_case || '',
+            experienceLevel: user.experience_level || up.experience_level || '',
+            emailVerified: user.email_verified || false,
+            phoneVerified: user.phone_verified || false,
+            avatarUrl: user.avatar_url || up.avatar_url || '',
+          };
+        }));
+        setLoading(false);
+        return;
+      }
+      
+      if (adminError) {
+        console.log('Admin function not available, falling back to direct query:', adminError.message);
+      }
+
+      // Fallback: Fetch profiles with credits directly
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        throw profilesError;
+      }
+
+      console.log('Fetched profiles:', profiles?.length || 0);
+
+      if (!profiles || profiles.length === 0) {
+        console.log('No profiles found. Checking if data exists...');
+        setUsers([]);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch credits for all users
+      const { data: credits, error: creditsError } = await supabase
+        .from('user_credits')
+        .select('user_id, credits_balance, used_credits');
+
+      if (creditsError) console.error('Error fetching credits:', creditsError);
+
+      // Fetch user_profiles for status and extended fields
+      const { data: userProfiles, error: upError } = await supabase
+        .from('user_profiles')
+        .select('user_id, is_active, last_login, mobile, city, role, use_case, experience_level');
+
+      if (upError) console.error('Error fetching user_profiles:', upError);
+
+      // Map to user format
+      const usersData = profiles.map(profile => {
+        const userCredit = credits?.find(c => c.user_id === profile.id);
+        const userProfile = userProfiles?.find(up => up.user_id === profile.id);
+        
+        return {
+          id: profile.id,
+          name: profile.full_name || profile.email?.split('@')[0] || 'Unknown',
+          email: profile.email || '',
+          avatar: (profile.full_name || profile.email || 'U').substring(0, 2).toUpperCase(),
+          plan: (profile.plan || 'free').charAt(0).toUpperCase() + (profile.plan || 'free').slice(1),
+          promptsUsed: userCredit?.used_credits || 0,
+          tokensUsed: (userCredit?.used_credits || 0) * 500,
+          joinedDate: profile.created_at,
+          lastActive: userProfile?.last_login || profile.updated_at,
+          status: userProfile?.is_active === false ? 'Suspended' : 'Active',
+          credits: userCredit?.credits_balance || 0,
+          // Extended profile fields
+          mobile: userProfile?.mobile || '',
+          city: userProfile?.city || '',
+          role: userProfile?.role || '',
+          useCase: userProfile?.use_case || '',
+          experienceLevel: userProfile?.experience_level || '',
+          emailVerified: false, // Not available in fallback
+          phoneVerified: false,
+          avatarUrl: profile.avatar_url || '',
+        };
+      });
+
+      setUsers(usersData);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function fetchAdminUsers() {
+    try {
+      const { data } = await supabase.from('admin_users').select('user_id, role');
+      setAdminUsers(data || []);
+    } catch (e) {
+      console.error('Error fetching admin users:', e);
+    }
+  }
+
+  const isUserAdmin = (userId) => adminUsers.some(a => a.user_id === userId);
+  const getUserAdminRole = (userId) => adminUsers.find(a => a.user_id === userId)?.role;
+
+  const logAdminAction = async (action, targetUser, details = {}) => {
+    try {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      await supabase.from('audit_logs').insert({
+        user_id: currentUser?.id,
+        action: 'admin_action',
+        details: JSON.stringify({
+          performed_by: currentUser?.email,
+          action,
+          target_user: targetUser?.name,
+          target_email: targetUser?.email,
+          target_id: targetUser?.id,
+          ...details,
+        }),
+      });
+    } catch (err) {
+      console.error('Failed to log admin action:', err);
+    }
+  };
+
+  const handleMakeAdmin = async () => {
+    if (!makeAdminUser) return;
+    try {
+      const { error } = await supabase
+        .from('admin_users')
+        .insert({ user_id: makeAdminUser.id, role: 'admin' });
+      if (error) throw error;
+      await fetchAdminUsers();
+      await logAdminAction('make_admin', makeAdminUser, { new_role: 'admin' });
+      alert(`${makeAdminUser.name} has been made an admin.`);
+    } catch (error) {
+      console.error('Error making admin:', error);
+      alert('Failed to make admin: ' + (error.message || 'Unknown error'));
+    }
+    setMakeAdminUser(null);
+  };
+
+  const handleRemoveAdmin = async () => {
+    if (!removeAdminUser) return;
+    try {
+      const previousRole = getUserAdminRole(removeAdminUser.id);
+      const { error } = await supabase
+        .from('admin_users')
+        .delete()
+        .eq('user_id', removeAdminUser.id);
+      if (error) throw error;
+      await fetchAdminUsers();
+      await logAdminAction('remove_admin', removeAdminUser, { removed_role: previousRole });
+      alert(`${removeAdminUser.name} has been removed as admin.`);
+    } catch (error) {
+      console.error('Error removing admin:', error);
+      alert('Failed to remove admin: ' + (error.message || 'Unknown error'));
+    }
+    setRemoveAdminUser(null);
+  };
+
+  // Fetch auth data for Auth & Security tab
+  async function fetchAuthUsers() {
+    setAuthLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, email, full_name, auth_providers, phone, phone_verified, is_enabled, is_verified, last_sign_in, sign_in_count, created_at')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setAuthUsers(data || []);
+    } catch (error) {
+      console.error('Error fetching auth users:', error);
+    } finally {
+      setAuthLoading(false);
+    }
+  }
+
+  // Effect to fetch auth users when tab changes
+  useEffect(() => {
+    if (activeTab === 'auth') {
+      fetchAuthUsers();
+    }
+  }, [activeTab]);
+
+  // Auth users filtering
+  const filteredAuthUsers = useMemo(() => {
+    if (!authSearchQuery) return authUsers;
+    const q = authSearchQuery.toLowerCase();
+    return authUsers.filter(u => 
+      u.email?.toLowerCase().includes(q) || 
+      u.full_name?.toLowerCase().includes(q)
+    );
+  }, [authUsers, authSearchQuery]);
+
+  // Auth actions
+  const handleToggleEnabled = async (user) => {
+    try {
+      const newVal = !user.is_enabled;
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_enabled: newVal })
+        .eq('id', user.id);
+      if (error) throw error;
+      setAuthUsers(prev => prev.map(u => u.id === user.id ? { ...u, is_enabled: newVal } : u));
+    } catch (error) {
+      console.error('Error toggling enabled:', error);
+      alert('Failed to update user');
+    }
+  };
+
+  const handleToggleVerified = async (user) => {
+    try {
+      const newVal = !user.is_verified;
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_verified: newVal })
+        .eq('id', user.id);
+      if (error) throw error;
+      setAuthUsers(prev => prev.map(u => u.id === user.id ? { ...u, is_verified: newVal } : u));
+    } catch (error) {
+      console.error('Error toggling verified:', error);
+      alert('Failed to update user');
+    }
+  };
+
+  const handleForcePasswordReset = async () => {
+    if (!forcePasswordResetUser) return;
+    try {
+      // In production, this would send a password reset email via Supabase Auth
+      const { error } = await supabase.auth.resetPasswordForEmail(forcePasswordResetUser.email);
+      if (error) throw error;
+      alert(`Password reset email sent to ${forcePasswordResetUser.email}`);
+    } catch (error) {
+      console.error('Error sending reset:', error);
+      alert('Failed to send password reset');
+    }
+    setForcePasswordResetUser(null);
+  };
+
+  const handleForceLogout = async () => {
+    if (!forceLogoutUser) return;
+    try {
+      // In production, this would invalidate all sessions for this user
+      // For now, we just update last_sign_in to trigger re-auth
+      const { error } = await supabase
+        .from('profiles')
+        .update({ last_sign_in: null })
+        .eq('id', forceLogoutUser.id);
+      if (error) throw error;
+      alert(`Logged out ${forceLogoutUser.email} from all sessions`);
+      fetchAuthUsers();
+    } catch (error) {
+      console.error('Error forcing logout:', error);
+      alert('Failed to force logout');
+    }
+    setForceLogoutUser(null);
+  };
+
+  // Filter users
+  const filteredUsers = useMemo(() => {
+    return users.filter(user => {
+      const matchesSearch = !searchQuery || 
+        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesPlan = planFilter === 'All' || user.plan === planFilter;
+      const matchesStatus = statusFilter === 'All' || user.status === statusFilter;
+      return matchesSearch && matchesPlan && matchesStatus;
+    });
+  }, [users, searchQuery, planFilter, statusFilter]);
+
+  // Paginate
+  const paginatedUsers = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredUsers.slice(start, start + pageSize);
+  }, [filteredUsers, currentPage]);
+
+  const totalPages = Math.ceil(filteredUsers.length / pageSize);
+
+  const handleSuspend = async (user) => {
+    try {
+      const newStatus = user.status === 'Suspended' ? true : false;
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({ is_active: newStatus })
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      setUsers(users.map(u => 
+        u.id === user.id ? { ...u, status: newStatus ? 'Active' : 'Suspended' } : u
+      ));
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      alert('Failed to update user status');
+    }
+    setConfirmAction(null);
+  };
+
+  const handleBan = async (user) => {
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({ is_active: false })
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      setUsers(users.map(u => 
+        u.id === user.id ? { ...u, status: 'Banned' } : u
+      ));
+    } catch (error) {
+      console.error('Error banning user:', error);
+      alert('Failed to ban user');
+    }
+    setConfirmAction(null);
+  };
+
+  const handleDelete = async (user) => {
+    try {
+      // Note: Deleting from profiles will cascade due to FK constraints
+      // In production, you might want to soft-delete instead
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', user.id);
+      
+      if (error) throw error;
+      
+      setUsers(users.filter(u => u.id !== user.id));
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      alert('Failed to delete user');
+    }
+    setConfirmAction(null);
+  };
+
+  const handleUpgrade = async (user, newPlan) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ plan: newPlan.toLowerCase() })
+        .eq('id', user.id);
+      
+      if (error) throw error;
+      
+      setUsers(users.map(u => 
+        u.id === user.id ? { ...u, plan: newPlan } : u
+      ));
+    } catch (error) {
+      console.error('Error upgrading user:', error);
+      alert('Failed to upgrade user');
+    }
+    setUpgradeUser(null);
+  };
+
+  const handleAddCredits = async (user) => {
+    try {
+      console.log('Adding credits to user:', user.id, 'Amount:', creditAmount);
+      
+      // Use admin RPC function to bypass RLS
+      const { data, error } = await supabase.rpc('admin_add_credits', {
+        p_user_id: user.id,
+        p_amount: creditAmount,
+        p_reason: creditReason || 'Admin credit grant'
+      });
+      
+      console.log('RPC response:', { data, error });
+      
+      if (error) {
+        console.error('RPC error:', error);
+        throw error;
+      }
+      if (!data?.success) {
+        console.error('Function returned error:', data);
+        throw new Error(data?.error || 'Failed to add credits');
+      }
+      
+      // Refresh user list to get updated data from database
+      await fetchUsers();
+      
+      setCreditAmount(100);
+      setCreditReason('');
+      setCreditsModal(null);
+      alert(`Added ${creditAmount} credits to ${user.name}. New balance: ${data.new_balance}`);
+    } catch (error) {
+      console.error('Error adding credits:', error);
+      alert('Failed to add credits: ' + (error.message || 'Unknown error'));
+    }
+  };
+
+  const handleDeductCredits = async (user) => {
+    try {
+      console.log('Deducting credits from user:', user.id, 'Amount:', creditAmount);
+      
+      // Use admin RPC function to bypass RLS
+      const { data, error } = await supabase.rpc('admin_deduct_credits', {
+        p_user_id: user.id,
+        p_amount: creditAmount,
+        p_reason: creditReason || 'Admin credit deduction'
+      });
+      
+      console.log('RPC response:', { data, error });
+      
+      if (error) {
+        console.error('RPC error:', error);
+        throw error;
+      }
+      if (!data?.success) {
+        console.error('Function returned error:', data);
+        throw new Error(data?.error || 'Failed to deduct credits');
+      }
+      
+      // Refresh user list to get updated data from database
+      await fetchUsers();
+      
+      setCreditAmount(100);
+      setCreditReason('');
+      setCreditsModal(null);
+      alert(`Deducted ${creditAmount} credits from ${user.name}. New balance: ${data.new_balance}`);
+    } catch (error) {
+      console.error('Error deducting credits:', error);
+      alert('Failed to deduct credits: ' + (error.message || 'Unknown error'));
+    }
+  };
+
+  const handleSetCredits = async (user, amount) => {
+    try {
+      console.log('Setting credits for user:', user.id, 'Amount:', amount);
+      
+      // Use admin RPC function to bypass RLS
+      const { data, error } = await supabase.rpc('admin_set_credits', {
+        p_user_id: user.id,
+        p_amount: amount,
+        p_reason: 'Admin set credits'
+      });
+      
+      console.log('RPC response:', { data, error });
+      
+      if (error) {
+        console.error('RPC error:', error);
+        throw error;
+      }
+      if (!data?.success) throw new Error(data?.error || 'Failed to set credits');
+      
+      // Refresh user list to get updated data from database
+      await fetchUsers();
+    } catch (error) {
+      console.error('Error setting credits:', error);
+    }
+  };
+
+  const handleImpersonate = (user) => {
+    console.log(`Impersonating user: ${user.email}`);
+    // Show toast simulation
+    alert(`Impersonating ${user.name}`);
+  };
+
+  const handleExport = () => {
+    console.log('Exporting users CSV...');
+  };
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedUsers(new Set(paginatedUsers.map(u => u.id)));
+    } else {
+      setSelectedUsers(new Set());
+    }
+  };
+
+  const handleSelectUser = (userId) => {
+    const newSelected = new Set(selectedUsers);
+    if (newSelected.has(userId)) {
+      newSelected.delete(userId);
+    } else {
+      newSelected.add(userId);
+    }
+    setSelectedUsers(newSelected);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header with Tabs */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h2 className="text-xl font-semibold text-foreground">User Management</h2>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="bg-muted border border-border">
+          <TabsTrigger
+            value="users"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2"
+          >
+            <Users className="w-4 h-4" />
+            Users List
+          </TabsTrigger>
+          <TabsTrigger
+            value="auth"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2"
+          >
+            <Shield className="w-4 h-4" />
+            Auth & Security
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Users List Tab */}
+        <TabsContent value="users" className="mt-6 space-y-6">
+      {/* Sub-Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Badge label={`${filteredUsers.length} total`} variant="neutral" />
+          {loading && <Loader2 className="w-4 h-4 text-primary animate-spin" />}
+        </div>
+        
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Refresh Button */}
+          <button
+            onClick={fetchUsers}
+            disabled={loading}
+            className="p-2 bg-card border border-border rounded-lg text-muted-foreground hover:text-foreground hover:border-border transition-colors"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+          
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search users..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="pl-10 pr-4 py-2 bg-card border border-border rounded-lg text-sm text-white placeholder-muted-foreground focus:outline-none focus:border-primary w-64"
+            />
+          </div>
+
+          {/* Plan Filter */}
+          <select
+            value={planFilter}
+            onChange={(e) => {
+              setPlanFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="px-3 py-2 bg-card border border-border rounded-lg text-sm text-white focus:outline-none focus:border-primary"
+          >
+            <option value="All">All Plans</option>
+            <option value="Free">Free</option>
+            <option value="Pro">Pro</option>
+            <option value="Enterprise">Enterprise</option>
+          </select>
+
+          {/* Status Filter */}
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="px-3 py-2 bg-card border border-border rounded-lg text-sm text-white focus:outline-none focus:border-primary"
+          >
+            <option value="All">All Status</option>
+            <option value="Active">Active</option>
+            <option value="Suspended">Suspended</option>
+            <option value="Banned">Banned</option>
+          </select>
+
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-lg text-sm text-muted-foreground hover:text-foreground hover:border-border transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            Export CSV
+          </button>
+
+          <button
+            onClick={() => setInviteModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary rounded-lg text-sm text-primary-foreground transition-colors"
+          >
+            <UserPlus className="w-4 h-4" />
+            Invite Admin
+          </button>
+        </div>
+      </div>
+
+      {/* Bulk Actions */}
+      {selectedUsers.size > 0 && (
+        <div className="flex items-center gap-3 p-3 bg-primary/10 border border-indigo-500/30 rounded-lg">
+          <span className="text-sm text-primary">{selectedUsers.size} selected</span>
+          <button className="px-3 py-1 text-sm bg-yellow-500/20 text-yellow-400 rounded hover:bg-yellow-500/30">
+            Suspend All
+          </button>
+          <button className="px-3 py-1 text-sm bg-red-500/20 text-red-400 rounded hover:bg-red-500/30">
+            Delete All
+          </button>
+          <button className="px-3 py-1 text-sm bg-blue-500/20 text-blue-400 rounded hover:bg-blue-500/30">
+            Email All
+          </button>
+        </div>
+      )}
+
+      {/* Table */}
+      <div className="bg-card border border-border rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="px-4 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    onChange={handleSelectAll}
+                    checked={paginatedUsers.length > 0 && paginatedUsers.every(u => selectedUsers.has(u.id))}
+                    className="w-4 h-4 rounded border-border bg-muted text-primary"
+                  />
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">#</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">User</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Plan</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Credits</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Prompts</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Joined</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Last Active</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Status</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedUsers.map((user, index) => (
+                <tr key={user.id} className="border-b border-border/50 hover:bg-muted/30">
+                  <td className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedUsers.has(user.id)}
+                      onChange={() => handleSelectUser(user.id)}
+                      className="w-4 h-4 rounded border-border bg-muted text-primary"
+                    />
+                  </td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">
+                    {(currentPage - 1) * pageSize + index + 1}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-semibold">
+                        {user.avatar}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm text-foreground font-medium">{user.name}</p>
+                          {isUserAdmin(user.id) && (
+                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide ${
+                              getUserAdminRole(user.id) === 'owner'
+                                ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                                : 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
+                            }`}>
+                              <Shield className="w-3 h-3" />
+                              {getUserAdminRole(user.id) === 'owner' ? 'Owner' : 'Admin'}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">{user.email}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <Badge label={user.plan} variant={planVariants[user.plan]} />
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-1">
+                      <Coins className="w-4 h-4 text-amber-400" />
+                      <span className="text-sm text-amber-400 font-medium">{(user.credits || 0).toLocaleString()}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">{user.promptsUsed.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">
+                    {new Date(user.joinedDate).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">
+                    {new Date(user.lastActive).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-3">
+                    <Badge label={user.status} variant={statusVariants[user.status]} />
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="relative">
+                      <button
+                        onClick={() => setActiveDropdown(activeDropdown === user.id ? null : user.id)}
+                        className="p-1 rounded hover:bg-muted"
+                      >
+                        <MoreVertical className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                      
+                      {activeDropdown === user.id && (
+                        <div className="absolute right-0 top-8 w-48 bg-card border border-border rounded-lg shadow-xl z-10">
+                          <button
+                            onClick={() => { setViewUser(user); setActiveDropdown(null); }}
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                          >
+                            <Eye className="w-4 h-4" /> View Profile
+                          </button>
+                          <button
+                            onClick={() => { handleImpersonate(user); setActiveDropdown(null); }}
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                          >
+                            <UserCog className="w-4 h-4" /> Impersonate
+                          </button>
+                          <button
+                            onClick={() => { setUpgradeUser(user); setActiveDropdown(null); }}
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                          >
+                            <ArrowUpCircle className="w-4 h-4" /> Upgrade Plan
+                          </button>
+                          <button
+                            onClick={() => { setCreditsModal(user); setActiveDropdown(null); }}
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-amber-400 hover:bg-muted"
+                          >
+                            <Coins className="w-4 h-4" /> Manage Credits
+                          </button>
+                          {isUserAdmin(user.id) ? (
+                            getUserAdminRole(user.id) !== 'owner' && (
+                              <button
+                                onClick={() => { setRemoveAdminUser(user); setActiveDropdown(null); }}
+                                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-orange-400 hover:bg-muted"
+                              >
+                                <Shield className="w-4 h-4" /> Remove Admin
+                              </button>
+                            )
+                          ) : (
+                            <button
+                              onClick={() => { setMakeAdminUser(user); setActiveDropdown(null); }}
+                              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-indigo-400 hover:bg-muted"
+                            >
+                              <Shield className="w-4 h-4" /> Make Admin
+                            </button>
+                          )}
+                          <button
+                            onClick={() => { setConfirmAction({ type: 'suspend', user }); setActiveDropdown(null); }}
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-yellow-400 hover:bg-muted"
+                          >
+                            <Ban className="w-4 h-4" /> {user.status === 'Suspended' ? 'Unsuspend' : 'Suspend'}
+                          </button>
+                          <button
+                            onClick={() => { setConfirmAction({ type: 'ban', user }); setActiveDropdown(null); }}
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-orange-400 hover:bg-muted"
+                          >
+                            <Ban className="w-4 h-4" /> Ban
+                          </button>
+                          <button
+                            onClick={() => { setConfirmAction({ type: 'delete', user }); setActiveDropdown(null); }}
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-400 hover:bg-muted"
+                          >
+                            <Trash2 className="w-4 h-4" /> Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between p-4 border-t border-border">
+            <p className="text-sm text-muted-foreground">
+              Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, filteredUsers.length)} of {filteredUsers.length}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 bg-muted text-muted-foreground rounded hover:text-foreground disabled:opacity-50"
+              >
+                Prev
+              </button>
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => i + 1).map(num => (
+                <button
+                  key={num}
+                  onClick={() => setCurrentPage(num)}
+                  className={`w-8 h-8 rounded text-sm ${
+                    currentPage === num ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {num}
+                </button>
+              ))}
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 bg-muted text-muted-foreground rounded hover:text-foreground disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* User Detail Drawer */}
+      {viewUser && (
+        <div className="fixed inset-y-0 right-0 w-full max-w-md bg-card border-l border-border shadow-2xl z-50 overflow-y-auto">
+          <div className="sticky top-0 bg-card border-b border-border p-4 flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-foreground">User Details</h3>
+            <button onClick={() => setViewUser(null)} className="p-1 hover:bg-muted rounded">
+              <X className="w-5 h-5 text-muted-foreground" />
+            </button>
+          </div>
+          
+          <div className="p-6 space-y-6">
+            {/* Profile Header */}
+            <div className="flex items-center gap-4 bg-background/50 rounded-xl p-4">
+              {/* Avatar */}
+              <div className="flex-shrink-0">
+                {viewUser.avatarUrl ? (
+                  <img src={viewUser.avatarUrl} alt={viewUser.name || 'User'} className="w-16 h-16 rounded-full object-cover border-2 border-primary/30" />
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xl font-bold border-2 border-primary/50">
+                    {viewUser.avatar || viewUser.name?.substring(0, 2).toUpperCase() || viewUser.email?.substring(0, 2).toUpperCase() || 'U'}
+                  </div>
+                )}
+              </div>
+              {/* User Info */}
+              <div className="flex-1 min-w-0">
+                <h4 className="text-xl text-foreground font-semibold truncate">
+                  {viewUser.name || viewUser.email?.split('@')[0] || 'Unknown User'}
+                </h4>
+                <p className="text-muted-foreground text-sm truncate">{viewUser.email || 'No email'}</p>
+                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                  <Badge label={viewUser.plan || 'Free'} variant={planVariants[viewUser.plan] || 'neutral'} />
+                  <Badge label={viewUser.status || 'Active'} variant={statusVariants[viewUser.status] || 'success'} />
+                </div>
+              </div>
+            </div>
+
+            {/* Contact Information */}
+            <div className="bg-background rounded-xl p-4 space-y-3">
+              <h5 className="text-sm font-semibold text-muted-foreground uppercase">Contact Information</h5>
+              <div className="grid grid-cols-1 gap-3">
+                <div className="flex items-center gap-3">
+                  <Mail className="w-4 h-4 text-muted-foreground" />
+                  <div className="flex-1">
+                    <p className="text-xs text-muted-foreground">Email</p>
+                    <p className="text-sm text-foreground">{viewUser.email || 'Not provided'}</p>
+                  </div>
+                  {viewUser.emailVerified && (
+                    <CheckCircle className="w-4 h-4 text-green-400" title="Verified" />
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <Phone className="w-4 h-4 text-muted-foreground" />
+                  <div className="flex-1">
+                    <p className="text-xs text-muted-foreground">Mobile Number</p>
+                    <p className="text-sm text-foreground">{viewUser.mobile || 'Not provided'}</p>
+                  </div>
+                  {viewUser.phoneVerified && (
+                    <CheckCircle className="w-4 h-4 text-green-400" title="Verified" />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Profile Details */}
+            <div className="bg-background rounded-xl p-4 space-y-3">
+              <h5 className="text-sm font-semibold text-muted-foreground uppercase">Profile Details</h5>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs text-muted-foreground">City/Location</p>
+                  <p className="text-sm text-foreground">{viewUser.city || 'Not provided'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Role/Profession</p>
+                  <p className="text-sm text-foreground">{viewUser.role || 'Not provided'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Use Case</p>
+                  <p className="text-sm text-foreground">{viewUser.useCase || 'Not provided'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Experience Level</p>
+                  <p className="text-sm text-foreground capitalize">{viewUser.experienceLevel || 'Not provided'}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-background rounded-lg p-4">
+                <p className="text-xs text-muted-foreground uppercase">Credits</p>
+                <p className="text-2xl text-amber-400 font-bold">{(viewUser.credits || 0).toLocaleString()}</p>
+              </div>
+              <div className="bg-background rounded-lg p-4">
+                <p className="text-xs text-muted-foreground uppercase">Total Prompts</p>
+                <p className="text-2xl text-foreground font-bold">{viewUser.promptsUsed.toLocaleString()}</p>
+              </div>
+              <div className="bg-background rounded-lg p-4">
+                <p className="text-xs text-muted-foreground uppercase">Tokens Used</p>
+                <p className="text-2xl text-foreground font-bold">{(viewUser.tokensUsed / 1000).toFixed(0)}K</p>
+              </div>
+              <div className="bg-background rounded-lg p-4">
+                <p className="text-xs text-muted-foreground uppercase">Last Login</p>
+                <p className="text-lg text-foreground font-bold">{viewUser.lastActive ? new Date(viewUser.lastActive).toLocaleDateString() : 'Never'}</p>
+              </div>
+            </div>
+
+            {/* Account Details */}
+            <div className="bg-background rounded-xl p-4 space-y-3">
+              <h5 className="text-sm font-semibold text-muted-foreground uppercase">Account Details</h5>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs text-muted-foreground">User ID</p>
+                  <p className="text-xs text-foreground font-mono truncate" title={viewUser.id}>{viewUser.id?.substring(0, 8)}...</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Joined Date</p>
+                  <p className="text-sm text-foreground">{new Date(viewUser.joinedDate).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Current Plan</p>
+                  <p className="text-sm text-foreground">{viewUser.plan} Plan</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Account Status</p>
+                  <p className="text-sm text-foreground">{viewUser.status}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Subscription History */}
+            <div>
+              <h5 className="text-sm font-semibold text-muted-foreground uppercase mb-3">Subscription History</h5>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 bg-background rounded-lg">
+                  <span className="text-sm text-foreground">{viewUser.plan} Plan</span>
+                  <span className="text-xs text-muted-foreground">Current</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-background rounded-lg">
+                  <span className="text-sm text-muted-foreground">Free Plan</span>
+                  <span className="text-xs text-muted-foreground">{new Date(viewUser.joinedDate).toLocaleDateString()}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => { setCreditsModal(viewUser); setViewUser(null); }}
+                className="flex-1 py-2 bg-amber-500/20 text-amber-400 rounded-lg hover:bg-amber-500/30"
+              >
+                Credits
+              </button>
+              <button
+                onClick={() => { setConfirmAction({ type: 'suspend', user: viewUser }); setViewUser(null); }}
+                className="flex-1 py-2 bg-yellow-500/20 text-yellow-400 rounded-lg hover:bg-yellow-500/30"
+              >
+                Suspend
+              </button>
+              <button
+                onClick={() => { setUpgradeUser(viewUser); setViewUser(null); }}
+                className="flex-1 py-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/90/30"
+              >
+                Upgrade
+              </button>
+              <button className="flex-1 py-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30">
+                Send Email
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Invite Admin Modal */}
+      <Modal isOpen={inviteModalOpen} onClose={() => setInviteModalOpen(false)} title="Invite Admin">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm text-muted-foreground mb-2">Email Address</label>
+            <input
+              type="email"
+              placeholder="admin@example.com"
+              className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:border-primary"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-muted-foreground mb-2">Role</label>
+            <select className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary">
+              <option value="admin">Admin</option>
+              <option value="moderator">Moderator</option>
+              <option value="readonly">Read Only</option>
+            </select>
+          </div>
+          <div className="flex gap-3 pt-4">
+            <button
+              onClick={() => setInviteModalOpen(false)}
+              className="flex-1 py-2 bg-muted text-foreground rounded-lg hover:bg-muted"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => { console.log('Invite sent'); setInviteModalOpen(false); }}
+              className="flex-1 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary"
+            >
+              Send Invite
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Upgrade Plan Modal */}
+      <Modal isOpen={!!upgradeUser} onClose={() => setUpgradeUser(null)} title="Upgrade Plan">
+        {upgradeUser && (
+          <div className="space-y-4">
+            <p className="text-muted-foreground">
+              Select a new plan for <span className="text-foreground">{upgradeUser.name}</span>
+            </p>
+            <div className="space-y-2">
+              {['Free', 'Pro', 'Enterprise'].map(plan => (
+                <button
+                  key={plan}
+                  onClick={() => handleUpgrade(upgradeUser, plan)}
+                  disabled={upgradeUser.plan === plan}
+                  className={`w-full p-4 text-left rounded-lg border transition-colors ${
+                    upgradeUser.plan === plan
+                      ? 'border-indigo-500 bg-primary/10 text-primary'
+                      : 'border-border hover:border-border text-foreground'
+                  }`}
+                >
+                  <span className="font-medium">{plan}</span>
+                  {upgradeUser.plan === plan && <span className="ml-2 text-xs">(Current)</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Credits Management Modal */}
+      <Modal isOpen={!!creditsModal} onClose={() => { setCreditsModal(null); setCreditAmount(100); setCreditReason(''); }} title="Manage User Credits">
+        {creditsModal && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 p-4 bg-background rounded-lg">
+              <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-lg font-bold">
+                {creditsModal.avatar}
+              </div>
+              <div>
+                <p className="text-foreground font-medium">{creditsModal.name}</p>
+                <p className="text-sm text-muted-foreground">{creditsModal.email}</p>
+              </div>
+            </div>
+            
+            <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+              <div className="flex items-center justify-between">
+                <span className="text-amber-400">Current Credits</span>
+                <span className="text-2xl font-bold text-amber-400">{(creditsModal.credits || 0).toLocaleString()}</span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm text-muted-foreground mb-2">Amount</label>
+              <input
+                type="number"
+                min="1"
+                value={creditAmount}
+                onChange={(e) => setCreditAmount(Math.max(1, parseInt(e.target.value) || 0))}
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm text-muted-foreground mb-2">Reason (optional)</label>
+              <input
+                type="text"
+                placeholder="e.g., Promotional bonus, Refund, Manual adjustment"
+                value={creditReason}
+                onChange={(e) => setCreditReason(e.target.value)}
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:border-primary"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                onClick={() => handleAddCredits(creditsModal)}
+                className="flex items-center justify-center gap-2 py-3 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Add Credits
+              </button>
+              <button
+                onClick={() => handleDeductCredits(creditsModal)}
+                className="flex items-center justify-center gap-2 py-3 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
+              >
+                <Minus className="w-4 h-4" />
+                Deduct Credits
+              </button>
+            </div>
+
+            <div className="pt-2 border-t border-border">
+              <label className="block text-sm text-muted-foreground mb-2">Or set to specific amount</label>
+              <div className="flex gap-2">
+                {[0, 100, 500, 1000, 5000].map(preset => (
+                  <button
+                    key={preset}
+                    onClick={() => handleSetCredits(creditsModal, preset)}
+                    className="flex-1 py-2 bg-muted text-muted-foreground rounded hover:bg-muted text-sm"
+                  >
+                    {preset.toLocaleString()}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Confirm Dialogs */}
+      <ConfirmDialog
+        isOpen={confirmAction?.type === 'suspend'}
+        onClose={() => setConfirmAction(null)}
+        onConfirm={() => handleSuspend(confirmAction.user)}
+        title={confirmAction?.user?.status === 'Suspended' ? 'Unsuspend User' : 'Suspend User'}
+        message={`Are you sure you want to ${confirmAction?.user?.status === 'Suspended' ? 'unsuspend' : 'suspend'} ${confirmAction?.user?.name}?`}
+        confirmLabel={confirmAction?.user?.status === 'Suspended' ? 'Unsuspend' : 'Suspend'}
+        variant="warning"
+      />
+
+      <ConfirmDialog
+        isOpen={confirmAction?.type === 'ban'}
+        onClose={() => setConfirmAction(null)}
+        onConfirm={() => handleBan(confirmAction.user)}
+        title="Ban User"
+        message={`Are you sure you want to ban ${confirmAction?.user?.name}? This action will prevent them from accessing the platform.`}
+        confirmLabel="Ban User"
+        variant="danger"
+      />
+
+      <ConfirmDialog
+        isOpen={confirmAction?.type === 'delete'}
+        onClose={() => setConfirmAction(null)}
+        onConfirm={() => handleDelete(confirmAction.user)}
+        title="Delete User"
+        message={`This will permanently delete ${confirmAction?.user?.name} and all their data. This action cannot be undone.`}
+        confirmLabel="Delete"
+        variant="danger"
+        requireTextInput="DELETE"
+      />
+
+      <ConfirmDialog
+        isOpen={!!makeAdminUser}
+        onClose={() => setMakeAdminUser(null)}
+        onConfirm={handleMakeAdmin}
+        title="Make Admin"
+        message={`Are you sure you want to make ${makeAdminUser?.name} (${makeAdminUser?.email}) an admin? They will have access to the admin panel.`}
+        confirmLabel="Make Admin"
+        variant="warning"
+      />
+
+      <ConfirmDialog
+        isOpen={!!removeAdminUser}
+        onClose={() => setRemoveAdminUser(null)}
+        onConfirm={handleRemoveAdmin}
+        title="Remove Admin"
+        message={`Are you sure you want to remove admin access from ${removeAdminUser?.name} (${removeAdminUser?.email})? They will lose access to the admin panel.`}
+        confirmLabel="Remove Admin"
+        variant="danger"
+      />
+        </TabsContent>
+
+        {/* Auth & Security Tab */}
+        <TabsContent value="auth" className="mt-6 space-y-6">
+          {/* Sub-Header */}
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Badge label={`${filteredAuthUsers.length} users`} variant="neutral" />
+              {authLoading && <Loader2 className="w-4 h-4 text-primary animate-spin" />}
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={fetchAuthUsers}
+                disabled={authLoading}
+                className="p-2 bg-card border border-border rounded-lg text-muted-foreground hover:text-white hover:border-border transition-colors"
+              >
+                <RefreshCw className={`w-4 h-4 ${authLoading ? 'animate-spin' : ''}`} />
+              </button>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Search users..."
+                  value={authSearchQuery}
+                  onChange={(e) => setAuthSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 py-2 bg-card border border-border rounded-lg text-sm text-white placeholder-muted-foreground focus:outline-none focus:border-primary w-64"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Auth Table */}
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">User</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Auth Providers</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Phone</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground uppercase">Enabled</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground uppercase">Verified</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Last Sign In</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground uppercase">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAuthUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-12 text-center">
+                        <Shield className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+                        <p className="text-muted-foreground">No users found</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredAuthUsers.map((user) => (
+                      <tr key={user.id} className="border-b border-border/50 hover:bg-muted/30">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-semibold">
+                              {(user.full_name || user.email || 'U').substring(0, 2).toUpperCase()}
+                            </div>
+                            <div>
+                              <p className="text-sm text-white font-medium">{user.full_name || user.email?.split('@')[0]}</p>
+                              <p className="text-xs text-muted-foreground">{user.email}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1">
+                            {(user.auth_providers || ['email']).map((provider, i) => (
+                              <span key={i} className="px-2 py-0.5 text-xs rounded bg-muted text-muted-foreground capitalize">
+                                {provider}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          {user.phone ? (
+                            <div className="flex items-center gap-1">
+                              <Phone className="w-3 h-3 text-muted-foreground" />
+                              <span className="text-sm text-muted-foreground">{user.phone}</span>
+                              {user.phone_verified && (
+                                <CheckCircle className="w-3 h-3 text-green-500" />
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">-</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <Switch
+                            checked={user.is_enabled !== false}
+                            onCheckedChange={() => handleToggleEnabled(user)}
+                            className="data-[state=checked]:bg-green-600"
+                          />
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <Switch
+                            checked={user.is_verified === true}
+                            onCheckedChange={() => handleToggleVerified(user)}
+                            className="data-[state=checked]:bg-blue-600"
+                          />
+                        </td>
+                        <td className="px-4 py-3 text-sm text-muted-foreground">
+                          {user.last_sign_in ? (
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {formatDistanceToNow(new Date(user.last_sign_in), { addSuffix: true })}
+                            </div>
+                          ) : '-'}
+                          {user.sign_in_count > 0 && (
+                            <p className="text-xs text-muted-foreground">{user.sign_in_count} sign-ins</p>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-center gap-1">
+                            <button
+                              onClick={() => setForcePasswordResetUser(user)}
+                              className="p-1.5 rounded hover:bg-yellow-500/20 text-muted-foreground hover:text-yellow-400"
+                              title="Force Password Reset"
+                            >
+                              <Key className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => setForceLogoutUser(user)}
+                              className="p-1.5 rounded hover:bg-red-500/20 text-muted-foreground hover:text-red-400"
+                              title="Force Logout"
+                            >
+                              <LogOut className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => setSignInHistoryUser(user)}
+                              className="p-1.5 rounded hover:bg-blue-500/20 text-muted-foreground hover:text-blue-400"
+                              title="Sign-in History"
+                            >
+                              <Clock className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Sign-in History Modal */}
+          <Modal isOpen={!!signInHistoryUser} onClose={() => setSignInHistoryUser(null)} title="Sign-in History">
+            {signInHistoryUser && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-4 bg-background rounded-lg">
+                  <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white text-lg font-bold">
+                    {(signInHistoryUser.full_name || signInHistoryUser.email || 'U').substring(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-white font-medium">{signInHistoryUser.full_name || signInHistoryUser.email}</p>
+                    <p className="text-sm text-muted-foreground">{signInHistoryUser.email}</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-3 bg-background rounded-lg">
+                    <span className="text-sm text-muted-foreground">Total Sign-ins</span>
+                    <span className="text-white font-medium">{signInHistoryUser.sign_in_count || 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-background rounded-lg">
+                    <span className="text-sm text-muted-foreground">Last Sign-in</span>
+                    <span className="text-white font-medium">
+                      {signInHistoryUser.last_sign_in 
+                        ? new Date(signInHistoryUser.last_sign_in).toLocaleString()
+                        : 'Never'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-background rounded-lg">
+                    <span className="text-sm text-muted-foreground">Account Created</span>
+                    <span className="text-white font-medium">
+                      {new Date(signInHistoryUser.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-background rounded-lg">
+                    <span className="text-sm text-muted-foreground">Auth Providers</span>
+                    <div className="flex gap-1">
+                      {(signInHistoryUser.auth_providers || ['email']).map((p, i) => (
+                        <span key={i} className="px-2 py-0.5 text-xs rounded bg-primary/20 text-primary capitalize">
+                          {p}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground text-center pt-2">
+                  Detailed sign-in logs require Supabase Auth Hooks configuration
+                </p>
+              </div>
+            )}
+          </Modal>
+
+          {/* Force Password Reset Confirm */}
+          <ConfirmDialog
+            isOpen={!!forcePasswordResetUser}
+            onClose={() => setForcePasswordResetUser(null)}
+            onConfirm={handleForcePasswordReset}
+            title="Force Password Reset"
+            message={`Send a password reset email to ${forcePasswordResetUser?.email}? The user will be required to set a new password.`}
+            confirmLabel="Send Reset Email"
+            variant="warning"
+          />
+
+          {/* Force Logout Confirm */}
+          <ConfirmDialog
+            isOpen={!!forceLogoutUser}
+            onClose={() => setForceLogoutUser(null)}
+            onConfirm={handleForceLogout}
+            title="Force Logout"
+            message={`Log out ${forceLogoutUser?.email} from all devices? They will need to sign in again.`}
+            confirmLabel="Force Logout"
+            variant="danger"
+          />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}

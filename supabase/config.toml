@@ -1,0 +1,11 @@
+[functions.check-credits]
+verify_jwt = false
+
+[functions.deduct-credits]
+verify_jwt = false
+
+[functions.razorpay-order]
+verify_jwt = false
+
+[functions.subscription-email]
+verify_jwt = false

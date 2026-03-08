@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en" data-theme="cosmos">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/askjai-logo.png" />
+    <title>AskJai — AI Prompt Generator</title>
+    <meta name="description" content="Generate perfect AI prompts in seconds. Craft basic or advanced chain-of-thought prompts for ChatGPT, Claude, Gemini, and more." />
+    <meta name="author" content="AskJai" />
+
+    <meta property="og:title" content="AskJai — AI Prompt Generator" />
+    <meta property="og:description" content="Generate perfect AI prompts in seconds for any AI model." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/askjai-logo.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@Lovable" />
+    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+
+    <!-- Theme flash prevention: Apply saved theme instantly before React loads -->
+    <script>
+      (function() {
+        try {
+          var theme = localStorage.getItem('aje_theme') || 'cosmos';
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch(e) {}
+      })();
+    </script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

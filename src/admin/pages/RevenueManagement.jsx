@@ -29,7 +29,6 @@ import Badge from '../components/Badge';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { supabase } from '../../lib/supabase';
-import { mockChartData } from '../mockData';
 
 const statusVariants = {
   Active: 'success',
@@ -44,6 +43,7 @@ export default function RevenueManagement() {
   const [failedPayments, setFailedPayments] = useState([]);
   const [coupons, setCoupons] = useState([]);
   const [chartData, setChartData] = useState([]);
+  const [revenueByPlan, setRevenueByPlan] = useState([]);
   const [kpis, setKpis] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -158,6 +158,38 @@ export default function RevenueManagement() {
 
       setChartData(chartDataMapped);
 
+      // Calculate Revenue by Plan from subscriptions
+      const planRevenue = {};
+      (subsData || []).forEach(s => {
+        const plan = s.plan || 'Free';
+        const amount = s.amount || 0;
+        if (!planRevenue[plan]) {
+          planRevenue[plan] = 0;
+        }
+        planRevenue[plan] += amount;
+      });
+
+      // Also add from payment transactions
+      (paymentData || []).forEach(t => {
+        const plan = t.metadata?.plan || t.plan || 'Pro';
+        const amount = parseFloat(t.amount) || 0;
+        if (!planRevenue[plan]) {
+          planRevenue[plan] = 0;
+        }
+        planRevenue[plan] += amount;
+      });
+
+      const planChartData = Object.entries(planRevenue).map(([plan, revenue]) => ({
+        plan,
+        revenue
+      })).sort((a, b) => b.revenue - a.revenue);
+
+      setRevenueByPlan(planChartData.length > 0 ? planChartData : [
+        { plan: 'Pro', revenue: proUsers * 499 },
+        { plan: 'Enterprise', revenue: enterpriseUsers * 1999 },
+        { plan: 'Free', revenue: 0 }
+      ]);
+
       // Fetch failed payments (status = failed)
       const { data: failedData } = await supabase
         .from('payment_transactions')
@@ -250,7 +282,7 @@ export default function RevenueManagement() {
         <p className="text-muted-foreground text-xs mb-1">{label}</p>
         {payload.map((entry, i) => (
           <p key={i} className="text-white text-sm font-medium">
-            {entry.name}: ${entry.value.toLocaleString()}
+            {entry.name}: ₹{entry.value.toLocaleString()}
           </p>
         ))}
       </div>
@@ -381,10 +413,10 @@ export default function RevenueManagement() {
         </ChartCard>
 
         {/* Revenue by Plan */}
-        <ChartCard title={<span>Revenue by Plan <span className="text-xs text-amber-500 ml-2">(Sample Data)</span></span>}>
+        <ChartCard title="Revenue by Plan">
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={mockChartData.revenueByPlan}>
+              <BarChart data={revenueByPlan}>
                 <XAxis 
                   dataKey="plan" 
                   axisLine={false} 
@@ -395,7 +427,7 @@ export default function RevenueManagement() {
                   axisLine={false} 
                   tickLine={false} 
                   tick={{ fill: '#6B7280', fontSize: 10 }}
-                  tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
+                  tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="revenue" fill="#6366F1" radius={[4, 4, 0, 0]} name="Revenue" />

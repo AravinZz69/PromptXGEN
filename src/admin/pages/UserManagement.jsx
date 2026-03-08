@@ -815,21 +815,27 @@ export default function UserManagement() {
           </div>
           
           <div className="p-6 space-y-6">
-            {/* Profile */}
-            <div className="flex items-center gap-4">
-              {viewUser.avatarUrl ? (
-                <img src={viewUser.avatarUrl} alt={viewUser.name} className="w-16 h-16 rounded-full object-cover" />
-              ) : (
-                <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white text-xl font-bold">
-                  {viewUser.avatar}
-                </div>
-              )}
-              <div>
-                <h4 className="text-xl text-white font-semibold">{viewUser.name}</h4>
-                <p className="text-muted-foreground">{viewUser.email}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <Badge label={viewUser.plan} variant={planVariants[viewUser.plan]} />
-                  <Badge label={viewUser.status} variant={statusVariants[viewUser.status]} />
+            {/* Profile Header */}
+            <div className="flex items-center gap-4 bg-background/50 rounded-xl p-4">
+              {/* Avatar */}
+              <div className="flex-shrink-0">
+                {viewUser.avatarUrl ? (
+                  <img src={viewUser.avatarUrl} alt={viewUser.name || 'User'} className="w-16 h-16 rounded-full object-cover border-2 border-primary/30" />
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white text-xl font-bold border-2 border-primary/50">
+                    {viewUser.avatar || viewUser.name?.substring(0, 2).toUpperCase() || viewUser.email?.substring(0, 2).toUpperCase() || 'U'}
+                  </div>
+                )}
+              </div>
+              {/* User Info */}
+              <div className="flex-1 min-w-0">
+                <h4 className="text-xl text-white font-semibold truncate">
+                  {viewUser.name || viewUser.email?.split('@')[0] || 'Unknown User'}
+                </h4>
+                <p className="text-muted-foreground text-sm truncate">{viewUser.email || 'No email'}</p>
+                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                  <Badge label={viewUser.plan || 'Free'} variant={planVariants[viewUser.plan] || 'neutral'} />
+                  <Badge label={viewUser.status || 'Active'} variant={statusVariants[viewUser.status] || 'success'} />
                 </div>
               </div>
             </div>

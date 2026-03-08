@@ -6,6 +6,7 @@ import { MiniNavbar } from '@/components/ui/mini-navbar';
 import Sidebar from '@/components/ui/sidebar-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useCredits } from '@/hooks/useCredits';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {
@@ -61,6 +62,7 @@ const History = () => {
 
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { credits } = useCredits();
   
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [chatHistory, setChatHistory] = useState<ChatConversation[]>([]);
@@ -74,6 +76,7 @@ const History = () => {
   // Get user info
   const userInitials = user?.email?.substring(0, 2).toUpperCase() || 'U';
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const currentPlan = credits?.planType === 'pro' ? 'Pro' : credits?.planType === 'enterprise' ? 'Enterprise' : 'Free';
 
   // Load history
   useEffect(() => {
@@ -236,7 +239,7 @@ Type: ${item.type}${item.category ? `\nCategory: ${item.category}` : ''}
       {/* Sidebar */}
       <Sidebar
         userName={userName}
-        userRole="Free Plan"
+        userRole={`${currentPlan} Plan`}
         userInitials={userInitials}
         onNavigate={(id) => {
           if (id === 'dashboard') navigate('/dashboard');

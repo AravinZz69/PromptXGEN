@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,6 +6,12 @@ import { MiniNavbar } from '@/components/ui/mini-navbar';
 import Sidebar from '@/components/ui/sidebar-menu';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useCredits } from '@/hooks/useCredits';
+import { 
+  initiatePayment, 
+  getEnabledGateways, 
+  PaymentGateway 
+} from '@/lib/paymentService';
 import {
   Check,
   X,
@@ -15,6 +21,7 @@ import {
   ArrowLeft,
   Sparkles,
   Star,
+  Loader2,
 } from 'lucide-react';
 
 const plans = [
@@ -93,8 +100,12 @@ const Pricing = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { credits, refetch: refetchCredits } = useCredits();
   const [annual, setAnnual] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [processingPayment, setProcessingPayment] = useState(false);
+  const [enabledGateways, setEnabledGateways] = useState<PaymentGateway[]>([]);
+  const [loadingGateways, setLoadingGateways] = useState(true);
 
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
   const userInitials = userName
@@ -104,22 +115,112 @@ const Pricing = () => {
     .toUpperCase()
     .slice(0, 2);
 
-  const handleSelectPlan = (planId: string) => {
+  // Current plan from credits
+  const currentPlanType = credits?.planType || 'free';
+
+  // Load enabled gateways on mount
+  useEffect(() => {
+    const loadGateways = async () => {
+      setLoadingGateways(true);
+      const gateways = await getEnabledGateways();
+      setEnabledGateways(gateways);
+      setLoadingGateways(false);
+    };
+    loadGateways();
+  }, []);
+
+  // Update plans with current status
+  const updatedPlans = plans.map(plan => ({
+    ...plan,
+    current: plan.id === currentPlanType,
+    cta: plan.id === currentPlanType 
+      ? 'Current Plan' 
+      : plan.id === 'enterprise' 
+        ? 'Upgrade to Enterprise' 
+        : plan.cta,
+  }));
+
+  const handleSelectPlan = async (planId: string) => {
+    // Check if user is logged in
+    if (!user) {
+      toast({
+        title: 'Login Required',
+        description: 'Please log in to upgrade your plan.',
+      });
+      navigate('/auth', { state: { from: '/upgrade' } });
+      return;
+    }
+
+    // Can't select current plan
+    if (planId === currentPlanType) {
+      toast({
+        title: 'Already on this plan',
+        description: `You are currently on the ${planId.charAt(0).toUpperCase() + planId.slice(1)} plan.`,
+      });
+      return;
+    }
+
+    // Free plan - can't downgrade via payment (contact support)
     if (planId === 'free') {
       toast({
-        title: 'Already on Free Plan',
-        description: 'You are currently on the Free plan.',
+        title: 'Contact Support',
+        description: 'To downgrade to Free plan, please contact support.',
+      });
+      return;
+    }
+
+    // Check if payment gateways are configured
+    if (enabledGateways.length === 0) {
+      toast({
+        title: 'Payment Not Available',
+        description: 'Payment gateways are not configured. Please contact admin.',
+        variant: 'destructive',
       });
       return;
     }
 
     setSelectedPlan(planId);
-    
-    // For demo, show coming soon
-    toast({
-      title: 'Coming Soon!',
-      description: `${planId === 'pro' ? 'Pro' : 'Enterprise'} plan payment integration coming soon. Stay tuned!`,
-    });
+    setProcessingPayment(true);
+
+    try {
+      // Initiate payment
+      const result = await initiatePayment(
+        user.id,
+        user.email || '',
+        planId,
+        annual
+      );
+
+      if (result.success) {
+        // Refresh credits to reflect new balance
+        await refetchCredits();
+
+        toast({
+          title: '🎉 Payment Successful!',
+          description: `You've been upgraded to ${planId.charAt(0).toUpperCase() + planId.slice(1)} plan with ${result.credits === 9999 ? 'unlimited' : result.credits} credits!`,
+        });
+
+        // Navigate to dashboard after successful payment
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 2000);
+      } else {
+        toast({
+          title: 'Payment Failed',
+          description: result.error || 'Something went wrong. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Payment Error',
+        description: error.message || 'An unexpected error occurred.',
+        variant: 'destructive',
+      });
+    } finally {
+      setProcessingPayment(false);
+      setSelectedPlan(null);
+    }
   };
 
   return (
@@ -127,7 +228,7 @@ const Pricing = () => {
       {/* Sidebar */}
       <Sidebar
         userName={userName}
-        userRole="Free Plan"
+        userRole={`${currentPlanType.charAt(0).toUpperCase() + currentPlanType.slice(1)} Plan`}
         userInitials={userInitials}
         onNavigate={(id) => {
           if (id === 'dashboard') navigate('/dashboard');
@@ -214,7 +315,7 @@ const Pricing = () => {
 
             {/* Pricing Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {plans.map((plan, index) => {
+              {updatedPlans.map((plan, index) => {
                 const Icon = plan.icon;
                 return (
                   <motion.div
@@ -294,9 +395,14 @@ const Pricing = () => {
                             ? 'bg-muted text-muted-foreground cursor-default'
                             : ''
                       }`}
-                      disabled={plan.current}
+                      disabled={plan.current || (processingPayment && selectedPlan === plan.id)}
                     >
-                      {plan.cta}
+                      {processingPayment && selectedPlan === plan.id ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Processing...
+                        </>
+                      ) : plan.cta}
                     </Button>
                   </motion.div>
                 );

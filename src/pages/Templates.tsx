@@ -7,6 +7,7 @@ import Sidebar from "@/components/ui/sidebar-menu";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
+import { useCredits } from "@/hooks/useCredits";
 import {
   Search,
   Grid3X3,
@@ -65,6 +66,7 @@ const Templates = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { credits } = useCredits();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -135,6 +137,7 @@ const Templates = () => {
   // Get user initials
   const userInitials = user?.email?.substring(0, 2).toUpperCase() || "U";
   const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
+  const currentPlan = credits?.planType === 'pro' ? 'Pro' : credits?.planType === 'enterprise' ? 'Enterprise' : 'Free';
 
   const filteredTemplates = useMemo(() => {
     return templates.filter((template) => {
@@ -196,7 +199,7 @@ const Templates = () => {
       {/* Sidebar */}
       <Sidebar
         userName={userName}
-        userRole="Free Plan"
+        userRole={`${currentPlan} Plan`}
         userInitials={userInitials}
         onNavigate={(id) => {
           if (id === "dashboard") navigate("/dashboard");

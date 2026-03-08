@@ -215,13 +215,14 @@ Return ONLY the optimized prompt, nothing else.`;
   // Get user initials
   const userInitials = user?.email?.substring(0, 2).toUpperCase() || 'U';
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const currentPlan = credits?.planType === 'pro' ? 'Pro' : credits?.planType === 'enterprise' ? 'Enterprise' : 'Free';
 
   return (
     <div className="min-h-screen bg-background relative flex">
       {/* Sidebar - Always visible, expands on hover */}
       <Sidebar
         userName={userName}
-        userRole="Free Plan"
+        userRole={`${currentPlan} Plan`}
         userInitials={userInitials}
         onNavigate={(id) => {
           if (id === 'dashboard') navigate('/dashboard');

@@ -112,7 +112,7 @@ const Dashboard = () => {
       {/* Sidebar - Always visible, expands on hover */}
       <Sidebar
         userName={userName}
-        userRole="Free Plan"
+        userRole={`${currentPlan} Plan`}
         userInitials={userInitials}
         onNavigate={(id) => {
           if (id === 'dashboard') navigate('/dashboard');

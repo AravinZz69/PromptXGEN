@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
+import { useCredits } from '@/hooks/useCredits';
 import {
   Pencil,
   Check,
@@ -40,6 +41,7 @@ const Settings = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { credits } = useCredits();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Profile editing states
@@ -134,6 +136,7 @@ const Settings = () => {
     .join('')
     .toUpperCase()
     .slice(0, 2);
+  const currentPlan = credits?.planType === 'pro' ? 'Pro' : credits?.planType === 'enterprise' ? 'Enterprise' : 'Free';
 
   const handleSaveProfile = async () => {
     if (!user) return;
@@ -287,7 +290,7 @@ const Settings = () => {
       {/* Sidebar */}
       <Sidebar
         userName={userName}
-        userRole="Free Plan"
+        userRole={`${currentPlan} Plan`}
         userInitials={userInitials}
         onNavigate={(id) => {
           if (id === 'dashboard') navigate('/dashboard');

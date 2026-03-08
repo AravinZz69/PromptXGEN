@@ -273,6 +273,7 @@ const TemplateGenerator = () => {
   // Get user info
   const userInitials = user?.email?.substring(0, 2).toUpperCase() || 'U';
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const currentPlan = credits?.planType === 'pro' ? 'Pro' : credits?.planType === 'enterprise' ? 'Enterprise' : 'Free';
 
   // Find template config
   const template = templateConfigs.find(t => t.id === templateId) || defaultTemplate;
@@ -555,7 +556,7 @@ Create a comprehensive, detailed prompt that a student can paste into any AI to 
       {/* Sidebar */}
       <Sidebar
         userName={userName}
-        userRole="Free Plan"
+        userRole={`${currentPlan} Plan`}
         userInitials={userInitials}
         onNavigate={(id) => {
           if (id === 'dashboard') navigate('/dashboard');

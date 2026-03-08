@@ -10,6 +10,7 @@ import { MiniNavbar } from "@/components/ui/mini-navbar";
 import Sidebar from "@/components/ui/sidebar-menu";
 import PromptChat from "@/components/ui/prompt-chat";
 import { addToHistory } from "@/lib/historyService";
+import { getDefaultAIModelConfig } from "@/lib/aiModelService";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {
@@ -101,20 +102,26 @@ Generate a prompt that:
 Return ONLY the optimized prompt, nothing else.`;
       }
 
-      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      // Get AI model configuration from Supabase
+      const modelConfig = await getDefaultAIModelConfig();
+      const apiUrl = modelConfig.apiUrl || 'https://api.groq.com/openai/v1/chat/completions';
+      const apiKey = modelConfig.apiKey || import.meta.env.VITE_GROQ_API_KEY;
+      const model = modelConfig.model || 'llama-3.3-70b-versatile';
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
+          model: model,
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
           ],
           temperature: 0.7,
-          max_tokens: 2048,
+          max_tokens: modelConfig.maxTokens || 2048,
         }),
       });
 

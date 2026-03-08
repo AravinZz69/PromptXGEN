@@ -1,17 +1,16 @@
 /**
- * EXISTING CHATBOT FINDINGS:
- * API key var:     import.meta.env.VITE_GROQ_API_KEY
- * API URL:         https://api.groq.com/openai/v1/chat/completions
- * Model used:      llama-3.3-70b-versatile
- * Theme accent:    Primary hsl(217 91% 60%), Accent hsl(260 80% 60%)
+ * DYNAMIC AI MODEL CHAT:
+ * Uses AI models configured in Supabase admin panel
+ * Falls back to Groq with environment variable if no models configured
  */
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { saveChatConversation, ChatMessage as DbChatMessage, saveAiInteraction } from '@/lib/chatHistoryService';
+import { getDefaultAIModelConfig, AIModelConfig, trackModelUsage } from '@/lib/aiModelService';
 
-// ── CONSTANTS ──────────────────────────────────────────────────────────────
-const MODEL = 'llama-3.3-70b-versatile';
-const API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+// ── FALLBACK CONSTANTS ──────────────────────────────────────────────────────
+const FALLBACK_MODEL = 'llama-3.3-70b-versatile';
+const FALLBACK_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 export interface Message {
   id: string;
@@ -37,7 +36,22 @@ export function useStreamingChat(options: UseStreamingChatOptions = {}) {
   const [streamingContent, setStreamingContent] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [modelConfig, setModelConfig] = useState<AIModelConfig | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Load AI model config on mount
+  useEffect(() => {
+    const loadModelConfig = async () => {
+      try {
+        const config = await getDefaultAIModelConfig();
+        setModelConfig(config);
+        console.log('[Chat] Loaded AI model:', config.model, 'from', config.provider);
+      } catch (err) {
+        console.warn('[Chat] Failed to load model config, using fallback');
+      }
+    };
+    loadModelConfig();
+  }, []);
 
   const {
     systemPrompt = `You are a helpful AI assistant specialized in education, particularly for Indian competitive exams like JEE, NEET, UPSC, GATE, and general academics. You provide clear, accurate, and well-structured responses. Use markdown formatting for better readability:
@@ -54,6 +68,13 @@ Be concise but thorough.`,
 
   const sendMessage = useCallback(async (userText: string) => {
     if (!userText.trim() || phase === 'thinking' || phase === 'streaming') return;
+
+    // Get model config (use state or fetch fresh)
+    const config = modelConfig || await getDefaultAIModelConfig();
+    const apiUrl = config.apiUrl || FALLBACK_API_URL;
+    const apiKey = config.apiKey || import.meta.env.VITE_GROQ_API_KEY;
+    const model = config.model || FALLBACK_MODEL;
+    const maxTokens = config.maxTokens || 2048;
 
     // 1. Add user message immediately
     const userMsg: Message = {
@@ -101,19 +122,20 @@ Be concise but thorough.`,
 
       // 6. Create AbortController so user can stop generation
       abortRef.current = new AbortController();
+      const startTime = Date.now();
 
-      // 7. STREAMING fetch call to Groq API
-      const response = await fetch(API_URL, {
+      // 7. STREAMING fetch call to configured AI API
+      const response = await fetch(apiUrl, {
         method: 'POST',
         signal: abortRef.current.signal,
         headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: MODEL,
+          model: model,
           stream: true, // ← KEY: enable streaming
-          max_tokens: 2048,
+          max_tokens: maxTokens,
           temperature: 0.7,
           messages: [
             { role: 'system', content: systemPrompt },
@@ -190,10 +212,16 @@ Be concise but thorough.`,
       
       setMessages(allMessages);
 
+      // Track model usage in Supabase
+      const latencyMs = Date.now() - startTime;
+      const tokensUsed = Math.ceil((userText.length + fullContent.length) / 4);
+      // Fire and forget - don't await
+      trackModelUsage(config.model, tokensUsed, latencyMs).catch(() => {});
+
       // Record credit usage if callback provided
       if (onCreditRecord && fullContent) {
         try {
-          await onCreditRecord(MODEL, userText, fullContent, 'Generative AI chat');
+          await onCreditRecord(model, userText, fullContent, 'Generative AI chat');
         } catch (creditError) {
           console.warn('Failed to record credit usage:', creditError);
         }
@@ -210,13 +238,13 @@ Be concise but thorough.`,
             timestamp: m.timestamp.toISOString(),
           }));
           
-          const saved = await saveChatConversation(dbMessages, conversationId || undefined, MODEL);
+          const saved = await saveChatConversation(dbMessages, conversationId || undefined, model);
           if (saved && !conversationId) {
             setConversationId(saved.id);
           }
           
           // Also save individual interaction to prompt_history for admin tracking
-          await saveAiInteraction(userText, fullContent, MODEL, 'chat');
+          await saveAiInteraction(userText, fullContent, model, 'chat');
         } catch (saveError) {
           console.warn('Failed to save conversation:', saveError);
         }

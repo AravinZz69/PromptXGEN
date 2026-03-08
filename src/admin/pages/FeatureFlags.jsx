@@ -76,8 +76,33 @@ export default function FeatureFlags() {
     }
   };
 
+  // Initial fetch
   useEffect(() => {
     fetchFlags();
+  }, []);
+
+  // Real-time subscription for instant updates
+  useEffect(() => {
+    const channel = supabase
+      .channel('admin_feature_flags_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'feature_flags',
+        },
+        (payload) => {
+          console.log('Feature flag changed:', payload);
+          // Refresh the list when any change occurs
+          fetchFlags();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const sections = [...new Set(flags.map(f => f.section))];

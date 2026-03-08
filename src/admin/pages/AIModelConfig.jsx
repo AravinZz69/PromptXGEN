@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Cpu,
   Key,
@@ -13,6 +13,7 @@ import {
   Zap,
   Clock,
   Activity,
+  Loader2,
 } from 'lucide-react';
 import {
   BarChart,
@@ -28,10 +29,19 @@ import Badge from '../components/Badge';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import ChartCard from '../components/ChartCard';
-import { mockAIModels, mockChartData } from '../mockData';
+import { supabase } from '../../lib/supabase';
+import { 
+  getAllAIModels, 
+  saveAIModel, 
+  deleteAIModel, 
+  setDefaultAIModel,
+  clearAIModelsCache 
+} from '../../lib/aiModelService';
 
 export default function AIModelConfig() {
-  const [models, setModels] = useState(mockAIModels);
+  const [models, setModels] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [showKeys, setShowKeys] = useState({});
   const [editModel, setEditModel] = useState(null);
   const [addAPIKeyOpen, setAddAPIKeyOpen] = useState(false);
@@ -39,7 +49,7 @@ export default function AIModelConfig() {
   
   // New model form state
   const [newModel, setNewModel] = useState({
-    provider: 'OpenAI',
+    provider: 'Groq',
     name: '',
     apiKey: '',
     inputCost: 0.01,
@@ -47,16 +57,84 @@ export default function AIModelConfig() {
     maxTokens: 4096,
   });
   
-  // MOCK DATA - Cost tracking
-  const costData = mockChartData.tokenUsage;
+  // MOCK DATA - Cost tracking (will be replaced with real data later)
+  const costData = [
+    { date: 'Mon', tokens: 45000 },
+    { date: 'Tue', tokens: 52000 },
+    { date: 'Wed', tokens: 48000 },
+    { date: 'Thu', tokens: 61000 },
+    { date: 'Fri', tokens: 55000 },
+    { date: 'Sat', tokens: 42000 },
+    { date: 'Sun', tokens: 38000 },
+  ];
 
-  // MOCK DATA - Rate limits
+  // Rate limits by plan
   const [rateLimits, setRateLimits] = useState({
     free: { requestsPerMin: 10, tokensPerDay: 10000 },
     starter: { requestsPerMin: 30, tokensPerDay: 50000 },
     pro: { requestsPerMin: 100, tokensPerDay: 200000 },
     enterprise: { requestsPerMin: 500, tokensPerDay: 1000000 },
   });
+
+  // Fetch models from Supabase
+  const fetchModels = async () => {
+    setLoading(true);
+    try {
+      const data = await getAllAIModels();
+      // Map Supabase data to component format
+      const mappedModels = data.map(model => ({
+        id: model.id,
+        name: model.name,
+        provider: model.provider,
+        apiKey: model.api_key_encrypted || '',
+        inputCost: model.input_cost_per_million / 1000, // Convert to per 1K
+        outputCost: model.output_cost_per_million / 1000,
+        maxTokens: model.max_tokens,
+        enabled: model.enabled,
+        isDefault: model.is_default,
+        requestsToday: model.requests_today,
+        tokensUsed: model.tokens_used,
+        avgLatency: model.avg_latency_ms,
+        availableForPlans: model.available_for_plans || ['free', 'pro', 'enterprise'],
+      }));
+      setModels(mappedModels);
+    } catch (error) {
+      console.error('Error fetching AI models:', error);
+      alert('Error loading AI models');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial fetch
+  useEffect(() => {
+    fetchModels();
+  }, []);
+
+  // Real-time subscription for instant updates
+  useEffect(() => {
+    const channel = supabase
+      .channel('admin_ai_models_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'ai_models',
+        },
+        (payload) => {
+          console.log('AI model changed:', payload);
+          // Refresh the list and clear cache when any change occurs
+          clearAIModelsCache();
+          fetchModels();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
@@ -76,76 +154,180 @@ export default function AIModelConfig() {
     setShowKeys(prev => ({ ...prev, [modelId]: !prev[modelId] }));
   };
 
-  const toggleModelStatus = (modelId) => {
-    setModels(prev => prev.map(m => 
-      m.id === modelId ? { ...m, enabled: !m.enabled } : m
-    ));
+  const toggleModelStatus = async (modelId) => {
+    const model = models.find(m => m.id === modelId);
+    if (!model) return;
+    
+    setSaving(true);
+    try {
+      const result = await saveAIModel({
+        id: modelId,
+        enabled: !model.enabled,
+      });
+      
+      if (result.success) {
+        setModels(prev => prev.map(m => 
+          m.id === modelId ? { ...m, enabled: !m.enabled } : m
+        ));
+      } else {
+        alert('Error updating model: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error toggling model:', error);
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const toggleDefault = (modelId) => {
-    setModels(prev => prev.map(m => ({
-      ...m,
-      isDefault: m.id === modelId
-    })));
+  const toggleDefault = async (modelId) => {
+    setSaving(true);
+    try {
+      const result = await setDefaultAIModel(modelId);
+      
+      if (result.success) {
+        setModels(prev => prev.map(m => ({
+          ...m,
+          isDefault: m.id === modelId
+        })));
+      } else {
+        alert('Error setting default: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error setting default:', error);
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleSaveModel = () => {
-    setModels(prev => prev.map(m => 
-      m.id === editModel.id ? editModel : m
-    ));
-    setEditModel(null);
+  const handleSaveModel = async () => {
+    setSaving(true);
+    try {
+      const result = await saveAIModel({
+        id: editModel.id,
+        name: editModel.name,
+        provider: editModel.provider,
+        api_key_encrypted: editModel.apiKey,
+        input_cost_per_million: editModel.inputCost * 1000,
+        output_cost_per_million: editModel.outputCost * 1000,
+        max_tokens: editModel.maxTokens,
+        available_for_plans: editModel.availableForPlans,
+      });
+      
+      if (result.success) {
+        await fetchModels();
+        setEditModel(null);
+        alert('Model updated successfully!');
+      } else {
+        alert('Error saving model: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error saving model:', error);
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleDeleteModel = () => {
-    setModels(prev => prev.filter(m => m.id !== deleteConfirm.id));
-    setDeleteConfirm(null);
+  const handleDeleteModel = async () => {
+    setSaving(true);
+    try {
+      const result = await deleteAIModel(deleteConfirm.id);
+      
+      if (result.success) {
+        setModels(prev => prev.filter(m => m.id !== deleteConfirm.id));
+        setDeleteConfirm(null);
+        alert('Model deleted successfully!');
+      } else {
+        alert('Error deleting model: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error deleting model:', error);
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleRotateKey = (model) => {
-    const newApiKey = `sk-${Math.random().toString(36).slice(2, 12)}...${Math.random().toString(36).slice(2, 8)}`;
-    setModels(prev => prev.map(m => 
-      m.id === model.id ? { ...m, apiKey: newApiKey } : m
-    ));
-    alert(`API key rotated for ${model.name}`);
+  const handleRotateKey = async (model) => {
+    const newApiKey = prompt('Enter new API key for ' + model.name + ':');
+    if (!newApiKey) return;
+    
+    setSaving(true);
+    try {
+      const result = await saveAIModel({
+        id: model.id,
+        api_key_encrypted: newApiKey,
+      });
+      
+      if (result.success) {
+        setModels(prev => prev.map(m => 
+          m.id === model.id ? { ...m, apiKey: newApiKey } : m
+        ));
+        alert(`API key updated for ${model.name}`);
+      } else {
+        alert('Error updating API key: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error rotating key:', error);
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleAddModel = () => {
+  const handleAddModel = async () => {
     if (!newModel.name || !newModel.apiKey) {
       alert('Please fill in model name and API key');
       return;
     }
     
-    const model = {
-      id: Date.now(),
-      name: newModel.name,
-      provider: newModel.provider,
-      apiKey: newModel.apiKey,
-      inputCost: newModel.inputCost,
-      outputCost: newModel.outputCost,
-      maxTokens: newModel.maxTokens,
-      enabled: true,
-      isDefault: false,
-      requestsToday: 0,
-    };
-    
-    setModels(prev => [...prev, model]);
-    setNewModel({
-      provider: 'OpenAI',
-      name: '',
-      apiKey: '',
-      inputCost: 0.01,
-      outputCost: 0.03,
-      maxTokens: 4096,
-    });
-    setAddAPIKeyOpen(false);
-    alert(`Model "${model.name}" added successfully!`);
+    setSaving(true);
+    try {
+      const result = await saveAIModel({
+        name: newModel.name,
+        provider: newModel.provider,
+        api_key_encrypted: newModel.apiKey,
+        input_cost_per_million: newModel.inputCost * 1000,
+        output_cost_per_million: newModel.outputCost * 1000,
+        max_tokens: newModel.maxTokens,
+        enabled: true,
+        is_default: models.length === 0, // First model becomes default
+        available_for_plans: ['free', 'pro', 'enterprise'],
+      });
+      
+      if (result.success) {
+        await fetchModels();
+        setNewModel({
+          provider: 'Groq',
+          name: '',
+          apiKey: '',
+          inputCost: 0.01,
+          outputCost: 0.03,
+          maxTokens: 4096,
+        });
+        setAddAPIKeyOpen(false);
+        alert(`Model "${newModel.name}" added successfully!`);
+      } else {
+        alert('Error adding model: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error adding model:', error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
     <div className="space-y-6">
+      {/* Loading Overlay */}
+      {saving && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-card rounded-lg p-4 flex items-center gap-3">
+            <Loader2 className="w-5 h-5 animate-spin text-primary" />
+            <span className="text-white">Saving...</span>
+          </div>
+        </div>
+      )}
+
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* MOCK DATA */}
         <div className="bg-card border border-border rounded-xl p-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
@@ -163,8 +345,8 @@ export default function AIModelConfig() {
               <DollarSign className="w-5 h-5 text-emerald-400" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Est. Monthly Cost</p>
-              <p className="text-xl font-bold text-white">$2,847</p>
+              <p className="text-xs text-muted-foreground">Total Tokens Used</p>
+              <p className="text-xl font-bold text-white">{models.reduce((sum, m) => sum + (m.tokensUsed || 0), 0).toLocaleString()}</p>
             </div>
           </div>
         </div>
@@ -175,7 +357,7 @@ export default function AIModelConfig() {
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Today's Requests</p>
-              <p className="text-xl font-bold text-white">12,483</p>
+              <p className="text-xl font-bold text-white">{models.reduce((sum, m) => sum + (m.requestsToday || 0), 0).toLocaleString()}</p>
             </div>
           </div>
         </div>
@@ -186,7 +368,7 @@ export default function AIModelConfig() {
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Avg Latency</p>
-              <p className="text-xl font-bold text-white">234ms</p>
+              <p className="text-xl font-bold text-white">{models.length > 0 ? Math.round(models.reduce((sum, m) => sum + (m.avgLatency || 0), 0) / models.length) : 0}ms</p>
             </div>
           </div>
         </div>
@@ -205,6 +387,24 @@ export default function AIModelConfig() {
           </button>
         </div>
         
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : models.length === 0 ? (
+          <div className="bg-card border border-border rounded-xl p-8 text-center">
+            <Cpu className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-white mb-2">No AI Models Configured</h3>
+            <p className="text-muted-foreground mb-4">Add your first AI model to enable chat and prompt generation features.</p>
+            <button
+              onClick={() => setAddAPIKeyOpen(true)}
+              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary"
+            >
+              <Plus className="w-4 h-4 inline mr-2" />
+              Add First Model
+            </button>
+          </div>
+        ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {models.map(model => (
             <div 
@@ -320,6 +520,7 @@ export default function AIModelConfig() {
             </div>
           ))}
         </div>
+        )}
       </div>
 
       {/* Rate Limits */}
@@ -526,9 +727,11 @@ export default function AIModelConfig() {
               onChange={(e) => setNewModel({ ...newModel, provider: e.target.value })}
               className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
             >
+              <option value="Groq">Groq (Recommended)</option>
               <option value="OpenAI">OpenAI</option>
               <option value="Anthropic">Anthropic</option>
               <option value="Google">Google</option>
+              <option value="Together">Together AI</option>
               <option value="Mistral">Mistral</option>
               <option value="Other">Other</option>
             </select>
@@ -537,7 +740,7 @@ export default function AIModelConfig() {
             <label className="block text-sm text-muted-foreground mb-2">Model Name</label>
             <input
               type="text"
-              placeholder="e.g., GPT-4o, Claude 3.5 Sonnet"
+              placeholder="e.g., llama-3.3-70b-versatile, gpt-4o"
               value={newModel.name}
               onChange={(e) => setNewModel({ ...newModel, name: e.target.value })}
               className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:border-primary"

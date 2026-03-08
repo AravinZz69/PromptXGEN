@@ -85,48 +85,98 @@ export default function RevenueManagement() {
         setSubscriptions(mappedSubs);
       }
 
-      // Fetch credit transactions for revenue data
-      const { data: transactions } = await supabase
-        .from('credit_transactions')
+      // Fetch payment transactions for real revenue data
+      const { data: paymentData } = await supabase
+        .from('payment_transactions')
         .select('*')
-        .eq('type', 'purchase')
+        .eq('status', 'completed')
         .order('created_at', { ascending: false });
 
-      // Calculate KPIs
-      const totalRevenue = (transactions || []).reduce((acc, t) => acc + Math.abs(t.amount || 0), 0);
-      const proUsers = (subsData || []).filter(s => s.plan === 'Pro' || s.plan === 'pro').length;
-      const enterpriseUsers = (subsData || []).filter(s => s.plan === 'Enterprise' || s.plan === 'enterprise').length;
+      // Also fetch credit transactions as backup
+      const { data: creditTxns } = await supabase
+        .from('credit_transactions')
+        .select('*')
+        .in('transaction_type', ['topup', 'purchase'])
+        .order('created_at', { ascending: false });
+
+      // Calculate total revenue from payment transactions
+      const paymentRevenue = (paymentData || []).reduce((acc, t) => acc + (parseFloat(t.amount) || 0), 0);
       
-      const mrr = proUsers * 19 + enterpriseUsers * 99;
+      // Calculate KPIs from subscriptions
+      const proUsers = (subsData || []).filter(s => 
+        s.plan?.toLowerCase() === 'pro' || s.plan?.toLowerCase() === 'starter'
+      ).length;
+      const enterpriseUsers = (subsData || []).filter(s => 
+        s.plan?.toLowerCase() === 'enterprise'
+      ).length;
+      const activeSubscriptions = (subsData || []).filter(s => 
+        s.status === 'Active' || s.status === 'active'
+      ).length;
+      
+      // PRO plan: ₹499/month, Enterprise: ₹1999/month (or $19/$99 in USD)
+      const mrr = proUsers * 499 + enterpriseUsers * 1999;
       const arr = mrr * 12;
-      const arpu = (subsData?.length || 1) > 0 ? mrr / (subsData?.length || 1) : 0;
+      const arpu = activeSubscriptions > 0 ? mrr / activeSubscriptions : 0;
+
+      // Today's revenue
+      const today = new Date().toDateString();
+      const todayRevenue = (paymentData || [])
+        .filter(t => new Date(t.created_at).toDateString() === today)
+        .reduce((acc, t) => acc + (parseFloat(t.amount) || 0), 0);
 
       setKpis([
-        { title: 'MRR', value: `$${mrr.toLocaleString()}`, icon: DollarSign, color: 'emerald' },
-        { title: 'ARR', value: `$${arr.toLocaleString()}`, icon: TrendingUp, color: 'green' },
-        { title: 'ARPU', value: `$${arpu.toFixed(2)}`, icon: Users, color: 'blue' },
+        { title: 'MRR', value: `₹${mrr.toLocaleString()}`, icon: DollarSign, color: 'emerald' },
+        { title: 'ARR', value: `₹${arr.toLocaleString()}`, icon: TrendingUp, color: 'green' },
+        { title: 'ARPU', value: `₹${arpu.toFixed(2)}`, icon: Users, color: 'blue' },
         { title: 'Pro Users', value: proUsers.toString(), changeType: 'positive', icon: TrendingUp, color: 'indigo' },
         { title: 'Enterprise', value: enterpriseUsers.toString(), changeType: 'positive', icon: CreditCard, color: 'purple' },
-        { title: 'Total Revenue', value: `$${totalRevenue.toLocaleString()}`, changeType: 'positive', icon: DollarSign, color: 'emerald' },
+        { title: 'Total Revenue', value: `₹${paymentRevenue.toLocaleString()}`, changeType: 'positive', icon: DollarSign, color: 'emerald' },
       ]);
 
-      // Generate chart data from transactions
+      // Generate chart data from payment transactions (last 14 days)
       const dayMap = {};
-      (transactions || []).forEach(t => {
+      const last14Days = [];
+      for (let i = 13; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const dayKey = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        dayMap[dayKey] = 0;
+        last14Days.push(dayKey);
+      }
+
+      (paymentData || []).forEach(t => {
         const day = new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        dayMap[day] = (dayMap[day] || 0) + Math.abs(t.amount || 0);
+        if (dayMap.hasOwnProperty(day)) {
+          dayMap[day] += parseFloat(t.amount) || 0;
+        }
       });
 
-      const chartDataMapped = Object.entries(dayMap)
-        .slice(-14)
-        .map(([name, Revenue]) => ({ name, Revenue }));
+      const chartDataMapped = last14Days.map(day => ({
+        name: day,
+        Revenue: dayMap[day]
+      }));
 
-      setChartData(chartDataMapped.length > 0 ? chartDataMapped : [
-        { name: 'No Data', Revenue: 0 }
-      ]);
+      setChartData(chartDataMapped);
 
-      // Set empty arrays for tables that need the admin_tables migration
-      setFailedPayments([]);
+      // Fetch failed payments (status = failed)
+      const { data: failedData } = await supabase
+        .from('payment_transactions')
+        .select('*')
+        .eq('status', 'failed')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      const mappedFailed = (failedData || []).map(p => ({
+        id: p.id,
+        user: p.user_email || 'Unknown',
+        amount: `₹${p.amount || 0}`,
+        date: new Date(p.created_at).toLocaleDateString(),
+        reason: p.metadata?.error || 'Payment failed',
+        attempts: p.metadata?.attempts || 1,
+      }));
+      setFailedPayments(mappedFailed);
+
+      // Coupons - empty for now (needs coupons table)
       setCoupons([]);
 
     } catch (error) {
@@ -136,8 +186,57 @@ export default function RevenueManagement() {
     }
   };
 
+  // Initial fetch
   useEffect(() => {
     fetchRevenueData();
+  }, []);
+
+  // Real-time subscription for instant updates
+  useEffect(() => {
+    // Subscribe to subscriptions changes
+    const subscriptionsChannel = supabase
+      .channel('revenue_subscriptions_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'subscriptions' },
+        (payload) => {
+          console.log('Subscription changed:', payload);
+          fetchRevenueData();
+        }
+      )
+      .subscribe();
+
+    // Subscribe to payment_transactions changes
+    const paymentsChannel = supabase
+      .channel('revenue_payments_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'payment_transactions' },
+        (payload) => {
+          console.log('Payment changed:', payload);
+          fetchRevenueData();
+        }
+      )
+      .subscribe();
+
+    // Subscribe to credit_transactions changes
+    const creditsChannel = supabase
+      .channel('revenue_credits_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'credit_transactions' },
+        (payload) => {
+          console.log('Credit transaction changed:', payload);
+          fetchRevenueData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscriptionsChannel);
+      supabase.removeChannel(paymentsChannel);
+      supabase.removeChannel(creditsChannel);
+    };
   }, []);
 
   const pageSize = 10;

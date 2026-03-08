@@ -23,6 +23,7 @@ import Badge from '../components/Badge';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { supabase } from '../../lib/supabase';
+import { useToast } from '../../hooks/use-toast';
 
 const channelIcons = {
   email: Mail,
@@ -46,9 +47,11 @@ const categoryColors = {
 };
 
 export default function Notifications() {
+  const { toast } = useToast();
   const [notifications, setNotifications] = useState([]);
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
   const [templatesLoading, setTemplatesLoading] = useState(true);
   const [composeOpen, setComposeOpen] = useState(false);
   const [viewNotification, setViewNotification] = useState(null);
@@ -159,6 +162,16 @@ export default function Notifications() {
   );
 
   const handleSendNotification = async (schedule = false) => {
+    if (!newNotification.title || !newNotification.message) {
+      toast({
+        title: '❌ Missing fields',
+        description: 'Please enter a title and message',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setSending(true);
     try {
       // Insert admin notification record
       const { data, error } = await supabase
@@ -177,7 +190,10 @@ export default function Notifications() {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Insert error:', error);
+        throw error;
+      }
 
       let actualRecipients = 0;
 
@@ -194,6 +210,11 @@ export default function Notifications() {
 
         if (sendError) {
           console.error('Error sending in-app notifications:', sendError);
+          toast({
+            title: '⚠️ Partial success',
+            description: 'Notification saved but in-app delivery failed: ' + sendError.message,
+            variant: 'destructive',
+          });
         } else {
           actualRecipients = result || 0;
         }
@@ -218,8 +239,22 @@ export default function Notifications() {
         priority: 'normal',
       });
       setComposeOpen(false);
+
+      toast({
+        title: schedule ? '📅 Notification scheduled' : '✅ Notification sent',
+        description: schedule 
+          ? 'Notification has been scheduled'
+          : `Sent to ${actualRecipients} users`,
+      });
     } catch (error) {
       console.error('Error sending notification:', error);
+      toast({
+        title: '❌ Error sending notification',
+        description: error.message || 'Unknown error occurred',
+        variant: 'destructive',
+      });
+    } finally {
+      setSending(false);
     }
   };
 
@@ -494,11 +529,15 @@ export default function Notifications() {
             <div className="flex gap-3 pt-2">
               <button
                 onClick={() => handleSendNotification(false)}
-                disabled={!newNotification.title || !newNotification.message}
+                disabled={!newNotification.title || !newNotification.message || sending}
                 className="flex-1 py-2 bg-primary text-white rounded-lg hover:bg-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                <Send className="w-4 h-4" />
-                Send Now
+                {sending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
+                {sending ? 'Sending...' : 'Send Now'}
               </button>
               <button
                 onClick={() => setComposeOpen(true)}

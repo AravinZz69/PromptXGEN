@@ -749,21 +749,34 @@ function ChatHistoryTab() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('chat_history')
-        .select(`
-          *,
-          profiles:user_id (full_name)
-        `)
+      // Fetch chat conversations
+      const { data: chatsData, error: chatsError } = await supabase
+        .from('chat_conversations')
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (chatsError) throw chatsError;
       
-      // Map the joined data to include user_name
-      const mappedData = (data || []).map((item: any) => ({
+      // Fetch profiles separately to get user names
+      const userIds = [...new Set((chatsData || []).map(item => item.user_id).filter(Boolean))];
+      let profilesMap: Record<string, string> = {};
+      
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name')
+          .in('id', userIds);
+        
+        profilesMap = (profiles || []).reduce((acc: Record<string, string>, p: any) => {
+          acc[p.id] = p.full_name;
+          return acc;
+        }, {});
+      }
+      
+      // Map the data to include user_name
+      const mappedData = (chatsData || []).map((item: any) => ({
         ...item,
-        user_name: item.profiles?.full_name || null,
-        profiles: undefined,
+        user_name: profilesMap[item.user_id] || null,
       }));
       setItems(mappedData);
     } catch (error: any) {
@@ -838,7 +851,7 @@ function ChatHistoryTab() {
     try {
       const newFlagged = !flagItem.is_flagged;
       const { error } = await supabase
-        .from('chat_history')
+        .from('chat_conversations')
         .update({
           is_flagged: newFlagged,
           flag_reason: newFlagged ? flagReason : null,
@@ -866,7 +879,7 @@ function ChatHistoryTab() {
   const handleDelete = async () => {
     if (!deleteItem) return;
     try {
-      const { error } = await supabase.from('chat_history').delete().eq('id', deleteItem.id);
+      const { error } = await supabase.from('chat_conversations').delete().eq('id', deleteItem.id);
       if (error) throw error;
       setItems((prev) => prev.filter((i) => i.id !== deleteItem.id));
       toast({ title: '✅ Deleted' });

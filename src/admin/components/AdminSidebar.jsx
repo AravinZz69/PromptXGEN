@@ -100,6 +100,13 @@ export default function AdminSidebar({ isOpen, onClose }) {
     navigate('/auth');
   };
 
+  // Only close sidebar on mobile (< 1024px)
+  const handleNavClick = () => {
+    if (window.innerWidth < 1024) {
+      onClose();
+    }
+  };
+
   return (
     <>
       {/* Mobile overlay */}
@@ -139,7 +146,7 @@ export default function AdminSidebar({ isOpen, onClose }) {
                 <NavLink
                   key={item.to}
                   to={item.to}
-                  onClick={onClose}
+                  onClick={handleNavClick}
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-6 py-2.5 text-sm font-medium transition-colors ${
                       isActive

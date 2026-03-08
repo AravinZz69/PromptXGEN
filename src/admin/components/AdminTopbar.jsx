@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { Bell, Search, Menu, ChevronDown, User, Key, LogOut } from 'lucide-react';
 import { getAdminSession, adminLogout } from '../adminAuth';
 
@@ -74,14 +74,17 @@ export default function AdminTopbar({ onMenuClick }) {
 
       {/* Right section */}
       <div className="flex items-center gap-4">
-        {/* Notifications */}
-        <button className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-sidebar-accent">
+        {/* Notifications - links to admin notifications page */}
+        <Link 
+          to="/admin/notifications"
+          className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-sidebar-accent"
+        >
           <Bell className="w-5 h-5" />
-          {/* MOCK DATA - Notification badge */}
+          {/* Notification badge */}
           <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs font-medium rounded-full flex items-center justify-center">
             3
           </span>
-        </button>
+        </Link>
 
         {/* Admin profile dropdown */}
         <div className="relative" ref={dropdownRef}>

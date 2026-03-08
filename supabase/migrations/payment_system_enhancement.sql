@@ -40,7 +40,7 @@ CREATE POLICY "Admins have full access to payment_gateways" ON public.payment_ga
     EXISTS (
       SELECT 1 FROM admin_users 
       WHERE user_id = auth.uid() 
-      AND role IN ('owner', 'admin')
+      AND role::text IN ('owner', 'admin')
       AND is_active = true
     )
   );
@@ -52,7 +52,7 @@ CREATE POLICY "Admins have full access to payment_transactions" ON public.paymen
     EXISTS (
       SELECT 1 FROM admin_users 
       WHERE user_id = auth.uid() 
-      AND role IN ('owner', 'admin')
+      AND role::text IN ('owner', 'admin')
       AND is_active = true
     )
   );

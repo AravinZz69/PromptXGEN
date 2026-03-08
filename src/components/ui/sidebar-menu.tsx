@@ -14,6 +14,7 @@ import {
   Bookmark,
   Shield,
   UserCircle,
+  Bell,
 } from 'lucide-react';
 import { CreditBadge } from '@/components/credits/CreditBadge';
 import { checkIsAdmin } from '@/lib/adminService';
@@ -35,6 +36,7 @@ const navItems: NavItem[] = [
   { id: 'templates', label: 'Templates', icon: LayoutTemplate },
   { id: 'bookmarks', label: 'Bookmarks', icon: Bookmark },
   { id: 'history', label: 'Prompt/Chat History', icon: History },
+  { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'analytics', label: 'My Analytics', icon: Clock },
   { id: 'profile', label: 'My Profile', icon: UserCircle },
   { id: 'admin', label: 'Admin Panel', icon: Shield, adminOnly: true },

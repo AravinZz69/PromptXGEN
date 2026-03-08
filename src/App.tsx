@@ -28,6 +28,7 @@ import BlogPost from "./pages/BlogPost";
 import AboutUs from "./pages/AboutUs";
 import ContactUs from "./pages/ContactUs";
 import TermsAndPolicies from "./pages/TermsAndPolicies";
+import UserNotifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
 
 // Admin Portal imports
@@ -142,6 +143,14 @@ function AnimatedRoutes() {
           element={
             <ProtectedRoute>
               <UserAnalytics />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <UserNotifications />
             </ProtectedRoute>
           }
         />

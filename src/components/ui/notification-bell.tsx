@@ -177,7 +177,7 @@ export function NotificationBell({
 
         <DropdownMenuContent
           align="end"
-          className="w-80 max-h-96 overflow-hidden bg-card border border-border rounded-xl shadow-xl"
+          className="z-[100] w-80 max-h-96 overflow-hidden bg-card border border-border rounded-xl shadow-xl"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
@@ -258,12 +258,13 @@ export function NotificationBell({
             <>
               <DropdownMenuSeparator />
               <div className="p-2">
-                <button
+                <Link
+                  to="/notifications"
                   onClick={() => setIsOpen(false)}
-                  className="w-full text-center text-sm text-primary hover:text-primary/80 py-2"
+                  className="block w-full text-center text-sm text-primary hover:text-primary/80 py-2"
                 >
                   View all notifications
-                </button>
+                </Link>
               </div>
             </>
           )}

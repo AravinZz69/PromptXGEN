@@ -163,7 +163,6 @@ function PromptHistoryTab() {
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState<string>('all');
   const [dateRange, setDateRange] = useState<DateRange>('all');
   const [flagFilter, setFlagFilter] = useState<string>('all');
 
@@ -245,11 +244,6 @@ function PromptHistoryTab() {
       );
     }
 
-    // Type filter
-    if (typeFilter !== 'all') {
-      result = result.filter((item) => item.type === typeFilter);
-    }
-
     // Date range
     if (dateRange !== 'all') {
       const now = new Date();
@@ -285,7 +279,7 @@ function PromptHistoryTab() {
     });
 
     return result;
-  }, [items, searchQuery, typeFilter, dateRange, flagFilter, sortField, sortDirection]);
+  }, [items, searchQuery, dateRange, flagFilter, sortField, sortDirection]);
 
   // Stats
   const stats = useMemo(() => {
@@ -405,19 +399,6 @@ function PromptHistoryTab() {
             className="w-full pl-10 pr-4 py-2 bg-muted border border-border text-white placeholder-muted-foreground rounded-lg"
           />
         </div>
-
-        <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-[130px] bg-muted border-border text-white">
-            <SelectValue placeholder="Type" />
-          </SelectTrigger>
-          <SelectContent className="bg-muted border-border">
-            <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="basic">Basic</SelectItem>
-            <SelectItem value="advanced">Advanced</SelectItem>
-            <SelectItem value="cot">CoT</SelectItem>
-            <SelectItem value="template">Template</SelectItem>
-          </SelectContent>
-        </Select>
 
         <Select value={dateRange} onValueChange={(v: any) => setDateRange(v)}>
           <SelectTrigger className="w-[140px] bg-muted border-border text-white">

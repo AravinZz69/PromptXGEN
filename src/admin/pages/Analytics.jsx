@@ -34,17 +34,13 @@ import { supabase } from '../../lib/supabase';
 
 export default function Analytics() {
   const [dateRange, setDateRange] = useState('30 Days');
-  const [planFilter, setPlanFilter] = useState('All');
-  const [regionFilter, setRegionFilter] = useState('Global');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   
   // Analytics data state
   const [analyticsKPIs, setAnalyticsKPIs] = useState([]);
   const [chartData, setChartData] = useState([]);
-  const [cohortData, setCohortData] = useState([]);
   const [topTemplates, setTopTemplates] = useState([]);
-  const [categoryData, setCategoryData] = useState([]);
   const [tokenData, setTokenData] = useState([]);
   const [conversionData, setConversionData] = useState([]);
   const [errorLatencyData, setErrorLatencyData] = useState([]);
@@ -140,30 +136,6 @@ export default function Analytics() {
 
       setChartData(chartDataMapped.length > 0 ? chartDataMapped : generateSampleChartData());
 
-      // Fetch prompt categories
-      const { data: categoryStats } = await supabase
-        .from('prompt_history')
-        .select('category');
-
-      const catMap = {};
-      (categoryStats || []).forEach(p => {
-        const cat = p.category || 'Other';
-        catMap[cat] = (catMap[cat] || 0) + 1;
-      });
-      const totalCat = Object.values(catMap).reduce((a, b) => a + b, 0) || 1;
-      const categoryDataMapped = Object.entries(catMap).map(([category, count]) => ({
-        category,
-        percentage: Math.round((count / totalCat) * 100),
-      })).sort((a, b) => b.percentage - a.percentage);
-
-      setCategoryData(categoryDataMapped.length > 0 ? categoryDataMapped : [
-        { category: 'Coding', percentage: 35 },
-        { category: 'Marketing', percentage: 25 },
-        { category: 'Business', percentage: 20 },
-        { category: 'Creative Writing', percentage: 15 },
-        { category: 'Other', percentage: 5 },
-      ]);
-
       // Fetch top templates from prompt_templates
       const { data: templatesData } = await supabase
         .from('prompt_templates')
@@ -180,55 +152,6 @@ export default function Analytics() {
         trend: Math.random() > 0.3 ? 'up' : 'down',
       }));
       setTopTemplates(templatesMapped);
-
-      // Generate cohort data from user registrations with activity tracking
-      const { data: usersWithDates } = await supabase
-        .from('profiles')
-        .select('id, created_at')
-        .order('created_at', { ascending: false })
-        .limit(200);
-
-      const cohortMap = {};
-      (usersWithDates || []).forEach(u => {
-        const week = new Date(u.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        if (!cohortMap[week]) cohortMap[week] = { users: 0, userIds: [] };
-        cohortMap[week].users++;
-        cohortMap[week].userIds.push(u.id);
-      });
-
-      // Get activity data for retention calculation
-      const { data: recentActivity } = await supabase
-        .from('prompt_history')
-        .select('user_id, created_at')
-        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
-
-      const userLastActivity = {};
-      (recentActivity || []).forEach(a => {
-        if (!userLastActivity[a.user_id] || new Date(a.created_at) > new Date(userLastActivity[a.user_id])) {
-          userLastActivity[a.user_id] = a.created_at;
-        }
-      });
-
-      const cohortDataMapped = Object.entries(cohortMap)
-        .slice(0, 4)
-        .map(([cohort, data]) => {
-          const activeIn1Day = data.userIds.filter(id => userLastActivity[id]).length;
-          const activeIn7Days = data.userIds.filter(id => {
-            const lastActive = userLastActivity[id];
-            return lastActive && (Date.now() - new Date(lastActive).getTime()) < 7 * 24 * 60 * 60 * 1000;
-          }).length;
-          return {
-            cohort,
-            users: data.users,
-            day1: data.users > 0 ? Math.round((activeIn1Day / data.users) * 100) : 0,
-            day7: data.users > 0 ? Math.round((activeIn7Days / data.users) * 100) : 0,
-            day14: Math.floor(35 + Math.random() * 20),
-            day30: Math.floor(25 + Math.random() * 20),
-            revenuePerUser: (Math.random() * 15 + 5).toFixed(2),
-          };
-        });
-
-      setCohortData(cohortDataMapped.length > 0 ? cohortDataMapped : generateSampleCohortData());
 
       // Fetch token consumption from prompt_history with tokens_used
       const { data: promptsWithTokens } = await supabase
@@ -360,13 +283,6 @@ export default function Analytics() {
     return data;
   };
 
-  const generateSampleCohortData = () => [
-    { cohort: 'Week 1', users: 245, day1: 85, day7: 62, day14: 48, day30: 35, revenuePerUser: 12.50 },
-    { cohort: 'Week 2', users: 312, day1: 82, day7: 58, day14: 45, day30: 32, revenuePerUser: 11.20 },
-    { cohort: 'Week 3', users: 189, day1: 88, day7: 65, day14: 52, day30: 38, revenuePerUser: 14.80 },
-    { cohort: 'Week 4', users: 276, day1: 80, day7: 55, day14: 42, day30: 30, revenuePerUser: 10.50 },
-  ];
-
   const generateSampleTokenData = () => {
     const data = [];
     for (let i = 13; i >= 0; i--) {
@@ -402,14 +318,28 @@ export default function Analytics() {
     return data;
   };
 
+  // Helper to get date cutoff based on dateRange
+  const getDateCutoff = () => {
+    const now = new Date();
+    switch (dateRange) {
+      case 'Today':
+        return new Date(now.setHours(0, 0, 0, 0)).toISOString();
+      case '7 Days':
+        return new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      case '30 Days':
+      default:
+        return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    }
+  };
+
   useEffect(() => {
     fetchAnalytics();
-  }, [dateRange, planFilter]);
+  }, [dateRange]);
 
-  // Real-time updates
+  // Real-time updates for live metrics
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveUsers(prev => prev + Math.floor(Math.random() * 11) - 5);
+      setActiveUsers(prev => Math.max(1, prev + Math.floor(Math.random() * 11) - 5));
       setPromptsPerMin(Math.floor(58 + Math.random() * 17));
       setApiCallsPerMin(Math.floor(120 + Math.random() * 60));
       setSparklineData(prev => [
@@ -420,6 +350,25 @@ export default function Analytics() {
     
     return () => clearInterval(interval);
   }, []);
+
+  // Real-time subscription for live data updates
+  useEffect(() => {
+    const channel = supabase
+      .channel('analytics_realtime')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'prompt_history' }, () => {
+        // Refresh top templates and token data on new prompts
+        fetchAnalytics();
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles' }, () => {
+        // Refresh conversion data when profiles change
+        fetchAnalytics();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [dateRange]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -449,12 +398,6 @@ export default function Analytics() {
     );
   };
 
-  const getRetentionColor = (value) => {
-    if (value >= 70) return 'bg-emerald-500/20 text-emerald-400';
-    if (value >= 40) return 'bg-yellow-500/20 text-yellow-400';
-    return 'bg-red-500/20 text-red-400';
-  };
-
   const getTrendIcon = (trend) => {
     if (trend === 'up') return <ArrowUp className="w-4 h-4 text-emerald-400" />;
     if (trend === 'down') return <ArrowDown className="w-4 h-4 text-red-400" />;
@@ -468,7 +411,7 @@ export default function Analytics() {
         <div className="flex flex-wrap items-center gap-4">
           {/* Date Range Tabs */}
           <div className="flex bg-card rounded-lg p-1 border border-border">
-            {['Today', '7 Days', '30 Days', '90 Days', 'Custom'].map((range) => (
+            {['Today', '7 Days', '30 Days'].map((range) => (
               <button
                 key={range}
                 onClick={() => setDateRange(range)}
@@ -482,31 +425,6 @@ export default function Analytics() {
               </button>
             ))}
           </div>
-
-          {/* Plan Filter */}
-          <select
-            value={planFilter}
-            onChange={(e) => setPlanFilter(e.target.value)}
-            className="px-3 py-2 bg-card border border-border rounded-lg text-sm text-white focus:outline-none focus:border-primary"
-          >
-            <option value="All">All Plans</option>
-            <option value="Free">Free</option>
-            <option value="Pro">Pro</option>
-            <option value="Enterprise">Enterprise</option>
-          </select>
-
-          {/* Region Filter */}
-          <select
-            value={regionFilter}
-            onChange={(e) => setRegionFilter(e.target.value)}
-            className="px-3 py-2 bg-card border border-border rounded-lg text-sm text-white focus:outline-none focus:border-primary"
-          >
-            <option value="Global">Global</option>
-            <option value="NA">North America</option>
-            <option value="EU">Europe</option>
-            <option value="APAC">Asia Pacific</option>
-            <option value="Other">Other</option>
-          </select>
 
           <div className="flex-1" />
 
@@ -565,7 +483,7 @@ export default function Analytics() {
         </ChartCard>
 
         {/* Token Consumption */}
-        <ChartCard title="Token Consumption" subtitle="Last 30 Days">
+        <ChartCard title="Token Consumption" subtitle="Real-time">
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={tokenData}>
@@ -590,24 +508,10 @@ export default function Analytics() {
         </ChartCard>
       </div>
 
-      {/* Charts Row 2 */}
+      {/* Charts Row 2 - Conversion & Error/Latency */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Prompt Categories */}
-        <ChartCard title="Prompt Categories">
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={categoryData} layout="vertical" margin={{ left: 20 }}>
-                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
-                <YAxis type="category" dataKey="category" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 11 }} width={100} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="percentage" fill="#6366F1" radius={[0, 4, 4, 0]} name="Usage %" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </ChartCard>
-
         {/* Conversion Rates */}
-        <ChartCard title="Subscription Conversion Rates" subtitle="Weekly">
+        <ChartCard title="Subscription Conversion Rates" subtitle="Real-time">
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={conversionData}>
@@ -621,12 +525,9 @@ export default function Analytics() {
             </ResponsiveContainer>
           </div>
         </ChartCard>
-      </div>
 
-      {/* Charts Row 3 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Error Rate & Latency */}
-        <ChartCard title="Error Rate & P95 Latency">
+        <ChartCard title="Error Rate & P95 Latency" subtitle="Real-time">
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={errorLatencyData}>
@@ -643,56 +544,8 @@ export default function Analytics() {
         </ChartCard>
       </div>
 
-      {/* Cohort Retention Table */}
-      <ChartCard title="User Cohort Retention">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Cohort</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Users</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground uppercase">Day 1</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground uppercase">Day 7</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground uppercase">Day 14</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground uppercase">Day 30</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Rev/User</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cohortData.map((cohort) => (
-                <tr key={cohort.cohort} className="border-b border-border/50">
-                  <td className="px-4 py-3 text-sm text-white font-medium">{cohort.cohort}</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">{(cohort.users || 0).toLocaleString()}</td>
-                  <td className="px-4 py-3 text-center">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${getRetentionColor(cohort.day1)}`}>
-                      {cohort.day1}%
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${getRetentionColor(cohort.day7)}`}>
-                      {cohort.day7}%
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${getRetentionColor(cohort.day14)}`}>
-                      {cohort.day14}%
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${getRetentionColor(cohort.day30)}`}>
-                      {cohort.day30}%
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-emerald-400">${parseFloat(cohort.revenuePerUser || 0).toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </ChartCard>
-
       {/* Top Templates Table */}
-      <ChartCard title="Top Prompt Templates">
+      <ChartCard title="Top Prompt Templates" subtitle="Real-time">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>

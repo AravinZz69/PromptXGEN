@@ -149,7 +149,7 @@ export function ProfileDropdown({
                     <DropdownMenuContent
                         align="end"
                         sideOffset={4}
-                        className="w-64 p-2 bg-card/95 backdrop-blur-sm border border-border rounded-2xl shadow-xl"
+                        className="z-[100] w-64 p-2 bg-card/95 backdrop-blur-sm border border-border rounded-2xl shadow-xl"
                     >
                         {/* User info header in dropdown for compact mode */}
                         {compact && (

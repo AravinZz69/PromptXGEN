@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   Search,
-  Filter,
   Flag,
   Trash2,
   Eye,
@@ -18,9 +17,6 @@ import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { supabase } from '../../lib/supabase';
 
-const categoryOptions = ['All', 'Coding', 'Marketing', 'Creative Writing', 'Business', 'Research', 'Other'];
-const modelOptions = ['All', 'GPT-4o', 'GPT-3.5 Turbo', 'Claude 3.5 Sonnet', 'Claude 3 Haiku'];
-
 // MOCK DATA - Plan Prompt Limits
 const planLimits = [
   { plan: 'Free', limit: 50, avgUsage: 32 },
@@ -36,8 +32,6 @@ export default function PromptManagement() {
   
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('All');
-  const [modelFilter, setModelFilter] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
   
   // Modals
@@ -144,9 +138,7 @@ export default function PromptManagement() {
     const matchesSearch = !searchQuery || 
       prompt.userEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
       prompt.input.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = categoryFilter === 'All' || prompt.category === categoryFilter;
-    const matchesModel = modelFilter === 'All' || prompt.model === modelFilter;
-    return matchesSearch && matchesCategory && matchesModel;
+    return matchesSearch;
   });
 
   const paginatedPrompts = filteredPrompts.slice(
@@ -341,26 +333,6 @@ export default function PromptManagement() {
                 className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg text-sm text-white placeholder-muted-foreground focus:outline-none focus:border-primary"
               />
             </div>
-            
-            <select
-              value={categoryFilter}
-              onChange={(e) => { setCategoryFilter(e.target.value); setCurrentPage(1); }}
-              className="px-3 py-2 bg-card border border-border rounded-lg text-sm text-white focus:outline-none focus:border-primary"
-            >
-              {categoryOptions.map(opt => (
-                <option key={opt} value={opt}>{opt === 'All' ? 'All Categories' : opt}</option>
-              ))}
-            </select>
-
-            <select
-              value={modelFilter}
-              onChange={(e) => { setModelFilter(e.target.value); setCurrentPage(1); }}
-              className="px-3 py-2 bg-card border border-border rounded-lg text-sm text-white focus:outline-none focus:border-primary"
-            >
-              {modelOptions.map(opt => (
-                <option key={opt} value={opt}>{opt === 'All' ? 'All Models' : opt}</option>
-              ))}
-            </select>
           </div>
 
           {/* Prompts Table */}

@@ -186,21 +186,37 @@ function PromptHistoryTab() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      // Fetch prompt history
+      const { data: historyData, error: historyError } = await supabase
         .from('prompt_history')
-        .select(`
-          *,
-          profiles:user_id (full_name)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (historyError) throw historyError;
       
-      // Map the joined data to include user_name
-      const mappedData = (data || []).map((item: any) => ({
+      // Get unique user IDs
+      const userIds = [...new Set((historyData || []).map((item: any) => item.user_id))];
+      
+      // Fetch profiles for these users
+      let profilesMap: Record<string, string> = {};
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name')
+          .in('id', userIds);
+        
+        if (profiles) {
+          profilesMap = profiles.reduce((acc: Record<string, string>, p: any) => {
+            acc[p.id] = p.full_name || 'Unknown User';
+            return acc;
+          }, {});
+        }
+      }
+      
+      // Map the data to include user_name
+      const mappedData = (historyData || []).map((item: any) => ({
         ...item,
-        user_name: item.profiles?.full_name || null,
-        profiles: undefined, // Remove the nested profiles object
+        user_name: profilesMap[item.user_id] || null,
       }));
       setItems(mappedData);
     } catch (error: any) {

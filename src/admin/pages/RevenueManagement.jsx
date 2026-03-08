@@ -61,6 +61,22 @@ export default function RevenueManagement() {
   const fetchRevenueData = async () => {
     setLoading(true);
     try {
+      // Fetch profiles to get user plan counts
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, email, full_name, plan');
+
+      // Count users by plan from profiles table
+      const proUsers = (profilesData || []).filter(p => 
+        p.plan?.toLowerCase() === 'pro' || p.plan?.toLowerCase() === 'starter'
+      ).length;
+      const enterpriseUsers = (profilesData || []).filter(p => 
+        p.plan?.toLowerCase() === 'enterprise'
+      ).length;
+      const freeUsers = (profilesData || []).filter(p => 
+        !p.plan || p.plan?.toLowerCase() === 'free'
+      ).length;
+
       // Fetch subscriptions
       const { data: subsData, error: subsError } = await supabase
         .from('subscriptions')
@@ -101,22 +117,12 @@ export default function RevenueManagement() {
 
       // Calculate total revenue from payment transactions
       const paymentRevenue = (paymentData || []).reduce((acc, t) => acc + (parseFloat(t.amount) || 0), 0);
+      const paidUsers = proUsers + enterpriseUsers;
       
-      // Calculate KPIs from subscriptions
-      const proUsers = (subsData || []).filter(s => 
-        s.plan?.toLowerCase() === 'pro' || s.plan?.toLowerCase() === 'starter'
-      ).length;
-      const enterpriseUsers = (subsData || []).filter(s => 
-        s.plan?.toLowerCase() === 'enterprise'
-      ).length;
-      const activeSubscriptions = (subsData || []).filter(s => 
-        s.status === 'Active' || s.status === 'active'
-      ).length;
-      
-      // PRO plan: ₹499/month, Enterprise: ₹1999/month (or $19/$99 in USD)
+      // PRO plan: ₹499/month, Enterprise: ₹1999/month
       const mrr = proUsers * 499 + enterpriseUsers * 1999;
       const arr = mrr * 12;
-      const arpu = activeSubscriptions > 0 ? mrr / activeSubscriptions : 0;
+      const arpu = paidUsers > 0 ? mrr / paidUsers : 0;
 
       // Today's revenue
       const today = new Date().toDateString();
@@ -158,37 +164,35 @@ export default function RevenueManagement() {
 
       setChartData(chartDataMapped);
 
-      // Calculate Revenue by Plan from subscriptions
-      const planRevenue = {};
-      (subsData || []).forEach(s => {
-        const plan = s.plan || 'Free';
-        const amount = s.amount || 0;
-        if (!planRevenue[plan]) {
-          planRevenue[plan] = 0;
-        }
-        planRevenue[plan] += amount;
-      });
-
-      // Also add from payment transactions
-      (paymentData || []).forEach(t => {
-        const plan = t.metadata?.plan || t.plan || 'Pro';
-        const amount = parseFloat(t.amount) || 0;
-        if (!planRevenue[plan]) {
-          planRevenue[plan] = 0;
-        }
-        planRevenue[plan] += amount;
-      });
-
-      const planChartData = Object.entries(planRevenue).map(([plan, revenue]) => ({
-        plan,
-        revenue
-      })).sort((a, b) => b.revenue - a.revenue);
-
-      setRevenueByPlan(planChartData.length > 0 ? planChartData : [
+      // Calculate Revenue by Plan - use profile plan counts for expected MRR
+      // This shows potential monthly revenue based on current user plans
+      const revenueByPlanData = [
         { plan: 'Pro', revenue: proUsers * 499 },
         { plan: 'Enterprise', revenue: enterpriseUsers * 1999 },
         { plan: 'Free', revenue: 0 }
-      ]);
+      ].filter(p => p.revenue > 0 || p.plan === 'Free');
+
+      // If we have actual payment data, override with real revenue
+      if (paymentData && paymentData.length > 0) {
+        const actualRevenue = {};
+        paymentData.forEach(t => {
+          const plan = t.metadata?.plan || t.plan || 'Pro';
+          const amount = parseFloat(t.amount) || 0;
+          if (!actualRevenue[plan]) {
+            actualRevenue[plan] = 0;
+          }
+          actualRevenue[plan] += amount;
+        });
+        
+        // Update with actual revenue where available
+        revenueByPlanData.forEach(item => {
+          if (actualRevenue[item.plan]) {
+            item.revenue = actualRevenue[item.plan];
+          }
+        });
+      }
+
+      setRevenueByPlan(revenueByPlanData.sort((a, b) => b.revenue - a.revenue));
 
       // Fetch failed payments (status = failed)
       const { data: failedData } = await supabase
@@ -264,10 +268,24 @@ export default function RevenueManagement() {
       )
       .subscribe();
 
+    // Subscribe to profiles changes (for plan updates)
+    const profilesChannel = supabase
+      .channel('revenue_profiles_changes')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'profiles' },
+        (payload) => {
+          console.log('Profile plan changed:', payload);
+          fetchRevenueData();
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(subscriptionsChannel);
       supabase.removeChannel(paymentsChannel);
       supabase.removeChannel(creditsChannel);
+      supabase.removeChannel(profilesChannel);
     };
   }, []);
 

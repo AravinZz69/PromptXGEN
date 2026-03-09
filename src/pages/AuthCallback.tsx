@@ -16,7 +16,23 @@ const AuthCallback = () => {
       }
 
       if (data.session) {
-        navigate('/dashboard');
+        // Check if user has completed onboarding
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('onboarding_completed, role, use_case, experience_level')
+          .eq('user_id', data.session.user.id)
+          .single();
+
+        // If profile exists and has role/use_case/experience_level OR onboarding_completed is true
+        const hasCompletedOnboarding = profile?.onboarding_completed || 
+          (profile?.role && profile?.use_case && profile?.experience_level);
+
+        if (hasCompletedOnboarding) {
+          navigate('/dashboard');
+        } else {
+          // Redirect to onboarding for OAuth users
+          navigate('/onboarding');
+        }
       } else {
         navigate('/auth');
       }

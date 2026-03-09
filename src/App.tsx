@@ -31,6 +31,7 @@ import TermsAndPolicies from "./pages/TermsAndPolicies";
 import UserNotifications from "./pages/Notifications";
 import TransactionHistory from "./pages/TransactionHistory";
 import NotFound from "./pages/NotFound";
+import Onboarding from "./pages/Onboarding";
 
 // Admin Portal imports
 import AdminApp from "./admin/AdminApp";
@@ -78,6 +79,7 @@ function AnimatedRoutes() {
         <Route path="/auth" element={<Auth />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/auth/reset-password" element={<ResetPassword />} />
+        <Route path="/onboarding" element={<Onboarding />} />
         <Route
           path="/dashboard"
           element={

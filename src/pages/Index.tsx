@@ -33,9 +33,24 @@ const Index = () => {
         }
         
         if (session) {
-          // Clear the hash from URL and redirect to dashboard
+          // Clear the hash from URL
           window.history.replaceState(null, '', window.location.pathname);
-          navigate('/dashboard');
+          
+          // Check if user has completed onboarding
+          const { data: profile } = await supabase
+            .from('user_profiles')
+            .select('onboarding_completed, role, use_case, experience_level')
+            .eq('user_id', session.user.id)
+            .single();
+
+          const hasCompletedOnboarding = profile?.onboarding_completed || 
+            (profile?.role && profile?.use_case && profile?.experience_level);
+
+          if (hasCompletedOnboarding) {
+            navigate('/dashboard');
+          } else {
+            navigate('/onboarding');
+          }
         }
       };
       

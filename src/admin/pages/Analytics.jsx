@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Clock,
   AlertCircle,
@@ -54,47 +54,81 @@ export default function Analytics() {
     Array.from({ length: 10 }, (_, i) => ({ x: i, y: 140 + Math.random() * 40 }))
   );
 
+  // Helper to get date cutoff based on dateRange
+  const getDateCutoff = useCallback(() => {
+    const now = new Date();
+    switch (dateRange) {
+      case 'Today': {
+        const today = new Date(now);
+        today.setHours(0, 0, 0, 0);
+        return today.toISOString();
+      }
+      case '7 Days':
+        return new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      case 'Last Month':
+        return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      case '30 Days':
+      default:
+        return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    }
+  }, [dateRange]);
+
+  // Get the number of days for the selected range (for chart grouping)
+  const getRangeDays = useCallback(() => {
+    switch (dateRange) {
+      case 'Today': return 1;
+      case '7 Days': return 7;
+      case 'Last Month': return 30;
+      case '30 Days':
+      default: return 30;
+    }
+  }, [dateRange]);
+
   // Fetch analytics data from Supabase
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     setLoading(true);
+    const cutoff = getDateCutoff();
+    const rangeDays = getRangeDays();
+
     try {
-      // Fetch user counts
+      // Fetch user counts (total is always all-time)
       const { count: totalUsers } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true });
 
-      // Fetch prompt counts
+      // Fetch prompt counts within date range
       const { count: totalPrompts } = await supabase
         .from('prompt_history')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', cutoff);
 
-      // Fetch credit transactions
+      // Fetch credit transactions within date range
       const { data: transactions } = await supabase
         .from('credit_transactions')
         .select('amount, transaction_type, created_at')
+        .gte('created_at', cutoff)
         .order('created_at', { ascending: false })
-        .limit(1000);
+        .limit(5000);
 
       const creditsUsed = (transactions || [])
         .filter(t => t.transaction_type === 'deduction' || t.amount < 0)
         .reduce((acc, t) => acc + Math.abs(t.amount || 0), 0);
 
-      // Fetch users registered today
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const { count: usersToday } = await supabase
+      // Fetch users registered within date range
+      const { count: newUsers } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true })
-        .gte('created_at', today.toISOString());
+        .gte('created_at', cutoff);
 
-      // Build KPIs with real data (removed Total Prompts)
+      // Build KPIs
+      const rangeLabel = dateRange === 'Today' ? 'Today' : dateRange;
       setAnalyticsKPIs([
-        { title: 'Total Users', value: (totalUsers || 0).toLocaleString(), change: '+12%', changeType: 'positive', icon: Users, color: 'blue' },
-        { title: 'Credits Used', value: creditsUsed.toLocaleString(), change: '+8%', changeType: 'positive', icon: Coins, color: 'amber' },
-        { title: 'New Today', value: (usersToday || 0).toLocaleString(), change: '+3%', changeType: 'positive', icon: TrendingUp, color: 'emerald' },
+        { title: 'Total Users', value: (totalUsers || 0).toLocaleString(), change: `${rangeLabel}`, changeType: 'neutral', icon: Users, color: 'blue' },
+        { title: 'Credits Used', value: creditsUsed.toLocaleString(), change: rangeLabel, changeType: 'neutral', icon: Coins, color: 'amber' },
+        { title: 'New Users', value: (newUsers || 0).toLocaleString(), change: rangeLabel, changeType: 'positive', icon: TrendingUp, color: 'emerald' },
       ]);
 
-      // Calculate active users and prompts per minute from recent activity
+      // Active users and prompts per minute from recent activity
       const { data: recentActiveData } = await supabase
         .from('prompt_history')
         .select('user_id')
@@ -108,14 +142,14 @@ export default function Analytics() {
         .select('*', { count: 'exact', head: true })
         .gte('created_at', new Date(Date.now() - 60 * 60 * 1000).toISOString());
       
-      setPromptsPerMin(Math.max(1, Math.floor((recentPromptsCount || 0) / 60)));
-      setApiCallsPerMin(Math.max(1, Math.floor((recentPromptsCount || 0) / 60) * 2));
+      setPromptsPerMin(Math.max(0, Math.floor((recentPromptsCount || 0) / 60)));
+      setApiCallsPerMin(Math.max(0, Math.floor((recentPromptsCount || 0) / 60) * 2));
 
-      // Fetch prompt history for daily chart
+      // Fetch prompt history for daily chart — filtered by date range
       const { data: promptsByDay } = await supabase
         .from('prompt_history')
         .select('created_at, user_id')
-        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+        .gte('created_at', cutoff)
         .order('created_at', { ascending: true });
 
       // Group by day
@@ -134,9 +168,9 @@ export default function Analytics() {
         Users: usersByDay[day]?.size || 0,
       }));
 
-      setChartData(chartDataMapped.length > 0 ? chartDataMapped : generateSampleChartData());
+      setChartData(chartDataMapped.length > 0 ? chartDataMapped : generateSampleChartData(rangeDays));
 
-      // Fetch top templates from prompt_templates
+      // Fetch top templates
       const { data: templatesData } = await supabase
         .from('prompt_templates')
         .select('name, category, times_used, is_featured')
@@ -153,11 +187,11 @@ export default function Analytics() {
       }));
       setTopTemplates(templatesMapped);
 
-      // Fetch token consumption from prompt_history with tokens_used
+      // Fetch token consumption — filtered by date range
       const { data: promptsWithTokens } = await supabase
         .from('prompt_history')
         .select('created_at, tokens_used, credits_used')
-        .gte('created_at', new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString())
+        .gte('created_at', cutoff)
         .order('created_at', { ascending: true });
 
       const tokensByDay = {};
@@ -174,18 +208,19 @@ export default function Analytics() {
         inputTokens: data.input,
         outputTokens: data.output,
       }));
-      setTokenData(tokenDataMapped.length > 0 ? tokenDataMapped : generateSampleTokenData());
+      setTokenData(tokenDataMapped.length > 0 ? tokenDataMapped : generateSampleTokenData(rangeDays));
 
-      // Fetch conversion data from user plan distribution
+      // Conversion data — filtered by date range
       const { data: planDistribution } = await supabase
         .from('profiles')
         .select('plan, created_at')
-        .gte('created_at', new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString());
+        .gte('created_at', cutoff);
 
       const weeklyConversions = {};
+      const weeksInRange = Math.max(1, Math.ceil(rangeDays / 7));
       (planDistribution || []).forEach(p => {
         const weekNum = Math.floor((Date.now() - new Date(p.created_at).getTime()) / (7 * 24 * 60 * 60 * 1000));
-        const weekLabel = `W${4 - Math.min(weekNum, 3)}`;
+        const weekLabel = rangeDays <= 1 ? 'Today' : `W${weeksInRange - Math.min(weekNum, weeksInRange - 1)}`;
         if (!weeklyConversions[weekLabel]) weeklyConversions[weekLabel] = { free: 0, pro: 0, enterprise: 0 };
         weeklyConversions[weekLabel][p.plan || 'free']++;
       });
@@ -200,14 +235,14 @@ export default function Analytics() {
             proToEnterprise: ((data.enterprise / total) * 100).toFixed(1),
           };
         });
-      setConversionData(conversionDataMapped.length > 0 ? conversionDataMapped : generateConversionData());
+      setConversionData(conversionDataMapped.length > 0 ? conversionDataMapped : generateConversionData(rangeDays));
 
-      // Fetch error/latency from analytics_events if available
+      // Error/latency — filtered by date range
       const { data: analyticsEvents } = await supabase
         .from('analytics_events')
         .select('event_type, event_data, created_at')
         .in('event_type', ['api_call', 'error', 'latency'])
-        .gte('created_at', new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString());
+        .gte('created_at', cutoff);
 
       const errorLatencyByDay = {};
       (analyticsEvents || []).forEach(e => {
@@ -223,13 +258,13 @@ export default function Analytics() {
         errorRate: data.total > 0 ? (data.errors / data.total) * 100 : 0,
         p95Latency: data.total > 0 ? Math.floor(data.latencySum / data.total) : 150,
       }));
-      setErrorLatencyData(errorLatencyMapped.length > 0 ? errorLatencyMapped : generateErrorLatencyData());
+      setErrorLatencyData(errorLatencyMapped.length > 0 ? errorLatencyMapped : generateErrorLatencyData(rangeDays));
 
-      // Generate funnel data from real user stats and activity
+      // Funnel data — filtered by date range
       const { data: activeUsersData } = await supabase
         .from('prompt_history')
         .select('user_id')
-        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+        .gte('created_at', cutoff);
       
       const uniqueActiveUsers = new Set((activeUsersData || []).map(u => u.user_id)).size;
       
@@ -240,13 +275,8 @@ export default function Analytics() {
       
       const paidUsers = paidUsersData?.length || 0;
       
-      const { data: powerUsersData } = await supabase
-        .from('prompt_history')
-        .select('user_id')
-        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
-      
       const userPromptCounts = {};
-      (powerUsersData || []).forEach(p => {
+      (activeUsersData || []).forEach(p => {
         userPromptCounts[p.user_id] = (userPromptCounts[p.user_id] || 0) + 1;
       });
       const powerUsers = Object.values(userPromptCounts).filter(count => count >= 10).length;
@@ -266,12 +296,12 @@ export default function Analytics() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getDateCutoff, getRangeDays, dateRange]);
 
-  // Helper functions for sample data when real data is insufficient
-  const generateSampleChartData = () => {
+  // Helper functions for sample data
+  const generateSampleChartData = (days = 14) => {
     const data = [];
-    for (let i = 13; i >= 0; i--) {
+    for (let i = days - 1; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
       data.push({
@@ -283,9 +313,9 @@ export default function Analytics() {
     return data;
   };
 
-  const generateSampleTokenData = () => {
+  const generateSampleTokenData = (days = 14) => {
     const data = [];
-    for (let i = 13; i >= 0; i--) {
+    for (let i = days - 1; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
       data.push({
@@ -297,16 +327,18 @@ export default function Analytics() {
     return data;
   };
 
-  const generateConversionData = () => [
-    { week: 'W1', freeToPro: 8.5, proToEnterprise: 2.1 },
-    { week: 'W2', freeToPro: 9.2, proToEnterprise: 2.4 },
-    { week: 'W3', freeToPro: 7.8, proToEnterprise: 1.9 },
-    { week: 'W4', freeToPro: 10.1, proToEnterprise: 2.8 },
-  ];
+  const generateConversionData = (days = 30) => {
+    const weeks = Math.max(1, Math.ceil(days / 7));
+    return Array.from({ length: weeks }, (_, i) => ({
+      week: days <= 1 ? 'Today' : `W${i + 1}`,
+      freeToPro: (7 + Math.random() * 4).toFixed(1),
+      proToEnterprise: (1.5 + Math.random() * 2).toFixed(1),
+    }));
+  };
 
-  const generateErrorLatencyData = () => {
+  const generateErrorLatencyData = (days = 14) => {
     const data = [];
-    for (let i = 13; i >= 0; i--) {
+    for (let i = days - 1; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
       data.push({
@@ -318,29 +350,14 @@ export default function Analytics() {
     return data;
   };
 
-  // Helper to get date cutoff based on dateRange
-  const getDateCutoff = () => {
-    const now = new Date();
-    switch (dateRange) {
-      case 'Today':
-        return new Date(now.setHours(0, 0, 0, 0)).toISOString();
-      case '7 Days':
-        return new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-      case '30 Days':
-      default:
-        return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-    }
-  };
-
   useEffect(() => {
     fetchAnalytics();
-  }, [dateRange]);
+  }, [fetchAnalytics]);
 
   // Real-time updates for live metrics
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        // Fetch real active users count (users with activity in last 24h)
         const { data: recentData } = await supabase
           .from('prompt_history')
           .select('user_id')
@@ -348,7 +365,6 @@ export default function Analytics() {
         const uniqueActive = new Set((recentData || []).map(u => u.user_id)).size;
         setActiveUsers(Math.max(1, uniqueActive));
 
-        // Fetch real prompts per minute (prompts in last hour / 60)
         const { count: recentPromptsCount } = await supabase
           .from('prompt_history')
           .select('*', { count: 'exact', head: true })
@@ -368,25 +384,6 @@ export default function Analytics() {
     return () => clearInterval(interval);
   }, []);
 
-  // Real-time subscription for live data updates
-  useEffect(() => {
-    const channel = supabase
-      .channel('analytics_realtime')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'prompt_history' }, () => {
-        // Refresh top templates and token data on new prompts
-        fetchAnalytics();
-      })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles' }, () => {
-        // Refresh conversion data when profiles change
-        fetchAnalytics();
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [dateRange]);
-
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await fetchAnalytics();
@@ -403,7 +400,7 @@ export default function Analytics() {
       <div className="bg-card border border-border rounded-lg px-3 py-2 shadow-xl">
         <p className="text-muted-foreground text-xs mb-1">{label}</p>
         {payload.map((entry, i) => (
-          <p key={i} className="text-white text-sm font-medium">
+          <p key={i} className="text-foreground text-sm font-medium">
             {entry.name}: {typeof entry.value === 'number' ? 
               (entry.name.includes('%') || entry.name.includes('Rate') ? 
                 `${entry.value.toFixed(1)}%` : 
@@ -424,226 +421,233 @@ export default function Analytics() {
   return (
     <div className="space-y-6">
       {/* Filters Bar */}
-      <div className="sticky top-16 z-10 -mx-4 lg:-mx-6 px-4 lg:px-6 py-4 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="flex flex-wrap items-center gap-4">
-          {/* Date Range Tabs */}
-          <div className="flex bg-card rounded-lg p-1 border border-border">
-            {['Today', '7 Days', '30 Days'].map((range) => (
-              <button
-                key={range}
-                onClick={() => setDateRange(range)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                  dateRange === range
-                    ? 'bg-primary text-white'
-                    : 'text-muted-foreground hover:text-white'
-                }`}
-              >
-                {range}
-              </button>
+      <div className="flex flex-wrap items-center gap-4 pb-4 border-b border-border">
+        {/* Date Range Tabs */}
+        <div className="flex bg-card rounded-lg p-1 border border-border">
+          {['Today', '7 Days', '30 Days', 'Last Month'].map((range) => (
+            <button
+              key={range}
+              onClick={() => setDateRange(range)}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                dateRange === range
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {range}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex-1" />
+
+        {/* Actions */}
+        <button
+          onClick={handleExport}
+          className="flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-lg text-sm text-muted-foreground hover:text-foreground hover:border-border transition-colors"
+        >
+          <Download className="w-4 h-4" />
+          Export CSV
+        </button>
+        <button
+          onClick={handleRefresh}
+          className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 rounded-lg text-sm text-primary-foreground transition-colors"
+        >
+          <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          Refresh
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <span className="ml-3 text-muted-foreground">Loading analytics...</span>
+        </div>
+      ) : (
+        <>
+          {/* Metric Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {analyticsKPIs.map((kpi, i) => (
+              <StatCard key={i} {...kpi} />
             ))}
           </div>
 
-          <div className="flex-1" />
-
-          {/* Actions */}
-          <button
-            onClick={handleExport}
-            className="flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-lg text-sm text-muted-foreground hover:text-white hover:border-border transition-colors"
-          >
-            <Download className="w-4 h-4" />
-            Export CSV
-          </button>
-          <button
-            onClick={handleRefresh}
-            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary rounded-lg text-sm text-white transition-colors"
-          >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
-        </div>
-      </div>
-
-      {/* Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        {analyticsKPIs.map((kpi, i) => (
-          <StatCard key={i} {...kpi} />
-        ))}
-      </div>
-
-      {/* Charts Row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* User Engagement Funnel */}
-        <ChartCard title="User Engagement Funnel">
-          <div className="space-y-3">
-            {funnelData.map((stage, i) => (
-              <div key={stage.stage} className="relative">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm text-muted-foreground">{stage.stage}</span>
-                  <span className="text-sm text-white font-medium">
-                    {stage.value.toLocaleString()}
-                    {i > 0 && (
-                      <span className="text-xs text-muted-foreground ml-2">
-                        ({stage.conversion}%)
+          {/* Charts Row 1 */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* User Engagement Funnel */}
+            <ChartCard title="User Engagement Funnel">
+              <div className="space-y-3">
+                {funnelData.map((stage, i) => (
+                  <div key={stage.stage} className="relative">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm text-muted-foreground">{stage.stage}</span>
+                      <span className="text-sm text-foreground font-medium">
+                        {stage.value.toLocaleString()}
+                        {i > 0 && (
+                          <span className="text-xs text-muted-foreground ml-2">
+                            ({stage.conversion}%)
+                          </span>
+                        )}
                       </span>
-                    )}
-                  </span>
-                </div>
-                <div className="h-8 bg-background rounded-lg overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-lg transition-all duration-500"
-                    style={{ width: `${(stage.value / (funnelData[0]?.value || 1)) * 100}%` }}
-                  />
+                    </div>
+                    <div className="h-8 bg-background rounded-lg overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-lg transition-all duration-500"
+                        style={{ width: `${(stage.value / (funnelData[0]?.value || 1)) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ChartCard>
+
+            {/* Token Consumption */}
+            <ChartCard title="Token Consumption" subtitle={dateRange}>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={tokenData}>
+                    <defs>
+                      <linearGradient id="inputGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="outputGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 10 }} interval="preserveStartEnd" />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 10 }} tickFormatter={(v) => v >= 1000000 ? `${(v / 1000000).toFixed(1)}M` : v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Area type="monotone" dataKey="inputTokens" stroke="hsl(var(--primary))" fill="url(#inputGradient)" name="Input Tokens" />
+                    <Area type="monotone" dataKey="outputTokens" stroke="#10B981" fill="url(#outputGradient)" name="Output Tokens" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </ChartCard>
+          </div>
+
+          {/* Charts Row 2 */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Conversion Rates */}
+            <ChartCard title="Subscription Conversion Rates" subtitle={dateRange}>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={conversionData}>
+                    <XAxis dataKey="week" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} tickFormatter={(v) => `${v}%`} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend verticalAlign="top" height={36} formatter={(value) => <span className="text-muted-foreground text-sm">{value}</span>} />
+                    <Line type="monotone" dataKey="freeToPro" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ fill: 'hsl(var(--primary))' }} name="Free → Pro %" />
+                    <Line type="monotone" dataKey="proToEnterprise" stroke="#10B981" strokeWidth={2} dot={{ fill: '#10B981' }} name="Pro → Enterprise %" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </ChartCard>
+
+            {/* Error Rate & Latency */}
+            <ChartCard title="Error Rate & P95 Latency" subtitle={dateRange}>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart data={errorLatencyData}>
+                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 10 }} interval="preserveStartEnd" />
+                    <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 10 }} tickFormatter={(v) => `${v.toFixed(1)}%`} />
+                    <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 10 }} tickFormatter={(v) => `${v}ms`} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <ReferenceLine yAxisId="left" y={2} stroke="#EF4444" strokeDasharray="3 3" />
+                    <Bar yAxisId="left" dataKey="errorRate" fill="#EF4444" radius={[2, 2, 0, 0]} name="Error Rate %" opacity={0.7} />
+                    <Line yAxisId="right" type="monotone" dataKey="p95Latency" stroke="#F59E0B" strokeWidth={2} dot={false} name="P95 Latency" />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </div>
+            </ChartCard>
+          </div>
+
+          {/* Top Templates Table */}
+          <ChartCard title="Top Prompt Templates" subtitle={dateRange}>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">#</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Template Name</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Times Used</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Avg Rating</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Category</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Trend</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topTemplates.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground text-sm">No template data available</td>
+                    </tr>
+                  ) : topTemplates.map((template) => (
+                    <tr key={template.rank} className="border-b border-border/50 hover:bg-muted/30">
+                      <td className="px-4 py-3 text-sm text-muted-foreground">{template.rank}</td>
+                      <td className="px-4 py-3 text-sm text-foreground">{template.name}</td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">{(template.timesUsed || 0).toLocaleString()}</td>
+                      <td className="px-4 py-3 text-sm text-amber-400">★ {template.avgRating}</td>
+                      <td className="px-4 py-3">
+                        <Badge label={template.category} variant="purple" />
+                      </td>
+                      <td className="px-4 py-3">{getTrendIcon(template.trend)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </ChartCard>
+
+          {/* Real-Time Panel */}
+          <ChartCard 
+            title={
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                </span>
+                <span>Real-Time Metrics</span>
+                <Badge label="LIVE" variant="success" />
+              </div>
+            }
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-background rounded-xl p-4">
+                <p className="text-sm text-muted-foreground mb-1">Active Users Right Now</p>
+                <p className="text-3xl font-bold text-foreground">{activeUsers.toLocaleString()}</p>
+              </div>
+              
+              <div className="bg-background rounded-xl p-4">
+                <p className="text-sm text-muted-foreground mb-1">Prompts / Minute</p>
+                <p className="text-3xl font-bold text-primary">{promptsPerMin}</p>
+              </div>
+              
+              <div className="bg-background rounded-xl p-4">
+                <p className="text-sm text-muted-foreground mb-1">API Calls / Minute</p>
+                <p className="text-3xl font-bold text-emerald-400">{apiCallsPerMin}</p>
+              </div>
+              
+              <div className="bg-background rounded-xl p-4">
+                <p className="text-sm text-muted-foreground mb-1">Activity (Last 30s)</p>
+                <div className="h-12">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={sparklineData}>
+                      <Line 
+                        type="monotone" 
+                        dataKey="y" 
+                        stroke="hsl(var(--primary))" 
+                        strokeWidth={2} 
+                        dot={false}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
-            ))}
-          </div>
-        </ChartCard>
-
-        {/* Token Consumption */}
-        <ChartCard title="Token Consumption" subtitle="Real-time">
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={tokenData}>
-                <defs>
-                  <linearGradient id="inputGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6366F1" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="outputGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 10 }} interval="preserveStartEnd" />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 10 }} tickFormatter={(v) => `${(v / 1000000).toFixed(0)}M`} />
-                <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="inputTokens" stroke="#6366F1" fill="url(#inputGradient)" name="Input Tokens" />
-                <Area type="monotone" dataKey="outputTokens" stroke="#10B981" fill="url(#outputGradient)" name="Output Tokens" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </ChartCard>
-      </div>
-
-      {/* Charts Row 2 - Conversion & Error/Latency */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Conversion Rates */}
-        <ChartCard title="Subscription Conversion Rates" subtitle="Real-time">
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={conversionData}>
-                <XAxis dataKey="week" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} tickFormatter={(v) => `${v}%`} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend verticalAlign="top" height={36} formatter={(value) => <span className="text-muted-foreground text-sm">{value}</span>} />
-                <Line type="monotone" dataKey="freeToPro" stroke="#6366F1" strokeWidth={2} dot={{ fill: '#6366F1' }} name="Free → Pro %" />
-                <Line type="monotone" dataKey="proToEnterprise" stroke="#10B981" strokeWidth={2} dot={{ fill: '#10B981' }} name="Pro → Enterprise %" />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </ChartCard>
-
-        {/* Error Rate & Latency */}
-        <ChartCard title="Error Rate & P95 Latency" subtitle="Real-time">
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={errorLatencyData}>
-                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 10 }} interval="preserveStartEnd" />
-                <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 10 }} tickFormatter={(v) => `${v.toFixed(1)}%`} />
-                <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 10 }} tickFormatter={(v) => `${v}ms`} />
-                <Tooltip content={<CustomTooltip />} />
-                <ReferenceLine yAxisId="left" y={2} stroke="#EF4444" strokeDasharray="3 3" />
-                <Bar yAxisId="left" dataKey="errorRate" fill="#EF4444" radius={[2, 2, 0, 0]} name="Error Rate %" opacity={0.7} />
-                <Line yAxisId="right" type="monotone" dataKey="p95Latency" stroke="#F59E0B" strokeWidth={2} dot={false} name="P95 Latency" />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
-        </ChartCard>
-      </div>
-
-      {/* Top Templates Table */}
-      <ChartCard title="Top Prompt Templates" subtitle="Real-time">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">#</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Template Name</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Times Used</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Avg Rating</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Category</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Trend</th>
-              </tr>
-            </thead>
-            <tbody>
-              {topTemplates.map((template) => (
-                <tr key={template.rank} className="border-b border-border/50 hover:bg-muted/30">
-                  <td className="px-4 py-3 text-sm text-muted-foreground">{template.rank}</td>
-                  <td className="px-4 py-3 text-sm text-white">{template.name}</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">{(template.timesUsed || 0).toLocaleString()}</td>
-                  <td className="px-4 py-3 text-sm text-amber-400">★ {template.avgRating}</td>
-                  <td className="px-4 py-3">
-                    <Badge label={template.category} variant="purple" />
-                  </td>
-                  <td className="px-4 py-3">{getTrendIcon(template.trend)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </ChartCard>
-
-      {/* Real-Time Panel */}
-      <ChartCard 
-        title={
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-            </span>
-            <span>Real-Time Metrics</span>
-            <Badge label="LIVE" variant="success" />
-          </div>
-        }
-      >
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Active Users */}
-          <div className="bg-background rounded-xl p-4">
-            <p className="text-sm text-muted-foreground mb-1">Active Users Right Now</p>
-            <p className="text-3xl font-bold text-white">{activeUsers.toLocaleString()}</p>
-          </div>
-          
-          {/* Prompts/Min */}
-          <div className="bg-background rounded-xl p-4">
-            <p className="text-sm text-muted-foreground mb-1">Prompts / Minute</p>
-            <p className="text-3xl font-bold text-primary">{promptsPerMin}</p>
-          </div>
-          
-          {/* API Calls/Min */}
-          <div className="bg-background rounded-xl p-4">
-            <p className="text-sm text-muted-foreground mb-1">API Calls / Minute</p>
-            <p className="text-3xl font-bold text-emerald-400">{apiCallsPerMin}</p>
-          </div>
-          
-          {/* Mini Sparkline */}
-          <div className="bg-background rounded-xl p-4">
-            <p className="text-sm text-muted-foreground mb-1">Activity (Last 30s)</p>
-            <div className="h-12">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={sparklineData}>
-                  <Line 
-                    type="monotone" 
-                    dataKey="y" 
-                    stroke="#6366F1" 
-                    strokeWidth={2} 
-                    dot={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
             </div>
-          </div>
-        </div>
-      </ChartCard>
+          </ChartCard>
+        </>
+      )}
     </div>
   );
 }

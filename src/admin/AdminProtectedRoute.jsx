@@ -77,18 +77,8 @@ export default function AdminProtectedRoute({ children }) {
     );
   }
   
-  if (!authState.hasAnySession) {
-    return (
-      <Navigate 
-        to="/auth" 
-        state={{ from: location.pathname, message: 'Please log in to continue.' }} 
-        replace 
-      />
-    );
-  }
-  
-  if (!authState.isAdmin) {
-    return <AccessDenied userEmail={authState.userEmail} />;
+  if (!authState.hasAnySession || !authState.isAdmin) {
+    return <Navigate to="/" replace />;
   }
   
   return children;

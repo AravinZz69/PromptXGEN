@@ -692,13 +692,6 @@ export default function UserManagement() {
             Export CSV
           </button>
 
-          <button
-            onClick={() => setInviteModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary rounded-lg text-sm text-primary-foreground transition-colors"
-          >
-            <UserPlus className="w-4 h-4" />
-            Invite Admin
-          </button>
         </div>
       </div>
 
@@ -708,9 +701,6 @@ export default function UserManagement() {
           <span className="text-sm text-primary">{selectedUsers.size} selected</span>
           <button className="px-3 py-1 text-sm bg-yellow-500/20 text-yellow-400 rounded hover:bg-yellow-500/30">
             Suspend All
-          </button>
-          <button className="px-3 py-1 text-sm bg-red-500/20 text-red-400 rounded hover:bg-red-500/30">
-            Delete All
           </button>
           <button className="px-3 py-1 text-sm bg-blue-500/20 text-blue-400 rounded hover:bg-blue-500/30">
             Email All
@@ -862,12 +852,6 @@ export default function UserManagement() {
                             className="flex items-center gap-2 w-full px-4 py-2 text-sm text-orange-400 hover:bg-muted"
                           >
                             <Ban className="w-4 h-4" /> Ban
-                          </button>
-                          <button
-                            onClick={() => { setConfirmAction({ type: 'delete', user }); setActiveDropdown(null); }}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-400 hover:bg-muted"
-                          >
-                            <Trash2 className="w-4 h-4" /> Delete
                           </button>
                         </div>
                       )}
@@ -1088,41 +1072,6 @@ export default function UserManagement() {
         </div>
       )}
 
-      {/* Invite Admin Modal */}
-      <Modal isOpen={inviteModalOpen} onClose={() => setInviteModalOpen(false)} title="Invite Admin">
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm text-muted-foreground mb-2">Email Address</label>
-            <input
-              type="email"
-              placeholder="admin@example.com"
-              className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:border-primary"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-muted-foreground mb-2">Role</label>
-            <select className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary">
-              <option value="admin">Admin</option>
-              <option value="moderator">Moderator</option>
-              <option value="readonly">Read Only</option>
-            </select>
-          </div>
-          <div className="flex gap-3 pt-4">
-            <button
-              onClick={() => setInviteModalOpen(false)}
-              className="flex-1 py-2 bg-muted text-foreground rounded-lg hover:bg-muted"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => { console.log('Invite sent'); setInviteModalOpen(false); }}
-              className="flex-1 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary"
-            >
-              Send Invite
-            </button>
-          </div>
-        </div>
-      </Modal>
 
       {/* Upgrade Plan Modal */}
       <Modal isOpen={!!upgradeUser} onClose={() => setUpgradeUser(null)} title="Upgrade Plan">
@@ -1251,16 +1200,6 @@ export default function UserManagement() {
         variant="danger"
       />
 
-      <ConfirmDialog
-        isOpen={confirmAction?.type === 'delete'}
-        onClose={() => setConfirmAction(null)}
-        onConfirm={() => handleDelete(confirmAction.user)}
-        title="Delete User"
-        message={`This will permanently delete ${confirmAction?.user?.name} and all their data. This action cannot be undone.`}
-        confirmLabel="Delete"
-        variant="danger"
-        requireTextInput="DELETE"
-      />
 
       <ConfirmDialog
         isOpen={!!makeAdminUser}

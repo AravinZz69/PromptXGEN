@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import {
   User,
-  Shield,
   Users,
+  Shield,
   Settings,
   Webhook,
   AlertTriangle,
@@ -10,9 +10,7 @@ import {
   Eye,
   EyeOff,
   Key,
-  Mail,
   Lock,
-  Globe,
   Bell,
   Database,
   Trash2,
@@ -20,7 +18,6 @@ import {
   Check,
   RefreshCw,
   Copy,
-  ExternalLink,
   Download,
   Loader2,
 } from 'lucide-react';
@@ -207,16 +204,12 @@ export default function AdminSettings() {
     loadProfile();
   }, []);
 
-  // MOCK DATA - Security
+  // Security settings
   const [security, setSecurity] = useState({
-    twoFactorEnabled: false,
     sessionTimeout: 8,
-    ipWhitelist: ['192.168.1.1', '10.0.0.1'],
     lastPasswordChange: 'Not tracked',
   });
 
-  // Admin Team - Only main admin
-  const [admins, setAdmins] = useState([]);
 
   // MOCK DATA - App Config
   const [appConfig, setAppConfig] = useState({
@@ -235,9 +228,7 @@ export default function AdminSettings() {
 
   // Modals
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [showInviteModal, setShowInviteModal] = useState(false);
   const [showWebhookModal, setShowWebhookModal] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(null);
   const [showPassword, setShowPassword] = useState({});
 
   // Password form
@@ -247,11 +238,6 @@ export default function AdminSettings() {
     confirm: '',
   });
 
-  // Invite form
-  const [inviteForm, setInviteForm] = useState({
-    email: '',
-    role: 'Admin',
-  });
 
   // Webhook form
   const [webhookForm, setWebhookForm] = useState({
@@ -263,7 +249,6 @@ export default function AdminSettings() {
   const sections = [
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'security', label: 'Security', icon: Shield },
-    { id: 'team', label: 'Admin Team', icon: Users },
     { id: 'app', label: 'App Config', icon: Settings },
     { id: 'webhooks', label: 'Webhooks', icon: Webhook },
     { id: 'danger', label: 'Danger Zone', icon: AlertTriangle },
@@ -362,36 +347,23 @@ export default function AdminSettings() {
     }
   };
 
-  const handleInviteAdmin = () => {
-    const newAdmin = {
-      id: admins.length + 1,
-      name: 'Pending User',
-      email: inviteForm.email,
-      role: inviteForm.role,
-      lastLogin: null,
-      status: 'Pending',
-    };
-    setAdmins([...admins, newAdmin]);
-    setInviteForm({ email: '', role: 'Admin' });
-    setShowInviteModal(false);
-    alert(`Invitation sent to ${newAdmin.email}`);
-  };
 
   const handleAddWebhook = () => {
+    if (!webhookForm.name || !webhookForm.url || webhookForm.events.length === 0) {
+      alert('Please fill in all fields and select at least one event.');
+      return;
+    }
     const newWebhook = {
-      id: webhooks.length + 1,
+      id: Date.now(),
       ...webhookForm,
       status: 'Active',
     };
     setWebhooks([...webhooks, newWebhook]);
     setWebhookForm({ name: '', url: '', events: [] });
     setShowWebhookModal(false);
+    alert(`Webhook "${newWebhook.name}" added successfully!`);
   };
 
-  const handleDeleteAdmin = () => {
-    setAdmins(admins.filter(a => a.id !== confirmDelete.id));
-    setConfirmDelete(null);
-  };
 
   const renderSection = () => {
     switch (activeSection) {
@@ -469,7 +441,7 @@ export default function AdminSettings() {
                 <div className="flex items-center gap-3">
                   <Key className="w-5 h-5 text-muted-foreground" />
                   <div>
-                    <h4 className="text-white font-medium">Password</h4>
+                    <h4 className="text-foreground font-medium">Password</h4>
                     <p className="text-sm text-muted-foreground">Last changed: {security.lastPasswordChange}</p>
                   </div>
                 </div>
@@ -482,43 +454,20 @@ export default function AdminSettings() {
               </div>
             </div>
 
-            {/* 2FA */}
-            <div className="bg-background border border-border rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Shield className="w-5 h-5 text-muted-foreground" />
-                  <div>
-                    <h4 className="text-white font-medium">Two-Factor Authentication</h4>
-                    <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => { setSecurity({ ...security, twoFactorEnabled: !security.twoFactorEnabled }); setHasChanges(true); }}
-                  className={`relative w-12 h-6 rounded-full transition-colors ${
-                    security.twoFactorEnabled ? 'bg-emerald-500' : 'bg-muted'
-                  }`}
-                >
-                  <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
-                    security.twoFactorEnabled ? 'left-6' : 'left-0.5'
-                  }`} />
-                </button>
-              </div>
-            </div>
-
             {/* Session Timeout */}
             <div className="bg-background border border-border rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Lock className="w-5 h-5 text-muted-foreground" />
                   <div>
-                    <h4 className="text-white font-medium">Session Timeout</h4>
+                    <h4 className="text-foreground font-medium">Session Timeout</h4>
                     <p className="text-sm text-muted-foreground">Automatically log out after inactivity</p>
                   </div>
                 </div>
                 <select
                   value={security.sessionTimeout}
                   onChange={(e) => { setSecurity({ ...security, sessionTimeout: parseInt(e.target.value) }); setHasChanges(true); }}
-                  className="px-3 py-2 bg-muted border border-border rounded-lg text-white text-sm focus:outline-none"
+                  className="px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none"
                 >
                   <option value="1">1 hour</option>
                   <option value="4">4 hours</option>
@@ -527,106 +476,9 @@ export default function AdminSettings() {
                 </select>
               </div>
             </div>
-
-            {/* IP Whitelist */}
-            <div className="bg-background border border-border rounded-lg p-4">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <Globe className="w-5 h-5 text-muted-foreground" />
-                  <div>
-                    <h4 className="text-white font-medium">IP Whitelist</h4>
-                    <p className="text-sm text-muted-foreground">Restrict admin access to specific IPs</p>
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                {security.ipWhitelist.map((ip, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <code className="flex-1 px-3 py-2 bg-muted rounded text-sm text-muted-foreground font-mono">{ip}</code>
-                    <button className="text-muted-foreground hover:text-red-400">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-                <button className="flex items-center gap-2 text-sm text-primary hover:text-indigo-300">
-                  <Plus className="w-4 h-4" />
-                  Add IP Address
-                </button>
-              </div>
-            </div>
           </div>
         );
 
-      case 'team':
-        return (
-          <div className="space-y-4">
-            <div className="flex justify-end">
-              <button
-                onClick={() => setShowInviteModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary"
-              >
-                <Plus className="w-4 h-4" />
-                Invite Admin
-              </button>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Admin</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Role</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Last Login</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {admins.map(admin => (
-                    <tr key={admin.id} className="border-b border-border/50">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
-                            <User className="w-4 h-4 text-primary" />
-                          </div>
-                          <div>
-                            <p className="text-white font-medium">{admin.name}</p>
-                            <p className="text-xs text-muted-foreground">{admin.email}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <Badge 
-                          label={admin.role} 
-                          variant={admin.role === 'Super Admin' ? 'purple' : 'info'} 
-                        />
-                      </td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground">
-                        {admin.lastLogin ? new Date(admin.lastLogin).toLocaleDateString() : 'Never'}
-                      </td>
-                      <td className="px-4 py-3">
-                        <Badge 
-                          label={admin.status} 
-                          variant={admin.status === 'Active' ? 'success' : 'warning'} 
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        {admin.role !== 'Super Admin' && (
-                          <button
-                            onClick={() => setConfirmDelete(admin)}
-                            className="text-muted-foreground hover:text-red-400"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        );
 
       case 'app':
         return (
@@ -719,7 +571,7 @@ export default function AdminSettings() {
             <div className="flex justify-end">
               <button
                 onClick={() => setShowWebhookModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary"
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90"
               >
                 <Plus className="w-4 h-4" />
                 Add Webhook
@@ -727,36 +579,65 @@ export default function AdminSettings() {
             </div>
 
             <div className="space-y-3">
-              {webhooks.map(webhook => (
-                <div key={webhook.id} className="bg-background border border-border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <Webhook className="w-5 h-5 text-primary" />
-                      <h4 className="text-white font-medium">{webhook.name}</h4>
-                      <Badge label={webhook.status} variant={webhook.status === 'Active' ? 'success' : 'neutral'} />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button className="text-muted-foreground hover:text-white">
-                        <RefreshCw className="w-4 h-4" />
-                      </button>
-                      <button className="text-muted-foreground hover:text-red-400">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <code className="text-sm text-muted-foreground font-mono truncate">{webhook.url}</code>
-                    <button className="text-muted-foreground hover:text-muted-foreground">
-                      <Copy className="w-3 h-3" />
-                    </button>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {webhook.events.map(event => (
-                      <Badge key={event} label={event} variant="neutral" size="sm" />
-                    ))}
-                  </div>
+              {webhooks.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Webhook className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p>No webhooks configured yet.</p>
+                  <p className="text-sm">Add a webhook to receive real-time notifications.</p>
                 </div>
-              ))}
+              ) : (
+                webhooks.map(webhook => (
+                  <div key={webhook.id} className="bg-background border border-border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <Webhook className="w-5 h-5 text-primary" />
+                        <h4 className="text-foreground font-medium">{webhook.name}</h4>
+                        <Badge label={webhook.status} variant={webhook.status === 'Active' ? 'success' : 'neutral'} />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => {
+                            setWebhooks(webhooks.map(w => 
+                              w.id === webhook.id 
+                                ? { ...w, status: w.status === 'Active' ? 'Paused' : 'Active' }
+                                : w
+                            ));
+                          }}
+                          className="text-muted-foreground hover:text-foreground"
+                          title={webhook.status === 'Active' ? 'Pause webhook' : 'Activate webhook'}
+                        >
+                          <RefreshCw className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => setWebhooks(webhooks.filter(w => w.id !== webhook.id))}
+                          className="text-muted-foreground hover:text-red-400"
+                          title="Delete webhook"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <code className="text-sm text-muted-foreground font-mono truncate flex-1">{webhook.url}</code>
+                      <button 
+                        onClick={() => {
+                          navigator.clipboard.writeText(webhook.url);
+                          alert('URL copied to clipboard!');
+                        }}
+                        className="text-muted-foreground hover:text-foreground"
+                        title="Copy URL"
+                      >
+                        <Copy className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {webhook.events.map(event => (
+                        <Badge key={event} label={event} variant="neutral" size="sm" />
+                      ))}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         );
@@ -947,47 +828,6 @@ export default function AdminSettings() {
         </div>
       </Modal>
 
-      {/* Invite Admin Modal */}
-      <Modal isOpen={showInviteModal} onClose={() => setShowInviteModal(false)} title="Invite Admin">
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm text-muted-foreground mb-2">Email Address</label>
-            <input
-              type="email"
-              value={inviteForm.email}
-              onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })}
-              placeholder="admin@example.com"
-              className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:border-primary"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-muted-foreground mb-2">Role</label>
-            <select
-              value={inviteForm.role}
-              onChange={(e) => setInviteForm({ ...inviteForm, role: e.target.value })}
-              className="w-full px-4 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
-            >
-              <option value="Admin">Admin</option>
-              <option value="Support">Support</option>
-              <option value="Viewer">Viewer</option>
-            </select>
-          </div>
-          <div className="flex gap-3 pt-4">
-            <button
-              onClick={() => setShowInviteModal(false)}
-              className="flex-1 py-2 bg-muted text-white rounded-lg hover:bg-muted"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleInviteAdmin}
-              className="flex-1 py-2 bg-primary text-white rounded-lg hover:bg-primary"
-            >
-              Send Invite
-            </button>
-          </div>
-        </div>
-      </Modal>
 
       {/* Add Webhook Modal */}
       <Modal isOpen={showWebhookModal} onClose={() => setShowWebhookModal(false)} title="Add Webhook">
@@ -1052,16 +892,6 @@ export default function AdminSettings() {
         </div>
       </Modal>
 
-      {/* Delete Admin Confirmation */}
-      <ConfirmDialog
-        isOpen={!!confirmDelete}
-        onClose={() => setConfirmDelete(null)}
-        onConfirm={handleDeleteAdmin}
-        title="Remove Admin"
-        message={`Are you sure you want to remove ${confirmDelete?.name} from the admin team?`}
-        confirmLabel="Remove"
-        variant="danger"
-      />
 
       {/* Danger Zone Confirmation */}
       <ConfirmDialog

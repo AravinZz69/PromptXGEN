@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { useUpdateChecker } from '../hooks/useUpdateChecker';
 import { adminLogout } from '../adminAuth';
-import { getMyPermissions, ROUTE_PERMISSION_MAP } from '@/lib/permissionsService';
+import { getMyPermissions, ROUTE_PERMISSION_MAP, ADMIN_PERMISSIONS } from '@/lib/permissionsService';
 
 const navGroups = [
   {
@@ -40,8 +40,6 @@ const navGroups = [
     icon: Cpu,
     items: [
       { to: '/admin/templates', icon: BookTemplate, label: 'Templates' },
-      { to: '/admin/prompts', icon: History, label: 'Prompts' },
-      { to: '/admin/history', icon: Clock, label: 'History Viewer' },
       { to: '/admin/ai-models', icon: Cpu, label: 'AI Models' },
       { to: '/admin/feature-flags', icon: ToggleLeft, label: 'Feature Flags' },
     ],
@@ -76,7 +74,7 @@ const navGroups = [
     items: [
       { to: '/admin/auth-config', icon: Shield, label: 'Auth Config' },
       { to: '/admin/audit-logs', icon: ScrollText, label: 'Audit Logs' },
-      { to: '/admin/roles', icon: Crown, label: 'Role Management' },
+      
       { to: '/admin/updates', icon: ArrowDownToLine, label: 'Updates', hasUpdateBadge: true },
       { to: '/admin/settings', icon: Settings, label: 'Settings' },
     ],

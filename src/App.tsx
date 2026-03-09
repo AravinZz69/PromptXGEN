@@ -61,7 +61,7 @@ import HistoryViewer from "./admin/pages/HistoryViewer";
 import PaymentGateway from "./admin/pages/PaymentGateway";
 import AuthConfig from "./admin/pages/AuthConfig";
 import AuthPageEditor from "./admin/pages/AuthPageEditor";
-import RoleManagement from "./admin/pages/RoleManagement";
+
 import Updates from "./admin/pages/Updates";
 import SupportTickets from "./admin/pages/SupportTickets";
 
@@ -192,7 +192,7 @@ function AnimatedRoutes() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="users" element={<UserManagement />} />
-          <Route path="prompts" element={<PromptManagement />} />
+          {/* Prompts route removed */}
           <Route path="revenue" element={<RevenueManagement />} />
           <Route path="ai-models" element={<AIModelConfig />} />
           <Route path="notifications" element={<Notifications />} />
@@ -211,11 +211,11 @@ function AnimatedRoutes() {
           <Route path="site-config" element={<SiteConfig />} />
           {/* New Feature Routes */}
           <Route path="templates" element={<TemplateManager />} />
-          <Route path="history" element={<HistoryViewer />} />
+          {/* History viewer route removed */}
           <Route path="payment-gateway" element={<PaymentGateway />} />
           <Route path="auth-config" element={<AuthConfig />} />
           <Route path="auth-pages" element={<AuthPageEditor />} />
-          <Route path="roles" element={<RoleManagement />} />
+          
           <Route path="updates" element={<Updates />} />
           <Route path="support-tickets" element={<SupportTickets />} />
         </Route>
